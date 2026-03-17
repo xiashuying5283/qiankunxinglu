@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Sparkles, Star, Clock } from 'lucide-react';
-import { trigrams } from '@/lib/divination-data';
+import { trigrams, hexagrams, type Hexagram } from '@/lib/divination-data';
 
 type Method = 'time' | 'number' | 'random';
 
@@ -16,6 +16,7 @@ export default function PlumBlossomPage() {
   const [result, setResult] = useState<{
     upperTrigram: typeof trigrams[0];
     lowerTrigram: typeof trigrams[0];
+    hexagram: Hexagram;
     changingLine: number;
     method: string;
     numbers?: { upper: number; lower: number; change: number };
@@ -25,6 +26,14 @@ export default function PlumBlossomPage() {
   const getTrigramByNumber = (num: number) => {
     const remainder = num % 8;
     return trigrams[remainder === 0 ? 7 : remainder - 1];
+  };
+
+  // 根据上下卦找到对应的六十四卦
+  const findHexagram = (upperName: string, lowerName: string): Hexagram => {
+    const found = hexagrams.find(
+      h => h.upperTrigram === upperName && h.lowerTrigram === lowerName
+    );
+    return found || hexagrams[0];
   };
 
   // 时间起卦
@@ -44,10 +53,12 @@ export default function PlumBlossomPage() {
 
     const upperTrigram = getTrigramByNumber(upperNum === 0 ? 8 : upperNum);
     const lowerTrigram = getTrigramByNumber(lowerNum === 0 ? 8 : lowerNum);
+    const hexagram = findHexagram(upperTrigram.name, lowerTrigram.name);
 
     setResult({
       upperTrigram,
       lowerTrigram,
+      hexagram,
       changingLine,
       method: `时间起卦：${year}年${month}月${day}日${hour}时`,
       numbers: {
@@ -74,10 +85,12 @@ export default function PlumBlossomPage() {
 
     const upperTrigram = getTrigramByNumber(upperNum === 0 ? 8 : upperNum);
     const lowerTrigram = getTrigramByNumber(lowerNum === 0 ? 8 : lowerNum);
+    const hexagram = findHexagram(upperTrigram.name, lowerTrigram.name);
 
     setResult({
       upperTrigram,
       lowerTrigram,
+      hexagram,
       changingLine,
       method: `数字起卦：${num1} 与 ${num2}`,
       numbers: {
@@ -96,10 +109,12 @@ export default function PlumBlossomPage() {
 
     const upperTrigram = getTrigramByNumber(upperNum);
     const lowerTrigram = getTrigramByNumber(lowerNum);
+    const hexagram = findHexagram(upperTrigram.name, lowerTrigram.name);
 
     setResult({
       upperTrigram,
       lowerTrigram,
+      hexagram,
       changingLine,
       method: '随机起卦',
       numbers: {
@@ -275,40 +290,62 @@ export default function PlumBlossomPage() {
                 </Card>
               )}
 
-              {/* 卦象显示 */}
+              {/* 卦象显示 - 显示完整的六十四卦 */}
               <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-pink-100">所成卦象</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-center items-center gap-8 mb-6">
-                    <div className="text-center">
-                      <div className="text-6xl mb-2">{result.upperTrigram.symbol}</div>
-                      <div className="text-lg text-pink-100">{result.upperTrigram.name}</div>
-                      <div className="text-sm text-pink-200/60">（上卦·{result.upperTrigram.nature}）</div>
+                  {/* 完整卦象 */}
+                  <div className="text-center mb-6">
+                    <div className="text-8xl mb-4">{result.hexagram.symbol}</div>
+                    <div className="text-3xl font-bold text-pink-100 mb-2">
+                      第{result.hexagram.number}卦 · {result.hexagram.name}卦
                     </div>
-                    <div className="text-4xl text-pink-300">—</div>
-                    <div className="text-center">
-                      <div className="text-6xl mb-2">{result.lowerTrigram.symbol}</div>
-                      <div className="text-lg text-pink-100">{result.lowerTrigram.name}</div>
-                      <div className="text-sm text-pink-200/60">（下卦·{result.lowerTrigram.nature}）</div>
+                    <div className="text-pink-200/80">
+                      {result.upperTrigram.name}上{result.lowerTrigram.name}下
                     </div>
                   </div>
 
-                  <div className="bg-pink-900/40 rounded-lg p-6">
-                    <div className="text-center mb-4">
-                      <span className="text-pink-300 font-medium">第 {result.changingLine} 爻动</span>
+                  {/* 上下卦分解 */}
+                  <div className="flex justify-center items-center gap-6 mb-6">
+                    <div className="text-center">
+                      <div className="text-4xl mb-1">{result.upperTrigram.symbol}</div>
+                      <div className="text-sm text-pink-100">{result.upperTrigram.name}</div>
+                      <div className="text-xs text-pink-200/60">上卦·{result.upperTrigram.nature}</div>
                     </div>
-                    <div className="space-y-2 text-sm text-pink-200/80">
-                      <p>
-                        <strong className="text-pink-100">上卦：</strong>
-                        {result.upperTrigram.name}卦 · {result.upperTrigram.nature} · {result.upperTrigram.attribute}
-                      </p>
-                      <p>
-                        <strong className="text-pink-100">下卦：</strong>
-                        {result.lowerTrigram.name}卦 · {result.lowerTrigram.nature} · {result.lowerTrigram.attribute}
-                      </p>
+                    <div className="text-2xl text-pink-300">+</div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-1">{result.lowerTrigram.symbol}</div>
+                      <div className="text-sm text-pink-100">{result.lowerTrigram.name}</div>
+                      <div className="text-xs text-pink-200/60">下卦·{result.lowerTrigram.nature}</div>
                     </div>
+                    <div className="text-2xl text-pink-300">=</div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-1">{result.hexagram.symbol}</div>
+                      <div className="text-sm text-pink-100">{result.hexagram.name}</div>
+                      <div className="text-xs text-pink-200/60">本卦</div>
+                    </div>
+                  </div>
+
+                  {/* 卦辞 */}
+                  <div className="bg-pink-900/40 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-bold text-pink-100 mb-2">卦辞</h4>
+                    <p className="text-pink-200">{result.hexagram.judgement}</p>
+                  </div>
+
+                  {/* 象辞 */}
+                  <div className="bg-pink-900/40 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-bold text-pink-100 mb-2">象辞</h4>
+                    <p className="text-pink-200">{result.hexagram.image}</p>
+                  </div>
+
+                  {/* 动爻 */}
+                  <div className="bg-pink-900/40 rounded-lg p-4">
+                    <h4 className="text-sm font-bold text-pink-100 mb-2">
+                      动爻（第{result.changingLine}爻）
+                    </h4>
+                    <p className="text-pink-200">{result.hexagram.lines[result.changingLine - 1]}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -320,13 +357,17 @@ export default function PlumBlossomPage() {
                 </CardHeader>
                 <CardContent className="text-pink-200 leading-relaxed">
                   <p className="mb-4">
-                    此卦为{result.upperTrigram.name}{result.lowerTrigram.name}卦，上{result.upperTrigram.nature}
-                    下{result.lowerTrigram.nature}。
+                    此卦为<strong className="text-pink-100">{result.hexagram.name}卦</strong>
+                    （第{result.hexagram.number}卦），由{result.upperTrigram.name}卦（{result.upperTrigram.nature}）在上、
+                    {result.lowerTrigram.name}卦（{result.lowerTrigram.nature}）在下组成。
                   </p>
                   <p className="mb-4">
-                    上卦{result.upperTrigram.name}代表{result.upperTrigram.attribute}，下卦{result.lowerTrigram.name}
-                    代表{result.lowerTrigram.attribute}。
+                    上卦{result.upperTrigram.name}代表{result.upperTrigram.attribute}，
+                    下卦{result.lowerTrigram.name}代表{result.lowerTrigram.attribute}。
+                  </p>
+                  <p className="mb-4">
                     第{result.changingLine}爻为动爻，象征事物发展的关键转折点。
+                    动爻提示：{result.hexagram.lines[result.changingLine - 1].split('：')[1]}
                   </p>
                   <div className="mt-4 p-4 bg-pink-900/40 rounded-lg">
                     <p className="text-sm">
