@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, GraduationCap } from 'lucide-react';
+import { Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, GraduationCap, Wand2, Sun, Calendar, User } from 'lucide-react';
 
 export default function Home() {
   const divinationFeatures = [
@@ -34,6 +34,34 @@ export default function Home() {
       icon: <Star className="w-8 h-8" />,
       href: '/plum-blossom',
       color: 'from-pink-500 to-rose-500',
+    },
+    {
+      title: '观音灵签',
+      description: '虔诚抽签问卦，观音菩萨指点迷津',
+      icon: <Wand2 className="w-8 h-8" />,
+      href: '/fortune-stick',
+      color: 'from-yellow-500 to-amber-500',
+    },
+    {
+      title: '周公解梦',
+      description: '解读梦境中的玄机，揭示潜意识的密码',
+      icon: <Moon className="w-8 h-8" />,
+      href: '/dream',
+      color: 'from-indigo-500 to-violet-500',
+    },
+    {
+      title: '每日运势',
+      description: '选择生肖查看今日运势，掌握幸运元素',
+      icon: <Sun className="w-8 h-8" />,
+      href: '/daily-fortune',
+      color: 'from-sky-500 to-blue-500',
+    },
+    {
+      title: '生辰八字',
+      description: '输入出生时间，推算您的八字命盘与五行',
+      icon: <Calendar className="w-8 h-8" />,
+      href: '/bazi',
+      color: 'from-amber-500 to-orange-500',
     },
     {
       title: '姻缘匹配',
