@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Moon, RotateCcw } from 'lucide-react';
@@ -135,6 +136,17 @@ export default function TarotPage() {
                       className="bg-white/10 backdrop-blur-md border-purple-300/30"
                     >
                       <CardHeader>
+                        {/* 塔罗牌图片 */}
+                        {drawnCard.card.image && (
+                          <div className={`relative w-full aspect-[2/3] mb-4 rounded-lg overflow-hidden ${drawnCard.isReversed ? 'rotate-180' : ''}`}>
+                            <Image
+                              src={drawnCard.card.image}
+                              alt={drawnCard.card.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
                         <div className="flex items-center justify-between mb-2">
                           <CardTitle className="text-2xl text-purple-100">
                             {meaning.title}

@@ -422,12 +422,13 @@ export interface TarotCard {
   reversed: string;
   keywords: string[];
   description: string;
+  image?: string; // 塔罗牌图片路径
 }
 
 export const majorArcana: TarotCard[] = [
-  { id: 0, name: '愚者', arcana: 'major', upright: '新的开始、冒险、纯真、自由', reversed: '鲁莽、轻率、愚昧、冒险', keywords: ['新开始', '冒险', '自由', '纯真'], description: '愚者代表新的旅程和无限可能。他站在悬崖边，象征着踏入未知的勇气。' },
-  { id: 1, name: '魔术师', arcana: 'major', upright: '创造力、意志力、技巧、新机会', reversed: '欺骗、操纵、才能浪费', keywords: ['创造', '意志', '技巧', '机会'], description: '魔术师象征着将想法转化为现实的能力，他掌握着四大元素的运用。' },
-  { id: 2, name: '女祭司', arcana: 'major', upright: '直觉、神秘、智慧、潜意识', reversed: '隐藏的意图、表面化、缺乏个人和谐', keywords: ['直觉', '神秘', '智慧', '潜意识'], description: '女祭司代表内在的智慧和直觉力量，她守护着知识的大门。' },
+  { id: 0, name: '愚者', arcana: 'major', upright: '新的开始、冒险、纯真、自由', reversed: '鲁莽、轻率、愚昧、冒险', keywords: ['新开始', '冒险', '自由', '纯真'], description: '愚者代表新的旅程和无限可能。他站在悬崖边，象征着踏入未知的勇气。', image: '/tarot/fool.png' },
+  { id: 1, name: '魔术师', arcana: 'major', upright: '创造力、意志力、技巧、新机会', reversed: '欺骗、操纵、才能浪费', keywords: ['创造', '意志', '技巧', '机会'], description: '魔术师象征着将想法转化为现实的能力，他掌握着四大元素的运用。', image: '/tarot/magician.png' },
+  { id: 2, name: '女祭司', arcana: 'major', upright: '直觉、神秘、智慧、潜意识', reversed: '隐藏的意图、表面化、缺乏个人和谐', keywords: ['直觉', '神秘', '智慧', '潜意识'], description: '女祭司代表内在的智慧和直觉力量，她守护着知识的大门。', image: '/tarot/high-priestess.png' },
   { id: 3, name: '女皇', arcana: 'major', upright: '丰饶、母性、创造、自然', reversed: '依赖、空虚、过度保护', keywords: ['丰饶', '母性', '创造', '自然'], description: '女皇象征着生命的创造力和丰饶，她代表大地之母的形象。' },
   { id: 4, name: '皇帝', arcana: 'major', upright: '权威、结构、控制、父亲形象', reversed: '专制、僵化、过度控制', keywords: ['权威', '结构', '控制', '领导'], description: '皇帝代表秩序、权威和物质世界的统治者。' },
   { id: 5, name: '教皇', arcana: 'major', upright: '传统、信仰、精神指导、婚姻', reversed: '叛逆、颠覆、新观点', keywords: ['传统', '信仰', '指导', '婚姻'], description: '教皇象征着精神上的指引和传统的智慧。' },
@@ -435,7 +436,7 @@ export const majorArcana: TarotCard[] = [
   { id: 7, name: '战车', arcana: 'major', upright: '意志力、决心、成功、行动', reversed: '失控、侵略、缺乏方向', keywords: ['意志', '胜利', '决心', '行动'], description: '战车象征着通过决心和意志力取得胜利。' },
   { id: 8, name: '力量', arcana: 'major', upright: '勇气、耐心、内在力量、同情心', reversed: '自我怀疑、软弱、缺乏自信', keywords: ['力量', '勇气', '耐心', '内在力量'], description: '力量牌代表内在的勇气和以柔克刚的智慧。' },
   { id: 9, name: '隐士', arcana: 'major', upright: '内省、寻求真理、孤独、指导', reversed: '孤立、孤独、退缩', keywords: ['内省', '寻求', '智慧', '独处'], description: '隐士代表着向内寻求答案和真理的旅程。' },
-  { id: 10, name: '命运之轮', arcana: 'major', upright: '改变、命运、好运、转折点', reversed: '厄运、抵抗改变、失控', keywords: ['命运', '改变', '循环', '好运'], description: '命运之轮象征着生命的循环和命运的转变。' },
+  { id: 10, name: '命运之轮', arcana: 'major', upright: '改变、命运、好运、转折点', reversed: '厄运、抵抗改变、失控', keywords: ['命运', '改变', '循环', '好运'], description: '命运之轮象征着生命的循环和命运的转变。', image: '/tarot/wheel-of-fortune.png' },
   { id: 11, name: '正义', arcana: 'major', upright: '公正、真理、法律、平衡', reversed: '不公正、不诚实、缺乏责任感', keywords: ['正义', '真理', '法律', '平衡'], description: '正义牌代表公平、真理和因果法则。' },
   { id: 12, name: '倒吊人', arcana: 'major', upright: '牺牲、放手、新视角、等待', reversed: '拖延、抵抗、无谓牺牲', keywords: ['牺牲', '等待', '新视角', '放手'], description: '倒吊人象征着通过牺牲和等待获得新的洞见。' },
   { id: 13, name: '死神', arcana: 'major', upright: '结束、转变、过渡、放手', reversed: '抵抗改变、停滞、无法放手', keywords: ['结束', '转变', '新生', '过渡'], description: '死神牌代表旧事物的结束和新生活的开始，而非字面上的死亡。' },
@@ -444,7 +445,7 @@ export const majorArcana: TarotCard[] = [
   { id: 16, name: '塔', arcana: 'major', upright: '突然改变、崩溃、启示、觉醒', reversed: '避免灾难、恐惧改变、延迟崩溃', keywords: ['改变', '崩溃', '觉醒', '解放'], description: '塔牌象征着旧结构的崩塌和必要的改变。' },
   { id: 17, name: '星星', arcana: 'major', upright: '希望、灵感、宁静、重生', reversed: '绝望、缺乏信心、失去希望', keywords: ['希望', '灵感', '宁静', '重生'], description: '星星牌代表黑暗过后的希望和指引。' },
   { id: 18, name: '月亮', arcana: 'major', upright: '幻象、恐惧、焦虑、潜意识', reversed: '释放恐惧、压抑情绪、混乱', keywords: ['幻象', '直觉', '恐惧', '潜意识'], description: '月亮牌象征着不确定性和内心的恐惧与幻象。' },
-  { id: 19, name: '太阳', arcana: 'major', upright: '快乐、成功、活力、积极', reversed: '暂时的挫折、过度乐观、延迟的成功', keywords: ['快乐', '成功', '活力', '光明'], description: '太阳牌是最积极的牌之一，代表成功、快乐和光明。' },
+  { id: 19, name: '太阳', arcana: 'major', upright: '快乐、成功、活力、积极', reversed: '暂时的挫折、过度乐观、延迟的成功', keywords: ['快乐', '成功', '活力', '光明'], description: '太阳牌是最积极的牌之一，代表成功、快乐和光明。', image: '/tarot/sun.png' },
   { id: 20, name: '审判', arcana: 'major', upright: '觉醒、重生、召唤、宽恕', reversed: '自我怀疑、拒绝召唤、逃避审判', keywords: ['觉醒', '重生', '召唤', '宽恕'], description: '审判牌象征着生命的觉醒和新的召唤。' },
   { id: 21, name: '世界', arcana: 'major', upright: '完成、成就、旅行、圆满', reversed: '未完成、缺乏闭合、寻求闭合', keywords: ['完成', '成就', '圆满', '成功'], description: '世界牌代表一个循环的完成和目标的达成。' },
 ];
