@@ -85,42 +85,8 @@ export default function Home() {
           </p>
         </div>
 
-        {/* 占卜功能区 */}
+        {/* 学习区 - 先学后用 */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-amber-200 mb-6 text-center">
-            <Sparkles className="w-6 h-6 inline-block mr-2" />
-            占卜问卦
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {divinationFeatures.map((feature, index) => (
-              <Link href={feature.href} key={index}>
-                <Card className="group h-full bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer">
-                  <CardHeader>
-                    <div className={`inline-flex w-fit p-3 rounded-lg bg-gradient-to-br ${feature.color} mb-4`}>
-                      <div className="text-white">{feature.icon}</div>
-                    </div>
-                    <CardTitle className="text-xl text-white group-hover:text-amber-300 transition-colors">
-                      {feature.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-300">
-                      {feature.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      className={`w-full bg-gradient-to-r ${feature.color} hover:opacity-90 text-white`}
-                    >
-                      开始占卜
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* 学习区 */}
-        <div>
           <h2 className="text-2xl font-bold text-emerald-200 mb-6 text-center">
             <GraduationCap className="w-6 h-6 inline-block mr-2" />
             知识学习
@@ -145,6 +111,40 @@ export default function Home() {
                       className={`w-full bg-gradient-to-r ${feature.color} hover:opacity-90 text-white`}
                     >
                       开始学习
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 占卜功能区 - 学以致用 */}
+        <div>
+          <h2 className="text-2xl font-bold text-amber-200 mb-6 text-center">
+            <Sparkles className="w-6 h-6 inline-block mr-2" />
+            占卜问卦
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {divinationFeatures.map((feature, index) => (
+              <Link href={feature.href} key={index}>
+                <Card className="group h-full bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer">
+                  <CardHeader>
+                    <div className={`inline-flex w-fit p-3 rounded-lg bg-gradient-to-br ${feature.color} mb-4`}>
+                      <div className="text-white">{feature.icon}</div>
+                    </div>
+                    <CardTitle className="text-xl text-white group-hover:text-amber-300 transition-colors">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-gray-300">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      className={`w-full bg-gradient-to-r ${feature.color} hover:opacity-90 text-white`}
+                    >
+                      开始占卜
                     </Button>
                   </CardContent>
                 </Card>
