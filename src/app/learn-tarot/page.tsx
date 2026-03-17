@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -181,11 +182,22 @@ export default function LearnTarotPage() {
 
                   <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
                     <CardHeader className="text-center">
-                      <div className="w-48 h-72 mx-auto mb-4 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="text-6xl mb-2">{selectedCard.id}</div>
-                          <div className="text-xl font-bold">{selectedCard.name}</div>
-                        </div>
+                      <div className="w-48 h-72 mx-auto mb-4 rounded-lg overflow-hidden relative bg-gradient-to-br from-purple-600 to-indigo-600">
+                        {selectedCard.image ? (
+                          <Image
+                            src={selectedCard.image}
+                            alt={selectedCard.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-6xl mb-2">{selectedCard.id}</div>
+                              <div className="text-xl font-bold">{selectedCard.name}</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <CardTitle className="text-3xl text-purple-100">
                         {selectedCard.id}. {selectedCard.name}
@@ -236,10 +248,19 @@ export default function LearnTarotPage() {
                       onClick={() => setSelectedCard(card)}
                     >
                       <CardContent className="py-6 text-center">
-                        <div className="w-full aspect-[3/4] mb-2 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                          <div>
-                            <div className="text-3xl font-bold">{card.id}</div>
-                          </div>
+                        <div className="w-full aspect-[3/4] mb-2 rounded overflow-hidden relative bg-gradient-to-br from-purple-600 to-indigo-600">
+                          {card.image ? (
+                            <Image
+                              src={card.image}
+                              alt={card.name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="text-3xl font-bold">{card.id}</div>
+                            </div>
+                          )}
                         </div>
                         <div className="text-sm font-medium text-purple-100">{card.name}</div>
                       </CardContent>
