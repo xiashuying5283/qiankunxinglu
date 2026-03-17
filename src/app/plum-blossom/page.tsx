@@ -12,7 +12,7 @@ type Method = 'time' | 'number' | 'random';
 
 export default function PlumBlossomPage() {
   const [method, setMethod] = useState<Method>('time');
-  const [numberInput, setNumberInput] = useState({ num1: '', num2: '' });
+  const [numberInput, setNumberInput] = useState({ num1: '', num2: '', num3: '' });
   const [result, setResult] = useState<{
     upperTrigram: typeof trigrams[0];
     lowerTrigram: typeof trigrams[0];
@@ -69,19 +69,23 @@ export default function PlumBlossomPage() {
     });
   };
 
-  // 数字起卦
+  // 数字起卦（三个数字）
   const divineByNumber = () => {
     const num1 = parseInt(numberInput.num1) || 0;
     const num2 = parseInt(numberInput.num2) || 0;
+    const num3 = parseInt(numberInput.num3) || 0;
 
-    if (num1 <= 0 || num2 <= 0) {
-      alert('请输入有效的数字');
+    if (num1 <= 0 || num2 <= 0 || num3 <= 0) {
+      alert('请输入三个有效的数字');
       return;
     }
 
+    // 第一个数字取上卦
     const upperNum = num1 % 8;
+    // 第二个数字取下卦
     const lowerNum = num2 % 8;
-    const changingLine = ((num1 + num2) % 6) || 6;
+    // 第三个数字取动爻
+    const changingLine = (num3 % 6) || 6;
 
     const upperTrigram = getTrigramByNumber(upperNum === 0 ? 8 : upperNum);
     const lowerTrigram = getTrigramByNumber(lowerNum === 0 ? 8 : lowerNum);
@@ -92,7 +96,7 @@ export default function PlumBlossomPage() {
       lowerTrigram,
       hexagram,
       changingLine,
-      method: `数字起卦：${num1} 与 ${num2}`,
+      method: `数字起卦：${num1}、${num2}、${num3}`,
       numbers: {
         upper: upperNum === 0 ? 8 : upperNum,
         lower: lowerNum === 0 ? 8 : lowerNum,
@@ -127,7 +131,7 @@ export default function PlumBlossomPage() {
 
   const methods = [
     { id: 'time', name: '时间起卦', icon: Clock, description: '根据当前时间推算卦象' },
-    { id: 'number', name: '数字起卦', icon: Star, description: '根据两个数字推算卦象' },
+    { id: 'number', name: '数字起卦', icon: Star, description: '根据三个数字推算卦象' },
     { id: 'random', name: '随机起卦', icon: Sparkles, description: '随机生成卦象' },
   ];
 
@@ -185,7 +189,7 @@ export default function PlumBlossomPage() {
                 </CardTitle>
                 <CardDescription className="text-pink-200/60">
                   {method === 'time' && '使用当前日期时间为您推算卦象'}
-                  {method === 'number' && '输入两个数字为您推算卦象'}
+                  {method === 'number' && '输入三个数字：第一个取上卦，第二个取下卦，第三个取动爻'}
                   {method === 'random' && '随机生成一组数字为您推算卦象'}
                 </CardDescription>
               </CardHeader>
@@ -207,24 +211,34 @@ export default function PlumBlossomPage() {
 
                 {method === 'number' && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm text-pink-200 mb-2 block">第一个数字</label>
+                        <label className="text-sm text-pink-200 mb-2 block text-center">第一个数字（上卦）</label>
                         <Input
                           type="number"
                           value={numberInput.num1}
                           onChange={(e) => setNumberInput({ ...numberInput, num1: e.target.value })}
-                          placeholder="输入数字"
+                          placeholder="上卦"
                           className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
                         />
                       </div>
                       <div>
-                        <label className="text-sm text-pink-200 mb-2 block">第二个数字</label>
+                        <label className="text-sm text-pink-200 mb-2 block text-center">第二个数字（下卦）</label>
                         <Input
                           type="number"
                           value={numberInput.num2}
                           onChange={(e) => setNumberInput({ ...numberInput, num2: e.target.value })}
-                          placeholder="输入数字"
+                          placeholder="下卦"
+                          className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-pink-200 mb-2 block text-center">第三个数字（动爻）</label>
+                        <Input
+                          type="number"
+                          value={numberInput.num3}
+                          onChange={(e) => setNumberInput({ ...numberInput, num3: e.target.value })}
+                          placeholder="动爻"
                           className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
                         />
                       </div>
@@ -232,7 +246,7 @@ export default function PlumBlossomPage() {
                     <div className="text-center pt-4">
                       <Button
                         onClick={divineByNumber}
-                        disabled={!numberInput.num1 || !numberInput.num2}
+                        disabled={!numberInput.num1 || !numberInput.num2 || !numberInput.num3}
                         className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
                       >
                         <Star className="w-5 h-5 mr-2" />
@@ -269,20 +283,20 @@ export default function PlumBlossomPage() {
                   <CardContent className="py-6">
                     <div className="text-center">
                       <div className="text-lg text-pink-200 mb-2">{result.method}</div>
-                      <div className="flex justify-center gap-8">
+                      <div className="flex justify-center gap-6">
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-pink-100">{result.numbers.upper}</div>
-                          <div className="text-sm text-pink-200/60">上卦数</div>
+                          <div className="text-2xl font-bold text-pink-100">{result.numbers.upper}</div>
+                          <div className="text-xs text-pink-200/60">上卦数</div>
                         </div>
-                        <div className="text-3xl text-pink-300">×</div>
+                        <div className="text-2xl text-pink-300">+</div>
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-pink-100">{result.numbers.lower}</div>
-                          <div className="text-sm text-pink-200/60">下卦数</div>
+                          <div className="text-2xl font-bold text-pink-100">{result.numbers.lower}</div>
+                          <div className="text-xs text-pink-200/60">下卦数</div>
                         </div>
-                        <div className="text-3xl text-pink-300">→</div>
+                        <div className="text-2xl text-pink-300">+</div>
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-pink-100">{result.numbers.change}</div>
-                          <div className="text-sm text-pink-200/60">动爻</div>
+                          <div className="text-2xl font-bold text-pink-100">{result.numbers.change}</div>
+                          <div className="text-xs text-pink-200/60">动爻数</div>
                         </div>
                       </div>
                     </div>
