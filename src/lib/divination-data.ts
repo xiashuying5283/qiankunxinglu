@@ -413,7 +413,7 @@ export const hexagrams: Hexagram[] = [
 
 // 塔罗牌数据
 export interface TarotCard {
-  id: number;
+  id: number | string;
   name: string;
   arcana: 'major' | 'minor';
   suit?: string;
@@ -462,6 +462,128 @@ export const plumNumbers = {
     water: { name: '水', trigrams: ['坎'], number: [1, 6] },
   },
 };
+
+// 小阿卡纳牌数据
+export interface MinorArcanaCard {
+  id: string;
+  name: string;
+  arcana: 'minor';
+  suit: 'wands' | 'cups' | 'swords' | 'pentacles';
+  number: number; // 1-14, 1-10为数字牌，11-14为宫廷牌(侍从/骑士/王后/国王)
+  upright: string;
+  reversed: string;
+  keywords: string[];
+  description: string;
+  image?: string;
+}
+
+// 牌组名称映射
+export const suitNames: Record<string, { name: string; element: string; symbol: string }> = {
+  wands: { name: '权杖', element: '火', symbol: '🔥' },
+  cups: { name: '圣杯', element: '水', symbol: '💧' },
+  swords: { name: '宝剑', element: '风', symbol: '⚔️' },
+  pentacles: { name: '星币', element: '土', symbol: '🌍' },
+};
+
+// 宫廷牌名称
+const courtNames: Record<number, string> = {
+  11: '侍从',
+  12: '骑士',
+  13: '王后',
+  14: '国王',
+};
+
+// 数字牌名称
+const numberNames: Record<number, string> = {
+  1: 'A',
+  2: '二',
+  3: '三',
+  4: '四',
+  5: '五',
+  6: '六',
+  7: '七',
+  8: '八',
+  9: '九',
+  10: '十',
+};
+
+// 权杖牌组（火元素）
+export const wandsCards: MinorArcanaCard[] = [
+  { id: 'wands-1', name: '权杖A', arcana: 'minor', suit: 'wands', number: 1, upright: '灵感、新开始、潜力、创造', reversed: '延迟、缺乏方向、错失机会', keywords: ['灵感', '新开始', '潜力'], description: '权杖A代表火元素的原始能量，象征新的开始和无限的创造力。', image: '/tarot/wands-1.png' },
+  { id: 'wands-2', name: '权杖二', arcana: 'minor', suit: 'wands', number: 2, upright: '计划、决定、进展、未来', reversed: '恐惧改变、缺乏计划、糟糕的计划', keywords: ['计划', '决定', '未来'], description: '权杖二代表站在十字路口，需要做出重要决定。', image: '/tarot/wands-2.png' },
+  { id: 'wands-3', name: '权杖三', arcana: 'minor', suit: 'wands', number: 3, upright: '扩展、远见、机会、探索', reversed: '障碍、延迟、挫折', keywords: ['扩展', '远见', '机会'], description: '权杖三象征着眼光放远，准备迎接新的机遇。', image: '/tarot/wands-3.png' },
+  { id: 'wands-4', name: '权杖四', arcana: 'minor', suit: 'wands', number: 4, upright: '庆祝、和谐、家、社区', reversed: '不稳定、过渡期、缺乏支持', keywords: ['庆祝', '和谐', '稳定'], description: '权杖四代表庆祝成功和家庭和睦。', image: '/tarot/wands-4.png' },
+  { id: 'wands-5', name: '权杖五', arcana: 'minor', suit: 'wands', number: 5, upright: '冲突、竞争、紧张、多样性', reversed: '避免冲突、尊重差异', keywords: ['冲突', '竞争', '挑战'], description: '权杖五象征着竞争和冲突，但也代表成长的机会。', image: '/tarot/wands-5.png' },
+  { id: 'wands-6', name: '权杖六', arcana: 'minor', suit: 'wands', number: 6, upright: '胜利、成功、公众认可、自信', reversed: '自我怀疑、缺乏认可', keywords: ['胜利', '成功', '认可'], description: '权杖六代表胜利和公众的认可。', image: '/tarot/wands-6.png' },
+  { id: 'wands-7', name: '权杖七', arcana: 'minor', suit: 'wands', number: 7, upright: '挑战、竞争、坚持、防御', reversed: '放弃、不堪重负', keywords: ['挑战', '坚持', '防御'], description: '权杖七象征坚守立场，面对挑战。', image: '/tarot/wands-7.png' },
+  { id: 'wands-8', name: '权杖八', arcana: 'minor', suit: 'wands', number: 8, upright: '快速行动、运动、变化、空中旅行', reversed: '延迟、挫折、等待', keywords: ['快速', '变化', '行动'], description: '权杖八代表事情迅速发展，变化即将来临。', image: '/tarot/wands-8.png' },
+  { id: 'wands-9', name: '权杖九', arcana: 'minor', suit: 'wands', number: 9, upright: '韧性、坚持、最后考验、防御', reversed: '疲惫、放弃、偏执', keywords: ['韧性', '坚持', '考验'], description: '权杖九代表经历风雨后的坚持和勇气。', image: '/tarot/wands-9.png' },
+  { id: 'wands-10', name: '权杖十', arcana: 'minor', suit: 'wands', number: 10, upright: '负担、责任、压力、努力', reversed: '卸下重担、委托他人', keywords: ['负担', '责任', '压力'], description: '权杖十象征承担责任，但也提醒要学会放下。', image: '/tarot/wands-10.png' },
+  { id: 'wands-11', name: '权杖侍从', arcana: 'minor', suit: 'wands', number: 11, upright: '灵感、发现、热情、好奇', reversed: '缺乏方向、拖延', keywords: ['灵感', '好奇', '热情'], description: '权杖侍从代表年轻的热情和对新事物的探索。', image: '/tarot/wands-11.png' },
+  { id: 'wands-12', name: '权杖骑士', arcana: 'minor', suit: 'wands', number: 12, upright: '行动、冒险、冲动、热情', reversed: '鲁莽、不耐烦', keywords: ['行动', '冒险', '热情'], description: '权杖骑士代表勇敢前行，追求目标。', image: '/tarot/wands-12.png' },
+  { id: 'wands-13', name: '权杖王后', arcana: 'minor', suit: 'wands', number: 13, upright: '自信、独立、社交、有决心', reversed: '自私、嫉妒、专横', keywords: ['自信', '独立', '决心'], description: '权杖王后代表自信和独立的女性力量。', image: '/tarot/wands-13.png' },
+  { id: 'wands-14', name: '权杖国王', arcana: 'minor', suit: 'wands', number: 14, upright: '领导力、远见、企业家、荣誉', reversed: '专制、傲慢、冲动', keywords: ['领导力', '远见', '荣誉'], description: '权杖国王代表富有远见的领导者。', image: '/tarot/wands-14.png' },
+];
+
+// 圣杯牌组（水元素）
+export const cupsCards: MinorArcanaCard[] = [
+  { id: 'cups-1', name: '圣杯A', arcana: 'minor', suit: 'cups', number: 1, upright: '爱、新关系、同情心、创造力', reversed: '情感封闭、压抑感情', keywords: ['爱', '新关系', '情感'], description: '圣杯A代表情感的涌现和新的爱情开始。', image: '/tarot/cups-1.png' },
+  { id: 'cups-2', name: '圣杯二', arcana: 'minor', suit: 'cups', number: 2, upright: '伙伴关系、联合、吸引、连接', reversed: '失衡、分离、紧张关系', keywords: ['伙伴关系', '连接', '和谐'], description: '圣杯二代表两个人的和谐关系和相互吸引。', image: '/tarot/cups-2.png' },
+  { id: 'cups-3', name: '圣杯三', arcana: 'minor', suit: 'cups', number: 3, upright: '庆祝、友谊、社区、创意合作', reversed: '过度纵情、流言蜚语', keywords: ['庆祝', '友谊', '欢乐'], description: '圣杯三代表朋友间的欢聚和庆祝。', image: '/tarot/cups-3.png' },
+  { id: 'cups-4', name: '圣杯四', arcana: 'minor', suit: 'cups', number: 4, upright: '冥想、沉思、冷漠、重新评估', reversed: '觉醒、新的机会', keywords: ['冥想', '冷漠', '反思'], description: '圣杯四代表对现状的不满和内心的沉思。', image: '/tarot/cups-4.png' },
+  { id: 'cups-5', name: '圣杯五', arcana: 'minor', suit: 'cups', number: 5, upright: '悲伤、失落、悲伤、遗憾', reversed: '接受、前进、寻找希望', keywords: ['悲伤', '失落', '遗憾'], description: '圣杯五代表失去和悲伤，但也提醒要看到希望。', image: '/tarot/cups-5.png' },
+  { id: 'cups-6', name: '圣杯六', arcana: 'minor', suit: 'cups', number: 6, upright: '怀旧、童年回忆、天真、重逢', reversed: '活在过去、不切实际', keywords: ['怀旧', '回忆', '天真'], description: '圣杯六代表对美好过去的怀念。', image: '/tarot/cups-6.png' },
+  { id: 'cups-7', name: '圣杯七', arcana: 'minor', suit: 'cups', number: 7, upright: '幻想、选择、愿望思维、想象', reversed: '清晰、专注、做决定', keywords: ['幻想', '选择', '想象'], description: '圣杯七代表众多选择和美好的幻想。', image: '/tarot/cups-7.png' },
+  { id: 'cups-8', name: '圣杯八', arcana: 'minor', suit: 'cups', number: 8, upright: '离开、放弃、寻找更深意义', reversed: '恐惧改变、停滞', keywords: ['离开', '放弃', '寻找'], description: '圣杯八代表离开舒适区寻找更深的意义。', image: '/tarot/cups-8.png' },
+  { id: 'cups-9', name: '圣杯九', arcana: 'minor', suit: 'cups', number: 9, upright: '满足、情感满足、愿望实现', reversed: '不满、贪婪', keywords: ['满足', '愿望', '幸福'], description: '圣杯九代表愿望的实现和内心的满足。', image: '/tarot/cups-9.png' },
+  { id: 'cups-10', name: '圣杯十', arcana: 'minor', suit: 'cups', number: 10, upright: '幸福、家庭、和谐、婚姻', reversed: '家庭冲突、价值观不合', keywords: ['幸福', '家庭', '和谐'], description: '圣杯十代表家庭的幸福和情感的圆满。', image: '/tarot/cups-10.png' },
+  { id: 'cups-11', name: '圣杯侍从', arcana: 'minor', suit: 'cups', number: 11, upright: '创意机会、直觉消息、好奇', reversed: '情感不成熟、逃避现实', keywords: ['创意', '直觉', '好奇'], description: '圣杯侍从代表情感的探索和创意的火花。', image: '/tarot/cups-11.png' },
+  { id: 'cups-12', name: '圣杯骑士', arcana: 'minor', suit: 'cups', number: 12, upright: '浪漫、魅力、想象力、美丽', reversed: '不切实际、嫉妒、情绪化', keywords: ['浪漫', '魅力', '想象'], description: '圣杯骑士代表浪漫的追求和理想主义。', image: '/tarot/cups-12.png' },
+  { id: 'cups-13', name: '圣杯王后', arcana: 'minor', suit: 'cups', number: 13, upright: '同情心、关怀、情感安全', reversed: '情感依赖、不安全感', keywords: ['同情', '关怀', '直觉'], description: '圣杯王后代表温柔和富有同情心的女性。', image: '/tarot/cups-13.png' },
+  { id: 'cups-14', name: '圣杯国王', arcana: 'minor', suit: 'cups', number: 14, upright: '情感平衡、慷慨、外交', reversed: '情绪化、操控', keywords: ['平衡', '慷慨', '智慧'], description: '圣杯国王代表情感成熟和智慧的领导者。', image: '/tarot/cups-14.png' },
+];
+
+// 宝剑牌组（风元素）
+export const swordsCards: MinorArcanaCard[] = [
+  { id: 'swords-1', name: '宝剑A', arcana: 'minor', suit: 'swords', number: 1, upright: '清晰、突破、新想法、真相', reversed: '混乱、残酷的真相', keywords: ['清晰', '真相', '突破'], description: '宝剑A代表思想的突破和真相的揭示。', image: '/tarot/swords-1.png' },
+  { id: 'swords-2', name: '宝剑二', arcana: 'minor', suit: 'swords', number: 2, upright: '艰难选择、僵局、否认', reversed: '信息过载、困惑', keywords: ['选择', '僵局', '犹豫'], description: '宝剑二代表需要做出艰难的选择。', image: '/tarot/swords-2.png' },
+  { id: 'swords-3', name: '宝剑三', arcana: 'minor', suit: 'swords', number: 3, upright: '心碎、悲伤、痛苦、悲伤', reversed: '康复、宽恕', keywords: ['心碎', '痛苦', '悲伤'], description: '宝剑三代表心灵的创伤和痛苦。', image: '/tarot/swords-3.png' },
+  { id: 'swords-4', name: '宝剑四', arcana: 'minor', suit: 'swords', number: 4, upright: '休息、恢复、沉思、静养', reversed: '疲惫、倦怠', keywords: ['休息', '恢复', '沉思'], description: '宝剑四代表需要休息和恢复。', image: '/tarot/swords-4.png' },
+  { id: 'swords-5', name: '宝剑五', arcana: 'minor', suit: 'swords', number: 5, upright: '冲突、紧张、失败、背叛', reversed: '和解、向前看', keywords: ['冲突', '失败', '背叛'], description: '宝剑五代表冲突和失败，胜利者也可能失去更多。', image: '/tarot/swords-5.png' },
+  { id: 'swords-6', name: '宝剑六', arcana: 'minor', suit: 'swords', number: 6, upright: '过渡、改变、远行、离开', reversed: '困住、抗拒改变', keywords: ['过渡', '改变', '远行'], description: '宝剑六代表从困境走向平静的过渡。', image: '/tarot/swords-6.png' },
+  { id: 'swords-7', name: '宝剑七', arcana: 'minor', suit: 'swords', number: 7, upright: '欺骗、策略、偷偷摸摸', reversed: '忏悔、良知', keywords: ['欺骗', '策略', '机智'], description: '宝剑七代表用策略达成目的，但也暗示欺骗。', image: '/tarot/swords-7.png' },
+  { id: 'swords-8', name: '宝剑八', arcana: 'minor', suit: 'swords', number: 8, upright: '囚禁、无力感、受害者心态', reversed: '自我解放、新视角', keywords: ['囚禁', '无力', '困境'], description: '宝剑八代表自我设限和感觉被困住。', image: '/tarot/swords-8.png' },
+  { id: 'swords-9', name: '宝剑九', arcana: 'minor', suit: 'swords', number: 9, upright: '焦虑、恐惧、噩梦、担忧', reversed: '内心平静、克服恐惧', keywords: ['焦虑', '恐惧', '担忧'], description: '宝剑九代表深层的焦虑和恐惧。', image: '/tarot/swords-9.png' },
+  { id: 'swords-10', name: '宝剑十', arcana: 'minor', suit: 'swords', number: 10, upright: '痛苦的结束、背叛、崩溃', reversed: '恢复、重生', keywords: ['结束', '背叛', '崩溃'], description: '宝剑十代表痛苦的结束，也预示新的开始。', image: '/tarot/swords-10.png' },
+  { id: 'swords-11', name: '宝剑侍从', arcana: 'minor', suit: 'swords', number: 11, upright: '好奇、新想法、智力、沟通', reversed: '八卦、狡猾', keywords: ['好奇', '沟通', '观察'], description: '宝剑侍从代表敏锐的观察力和好奇心。', image: '/tarot/swords-11.png' },
+  { id: 'swords-12', name: '宝剑骑士', arcana: 'minor', suit: 'swords', number: 12, upright: '雄心、行动导向、快速思维', reversed: '鲁莽、无礼', keywords: ['雄心', '行动', '果断'], description: '宝剑骑士代表果断和快速行动。', image: '/tarot/swords-12.png' },
+  { id: 'swords-13', name: '宝剑王后', arcana: 'minor', suit: 'swords', number: 13, upright: '独立、清晰思维、直接沟通', reversed: '冷酷、刻薄', keywords: ['独立', '清晰', '理智'], description: '宝剑王后代表理智和独立的女性。', image: '/tarot/swords-13.png' },
+  { id: 'swords-14', name: '宝剑国王', arcana: 'minor', suit: 'swords', number: 14, upright: '权威、真相、清晰、标准', reversed: '专制、残酷', keywords: ['权威', '真相', '理智'], description: '宝剑国王代表理智和公正的领导者。', image: '/tarot/swords-14.png' },
+];
+
+// 星币牌组（土元素）
+export const pentaclesCards: MinorArcanaCard[] = [
+  { id: 'pentacles-1', name: '星币A', arcana: 'minor', suit: 'pentacles', number: 1, upright: '新财务机会、繁荣、富足', reversed: '错失机会、贪婪', keywords: ['机会', '繁荣', '富足'], description: '星币A代表新的财务机会和物质上的成功。', image: '/tarot/pentacles-1.png' },
+  { id: 'pentacles-2', name: '星币二', arcana: 'minor', suit: 'pentacles', number: 2, upright: '平衡、适应、时间管理', reversed: '混乱、失去平衡', keywords: ['平衡', '适应', '灵活'], description: '星币二代表在多个责任之间寻找平衡。', image: '/tarot/pentacles-2.png' },
+  { id: 'pentacles-3', name: '星币三', arcana: 'minor', suit: 'pentacles', number: 3, upright: '团队合作、协作、学习', reversed: '缺乏团队合作', keywords: ['团队', '学习', '技能'], description: '星币三代表团队合作和技能提升。', image: '/tarot/pentacles-3.png' },
+  { id: 'pentacles-4', name: '星币四', arcana: 'minor', suit: 'pentacles', number: 4, upright: '安全、保守、储蓄、控制', reversed: '过度消费、贪婪', keywords: ['安全', '储蓄', '控制'], description: '星币四代表对物质的控制和保守。', image: '/tarot/pentacles-4.png' },
+  { id: 'pentacles-5', name: '星币五', arcana: 'minor', suit: 'pentacles', number: 5, upright: '困难、贫穷、孤立、担忧', reversed: '康复、财务改善', keywords: ['困难', '贫穷', '孤立'], description: '星币五代表物质困难和孤独。', image: '/tarot/pentacles-5.png' },
+  { id: 'pentacles-6', name: '星币六', arcana: 'minor', suit: 'pentacles', number: 6, upright: '慷慨、慈善、分享财富', reversed: '债务、自私', keywords: ['慷慨', '分享', '平衡'], description: '星币六代表慷慨和财富的分享。', image: '/tarot/pentacles-6.png' },
+  { id: 'pentacles-7', name: '星币七', arcana: 'minor', suit: 'pentacles', number: 7, upright: '长期愿景、坚持、投资', reversed: '缺乏长远规划', keywords: ['耐心', '投资', '回报'], description: '星币七代表耐心等待努力的成果。', image: '/tarot/pentacles-7.png' },
+  { id: 'pentacles-8', name: '星币八', arcana: 'minor', suit: 'pentacles', number: 8, upright: '学徒期、勤奋、技能发展', reversed: '缺乏专注、懒惰', keywords: ['勤奋', '技能', '专注'], description: '星币八代表努力工作和技能精进。', image: '/tarot/pentacles-8.png' },
+  { id: 'pentacles-9', name: '星币九', arcana: 'minor', suit: 'pentacles', number: 9, upright: '富足、独立、奢华', reversed: '过度工作、物质主义', keywords: ['富足', '独立', '享受'], description: '星币九代表物质上的成功和享受。', image: '/tarot/pentacles-9.png' },
+  { id: 'pentacles-10', name: '星币十', arcana: 'minor', suit: 'pentacles', number: 10, upright: '财富、遗产、家庭、稳定', reversed: '家庭冲突、财务失败', keywords: ['财富', '家庭', '传承'], description: '星币十代表家族财富和长久的稳定。', image: '/tarot/pentacles-10.png' },
+  { id: 'pentacles-11', name: '星币侍从', arcana: 'minor', suit: 'pentacles', number: 11, upright: '机会、新技能、学习', reversed: '缺乏进展、拖延', keywords: ['学习', '机会', '务实'], description: '星币侍从代表学习新技能和务实的机会。', image: '/tarot/pentacles-11.png' },
+  { id: 'pentacles-12', name: '星币骑士', arcana: 'minor', suit: 'pentacles', number: 12, upright: '效率、常规、保守、勤奋', reversed: '工作狂、乏味', keywords: ['勤奋', '可靠', '稳健'], description: '星币骑士代表稳健和勤奋的工作者。', image: '/tarot/pentacles-12.png' },
+  { id: 'pentacles-13', name: '星币王后', arcana: 'minor', suit: 'pentacles', number: 13, upright: '务实、富足、家庭、安全', reversed: '过度专注物质', keywords: ['务实', '富足', '关怀'], description: '星币王后代表务实和善于理财的女性。', image: '/tarot/pentacles-13.png' },
+  { id: 'pentacles-14', name: '星币国王', arcana: 'minor', suit: 'pentacles', number: 14, upright: '富足、商业、领导、安全', reversed: '贪婪、物质主义', keywords: ['富足', '领导', '成功'], description: '星币国王代表成功的商人和富有的领导者。', image: '/tarot/pentacles-14.png' },
+];
+
+// 合并所有塔罗牌
+export const minorArcana = [...wandsCards, ...cupsCards, ...swordsCards, ...pentaclesCards];
+
+// 所有塔罗牌（78张）
+export const allTarotCards = [...majorArcana, ...minorArcana];
 
 // 字形笔画数据（简化版）
 export const charStrokes: Record<string, number> = {

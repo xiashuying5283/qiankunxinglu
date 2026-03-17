@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Moon, BookOpen, Sparkles } from 'lucide-react';
-import { majorArcana } from '@/lib/divination-data';
+import { majorArcana, minorArcana, wandsCards, cupsCards, swordsCards, pentaclesCards, suitNames, allTarotCards } from '@/lib/divination-data';
 
 export default function LearnTarotPage() {
-  const [selectedCard, setSelectedCard] = useState<typeof majorArcana[0] | null>(null);
+  const [selectedCard, setSelectedCard] = useState<typeof allTarotCards[0] | null>(null);
+  const [selectedSuit, setSelectedSuit] = useState<'wands' | 'cups' | 'swords' | 'pentacles' | null>(null);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-violet-900">
@@ -35,7 +36,7 @@ export default function LearnTarotPage() {
 
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="basics" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 bg-white/10 border border-purple-300/30">
+            <TabsList className="grid w-full grid-cols-5 bg-white/10 border border-purple-300/30">
               <TabsTrigger value="basics" className="data-[state=active]:bg-purple-600/30 text-purple-100">
                 <BookOpen className="w-4 h-4 mr-2" />
                 基础知识
@@ -44,9 +45,17 @@ export default function LearnTarotPage() {
                 <Sparkles className="w-4 h-4 mr-2" />
                 大阿卡纳
               </TabsTrigger>
+              <TabsTrigger value="minor" className="data-[state=active]:bg-purple-600/30 text-purple-100">
+                <Moon className="w-4 h-4 mr-2" />
+                小阿卡纳
+              </TabsTrigger>
               <TabsTrigger value="spread" className="data-[state=active]:bg-purple-600/30 text-purple-100">
                 <Moon className="w-4 h-4 mr-2" />
                 牌阵指南
+              </TabsTrigger>
+              <TabsTrigger value="all" className="data-[state=active]:bg-purple-600/30 text-purple-100">
+                <Sparkles className="w-4 h-4 mr-2" />
+                全部78张
               </TabsTrigger>
             </TabsList>
 
@@ -413,6 +422,173 @@ export default function LearnTarotPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            </TabsContent>
+
+            {/* 小阿卡纳 */}
+            <TabsContent value="minor">
+              <div className="space-y-6">
+                {/* 牌组选择 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card 
+                    className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border-orange-400/30 cursor-pointer hover:scale-105 transition-all"
+                    onClick={() => setSelectedSuit('wands')}
+                  >
+                    <CardContent className="py-6 text-center">
+                      <div className="text-4xl mb-2">🔥</div>
+                      <div className="text-lg font-bold text-orange-100">权杖牌组</div>
+                      <div className="text-sm text-orange-200/60">火元素 · 14张</div>
+                    </CardContent>
+                  </Card>
+                  <Card 
+                    className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-400/30 cursor-pointer hover:scale-105 transition-all"
+                    onClick={() => setSelectedSuit('cups')}
+                  >
+                    <CardContent className="py-6 text-center">
+                      <div className="text-4xl mb-2">💧</div>
+                      <div className="text-lg font-bold text-blue-100">圣杯牌组</div>
+                      <div className="text-sm text-blue-200/60">水元素 · 14张</div>
+                    </CardContent>
+                  </Card>
+                  <Card 
+                    className="bg-gradient-to-br from-gray-400/20 to-gray-600/20 border-gray-400/30 cursor-pointer hover:scale-105 transition-all"
+                    onClick={() => setSelectedSuit('swords')}
+                  >
+                    <CardContent className="py-6 text-center">
+                      <div className="text-4xl mb-2">⚔️</div>
+                      <div className="text-lg font-bold text-gray-100">宝剑牌组</div>
+                      <div className="text-sm text-gray-200/60">风元素 · 14张</div>
+                    </CardContent>
+                  </Card>
+                  <Card 
+                    className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/30 cursor-pointer hover:scale-105 transition-all"
+                    onClick={() => setSelectedSuit('pentacles')}
+                  >
+                    <CardContent className="py-6 text-center">
+                      <div className="text-4xl mb-2">🌍</div>
+                      <div className="text-lg font-bold text-green-100">星币牌组</div>
+                      <div className="text-sm text-green-200/60">土元素 · 14张</div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* 显示选中的牌组 */}
+                {selectedSuit && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-2xl font-bold text-purple-100">
+                        {suitNames[selectedSuit].symbol} {suitNames[selectedSuit].name}牌组
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setSelectedSuit(null)}
+                        className="text-purple-200 hover:text-purple-100"
+                      >
+                        返回牌组选择
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                      {(selectedSuit === 'wands' ? wandsCards : 
+                        selectedSuit === 'cups' ? cupsCards : 
+                        selectedSuit === 'swords' ? swordsCards : pentaclesCards
+                      ).map((card) => (
+                        <Card
+                          key={card.id}
+                          className="bg-white/10 backdrop-blur-md border-purple-300/30 hover:bg-white/20 cursor-pointer transition-all hover:scale-105"
+                          onClick={() => setSelectedCard(card)}
+                        >
+                          <CardContent className="py-4 text-center">
+                            <div className="w-full aspect-[3/4] mb-2 rounded overflow-hidden relative bg-gradient-to-br from-purple-600 to-indigo-600">
+                              {card.image ? (
+                                <Image
+                                  src={card.image}
+                                  alt={card.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="text-2xl font-bold">{card.name}</div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-xs font-medium text-purple-100 truncate">{card.name}</div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* 全部78张牌 */}
+            <TabsContent value="all">
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-purple-100 mb-2">完整塔罗牌组 · 78张</h3>
+                  <p className="text-purple-200/60">点击任意牌查看详细解读</p>
+                </div>
+                
+                {/* 大阿卡纳 */}
+                <div>
+                  <h4 className="text-lg font-bold text-purple-200 mb-4">大阿卡纳 (22张)</h4>
+                  <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-11 gap-2">
+                    {majorArcana.map((card) => (
+                      <Card
+                        key={card.id}
+                        className="bg-white/10 backdrop-blur-md border-purple-300/30 hover:bg-white/20 cursor-pointer transition-all hover:scale-105"
+                        onClick={() => setSelectedCard(card)}
+                      >
+                        <CardContent className="py-2 text-center">
+                          <div className="w-full aspect-[3/4] mb-1 rounded overflow-hidden relative bg-gradient-to-br from-purple-600 to-indigo-600">
+                            {card.image ? (
+                              <Image
+                                src={card.image}
+                                alt={card.name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-xs">{card.id}</div>
+                            )}
+                          </div>
+                          <div className="text-xs text-purple-100 truncate">{card.name}</div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 小阿卡纳 */}
+                <div>
+                  <h4 className="text-lg font-bold text-purple-200 mb-4">小阿卡纳 (56张)</h4>
+                  <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-14 gap-2">
+                    {minorArcana.map((card) => (
+                      <Card
+                        key={card.id}
+                        className="bg-white/10 backdrop-blur-md border-purple-300/30 hover:bg-white/20 cursor-pointer transition-all hover:scale-105"
+                        onClick={() => setSelectedCard(card)}
+                      >
+                        <CardContent className="py-2 text-center">
+                          <div className="w-full aspect-[3/4] mb-1 rounded overflow-hidden relative bg-gradient-to-br from-purple-600 to-indigo-600">
+                            {card.image ? (
+                              <Image
+                                src={card.image}
+                                alt={card.name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-xs">{card.name}</div>
+                            )}
+                          </div>
+                          <div className="text-xs text-purple-100 truncate">{card.name}</div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

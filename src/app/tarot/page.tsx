@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Moon, RotateCcw } from 'lucide-react';
-import { majorArcana, type TarotCard } from '@/lib/divination-data';
+import { allTarotCards, type TarotCard } from '@/lib/divination-data';
 
 type SpreadType = 'single' | 'three' | 'celtic';
 
@@ -33,7 +33,7 @@ export default function TarotPage() {
     setRevealedCards(new Set());
 
     // 随机抽取指定数量的牌
-    const shuffled = [...majorArcana].sort(() => Math.random() - 0.5);
+    const shuffled = [...allTarotCards].sort(() => Math.random() - 0.5);
     const selected: DrawnCard[] = shuffled.slice(0, count).map(card => ({
       card,
       isReversed: Math.random() > 0.5,
