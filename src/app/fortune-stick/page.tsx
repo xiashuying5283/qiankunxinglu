@@ -1,54 +1,103 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Scroll } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Scroll, ChevronDown, ChevronUp, BookOpen, Sparkles } from 'lucide-react';
 
-// 观音灵签数据（简化版，实际有100签）
-const fortuneSticks = [
-  { number: 1, title: '钟离成道', poem: '开天辟地作良缘，吉日良时万物全。若得此签非小可，人行忠正帝王宣。', meaning: '此签大吉，诸事皆顺。求财得财，求名得名，婚姻美满，事业亨通。', level: '上上签' },
-  { number: 2, title: '苏武牧羊', poem: '鸟语花香景艳阳，心田未静强商量。如今且把归途看，切莫今朝恋晚芳。', meaning: '此签中平，不宜急进。守正待时，静候良机。凡事谨慎，切勿贪心。', level: '中平签' },
-  { number: 3, title: '董永卖身', poem: '临风冒雨过前山，正是干戈战未闲。须向此时求善策，如今不必问容颜。', meaning: '此签中吉，先苦后甜。目前虽有困难，但只要坚持努力，终会苦尽甘来。', level: '中吉签' },
-  { number: 4, title: '玄德请诸葛', poem: '千里迢迢往西求，前途美景自悠悠。问君但看前头路，万事俱成乐无忧。', meaning: '此签上吉，前途光明。出行大吉，求谋顺利，贵人相助，心想事成。', level: '上吉签' },
-  { number: 5, title: '吕蒙正破窑', poem: '一箭射红心，人人说好音。高低且随分，荣华自有时。', meaning: '此签上吉，功名可求。虽有波折，终能成功。耐心等待，时机自到。', level: '上吉签' },
-  { number: 6, title: '仁贵投军', poem: '投身岩下铜鸟居，须是还他大丈夫。早晚功名终有望，由天勿用自图谋。', meaning: '此签中平，顺其自然。不要强求，随缘而行。时机未到，宜守不宜进。', level: '中平签' },
-  { number: 7, title: '苏秦刺股', poem: '奔波役役重重险，若要还时莫要贪。心正自然无伤害，出入求谋定不难。', meaning: '此签中吉，需经磨炼。勤奋努力，终有所成。切勿投机取巧，脚踏实地为上。', level: '中吉签' },
-  { number: 8, title: '姜公渭水钓鱼', poem: '绿水青山景色新，前途渐渐见光明。若有贵人相助力，平地一声雷惊人。', meaning: '此签上吉，贵人相助。耐心等待时机，必有贵人出现，事业将有大的突破。', level: '上吉签' },
-  { number: 9, title: '孔明入川', poem: '昔因路险要迷踪，今日前途尽许通。步步经营皆有利，前程大道任西东。', meaning: '此签上吉，前途畅通。过去的障碍已经消除，现在可以放心前行，一切顺利。', level: '上吉签' },
-  { number: 10, title: '庞涓观阵', poem: '石小皆因块大难，前程莫把望高攀。若是有心勤作事，暂时忍耐自有还。', meaning: '此签中平，不宜好高骛远。脚踏实地，循序渐进。切勿贪大求全，稳扎稳打为上。', level: '中平签' },
-  { number: 11, title: '韩信功劳', poem: '绿水青山色更鲜，逍遥景物正当前。若将此签来问我，财运亨通福禄全。', meaning: '此签上上，大吉大利。财运亨通，事业顺遂，家庭和睦，诸事皆宜。', level: '上上签' },
-  { number: 12, title: '武则天登基', poem: '威风凛凛万人钦，莫道英雄非女身。若逢此签来相问，无事不成乐太平。', meaning: '此签上吉，事业有成。无论男女，皆可建功立业。把握机会，勇往直前。', level: '上吉签' },
-  // 继续添加更多签...
-  { number: 13, title: '罗通拜帅', poem: '不必心高不必忙，也须事事要商量。但愿一心皆稳静，家门安乐自荣昌。', meaning: '此签中平，安分为上。不要好高骛远，脚踏实地经营，家庭自然安乐。', level: '中平签' },
-  { number: 14, title: '子牙弃官', poem: '卦逢吉兆在眼前，经营出入两俱全。生意滔滔如流水，财源滚滚似涌泉。', meaning: '此签上吉，财运亨通。经商大吉，投资顺利，财源广进，事业兴旺。', level: '上吉签' },
-  { number: 15, title: '苏秦背剑', poem: '东风解冻雪消时，万物逢春发旧枝。这日若来求得意，花开正是太阳时。', meaning: '此签上吉，春回大地。困境将过，好运将至。把握时机，奋发向前。', level: '上吉签' },
-  { number: 16, title: '叶梦雄朝帝', poem: '天开地阔志能伸，万事皆成贵人亲。时来运到人财旺，紫气东来满堂春。', meaning: '此签上上，万事如意。贵人相助，事业亨通，财运旺盛，前途无量。', level: '上上签' },
-  { number: 17, title: '话梅止渴', poem: '渴望梅林只画饼，几番空想费精神。若要真正解焦渴，还须实地去寻津。', meaning: '此签下下，空想无益。不要只做白日梦，需要实际行动才能成功。', level: '下下签' },
-  { number: 18, title: '曹操献刀', poem: '心中有事暗相猜，行事多疑费尽才。得此签者宜守正，莫教小辈把头抬。', meaning: '此签中平，宜守不宜进。凡事三思，谨慎行事。不要轻信他人，以免受骗。', level: '中平签' },
-  { number: 19, title: '子仪封王', poem: '福星高照遇贵人，诸事呈祥福自临。前途无阻皆顺遂，荣华富贵耀门庭。', meaning: '此签上上，福星高照。贵人相助，万事顺遂，荣华富贵，前程似锦。', level: '上上签' },
-  { number: 20, title: '姜维接印', poem: '秋来菊花正芬芳，事业功名渐渐昌。若遇贵人相助力，如同枯木又逢春。', meaning: '此签上吉，事业渐兴。贵人相助，如枯木逢春，事业将有大的发展。', level: '上吉签' },
-];
+interface FortuneInterpretation {
+  wealth: string;
+  marriage: string;
+  career: string;
+  travel: string;
+  health: string;
+  lawsuit: string;
+  study: string;
+  lost: string;
+}
+
+interface FortuneStick {
+  number: number;
+  title: string;
+  poem: string;
+  meaning: string;
+  level: string;
+  story: string | null;
+  interpretation: FortuneInterpretation;
+}
 
 export default function FortuneStickPage() {
   const [isDrawing, setIsDrawing] = useState(false);
-  const [result, setResult] = useState<typeof fortuneSticks[0] | null>(null);
+  const [result, setResult] = useState<FortuneStick | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    story: false,
+    interpretation: false
+  });
+  const [shakeOffset, setShakeOffset] = useState(0);
+  const [stickNumber, setStickNumber] = useState<number | null>(null);
 
+  // 检查数据库是否已初始化
+  useEffect(() => {
+    const checkInit = async () => {
+      try {
+        const res = await fetch('/api/fortune-sticks/init');
+        const data = await res.json();
+        if (data.success && !data.initialized) {
+          // 自动初始化
+          await fetch('/api/fortune-sticks/init', { method: 'POST' });
+        }
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('检查初始化状态失败:', error);
+        setIsInitialized(true); // 即使失败也允许继续
+      }
+    };
+    checkInit();
+  }, []);
+
+  // 抽签动画
   const drawStick = async () => {
     setIsDrawing(true);
     setShowResult(false);
-    
-    // 模拟抽签动画
+    setStickNumber(null);
+    setExpandedSections({ story: false, interpretation: false });
+
+    // 签筒摇晃动画
+    let count = 0;
+    const shakeInterval = setInterval(() => {
+      setShakeOffset(Math.sin(count * 0.5) * 10);
+      count++;
+    }, 50);
+
+    // 等待2秒动画
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 随机抽取一签
-    const randomIndex = Math.floor(Math.random() * fortuneSticks.length);
-    setResult(fortuneSticks[randomIndex]);
-    setIsDrawing(false);
-    
-    setTimeout(() => setShowResult(true), 100);
+    clearInterval(shakeInterval);
+    setShakeOffset(0);
+
+    try {
+      // 从API随机获取一签
+      const res = await fetch('/api/fortune-sticks?random=true');
+      const data = await res.json();
+      
+      if (data.success && data.data) {
+        // 显示签号
+        setStickNumber(data.data.number);
+        
+        // 再等1秒显示结果
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setResult(data.data);
+        setIsDrawing(false);
+        setTimeout(() => setShowResult(true), 100);
+      }
+    } catch (error) {
+      console.error('抽签失败:', error);
+      setIsDrawing(false);
+    }
   };
 
   const getLevelColor = (level: string) => {
@@ -60,6 +109,24 @@ export default function FortuneStickPage() {
       case '下下签': return 'text-gray-400';
       default: return 'text-amber-400';
     }
+  };
+
+  const getLevelBg = (level: string) => {
+    switch (level) {
+      case '上上签': return 'from-red-600 to-orange-600';
+      case '上吉签': return 'from-orange-500 to-amber-500';
+      case '中吉签': return 'from-yellow-500 to-green-500';
+      case '中平签': return 'from-green-500 to-teal-500';
+      case '下下签': return 'from-gray-500 to-slate-500';
+      default: return 'from-amber-600 to-orange-600';
+    }
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   return (
@@ -80,7 +147,8 @@ export default function FortuneStickPage() {
             <h1 className="text-4xl font-bold text-amber-100">观音灵签</h1>
             <Scroll className="w-10 h-10 text-amber-300 ml-3" />
           </div>
-          <p className="text-amber-200/80">诚心祈愿，抽签问卦，指引迷津</p>
+          <p className="text-amber-200/80">诚心祈愿，抽签问卦，观音菩萨指点迷津</p>
+          <p className="text-amber-300/60 text-sm mt-2">共一百签，涵盖人生各事</p>
         </div>
 
         <div className="max-w-2xl mx-auto">
@@ -95,35 +163,83 @@ export default function FortuneStickPage() {
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 {/* 签筒 */}
-                <div className="relative mb-8">
-                  <div className="w-32 h-48 bg-gradient-to-b from-amber-600 to-amber-800 rounded-t-full border-4 border-amber-500 flex items-end justify-center pb-4">
-                    <div className="text-amber-200 text-sm">签筒</div>
+                <div 
+                  className="relative mb-8 transition-transform duration-100"
+                  style={{ transform: `translateX(${shakeOffset}px) rotate(${shakeOffset}deg)` }}
+                >
+                  <div className="w-32 h-52 bg-gradient-to-b from-amber-600 to-amber-800 rounded-t-full border-4 border-amber-500 shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
+                    {/* 签筒纹理 */}
+                    <div className="absolute inset-0 opacity-30">
+                      <div className="absolute top-0 left-0 right-0 h-8 bg-amber-400/50"></div>
+                      <div className="absolute bottom-8 left-0 right-0 h-8 bg-amber-900/50"></div>
+                    </div>
+                    
+                    {/* 签条 */}
+                    <div className="flex gap-1 mt-8">
+                      {[...Array(5)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className="w-1.5 h-24 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t transition-transform duration-300"
+                          style={{ 
+                            transform: isDrawing ? `translateY(-${Math.random() * 20 + 10}px)` : 'none',
+                            transitionDelay: `${i * 100}ms`
+                          }}
+                        ></div>
+                      ))}
+                    </div>
+                    
+                    <div className="text-amber-200 text-sm mt-4 font-bold">签筒</div>
                   </div>
+                  
                   {isDrawing && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <RefreshCw className="w-12 h-12 text-amber-300 animate-spin" />
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
+                      <Sparkles className="w-8 h-8 text-amber-300 animate-pulse" />
                     </div>
                   )}
                 </div>
 
+                {/* 抽签过程中的签号显示 */}
+                {stickNumber && (
+                  <div className="mb-6 text-center animate-bounce">
+                    <div className="text-amber-300 text-lg">抽中第</div>
+                    <div className="text-5xl font-bold text-amber-100">{stickNumber}</div>
+                    <div className="text-amber-300 text-lg">签</div>
+                  </div>
+                )}
+
                 <Button
                   onClick={drawStick}
-                  disabled={isDrawing}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  disabled={isDrawing || !isInitialized}
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg shadow-lg"
                 >
-                  {isDrawing ? '抽签中...' : '开始抽签'}
+                  {isDrawing ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                      抽签中...
+                    </>
+                  ) : !isInitialized ? (
+                    '正在准备...'
+                  ) : (
+                    '开始抽签'
+                  )}
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-6">
+            <div className={`space-y-6 transition-all duration-500 ${showResult ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               {/* 签文显示 */}
               <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 overflow-hidden">
                 {/* 签头 */}
-                <div className="bg-gradient-to-r from-amber-600 to-orange-600 py-4 text-center">
-                  <div className="text-amber-100 text-lg">观音灵签</div>
-                  <div className="text-amber-200 text-3xl font-bold">第 {result.number} 签</div>
-                  <div className={`text-xl font-bold mt-1 ${getLevelColor(result.level)}`}>
+                <div className={`bg-gradient-to-r ${getLevelBg(result.level)} py-6 text-center relative`}>
+                  {/* 装饰 */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-2 left-4 text-6xl">❋</div>
+                    <div className="absolute bottom-2 right-4 text-6xl">❋</div>
+                  </div>
+                  
+                  <div className="text-amber-100/90 text-lg">观音灵签</div>
+                  <div className="text-amber-200 text-4xl font-bold my-2">第 {result.number} 签</div>
+                  <div className={`text-2xl font-bold ${getLevelColor(result.level)}`}>
                     {result.level}
                   </div>
                 </div>
@@ -131,27 +247,95 @@ export default function FortuneStickPage() {
                 <CardContent className="pt-6 space-y-6">
                   {/* 签题 */}
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold text-amber-100">{result.title}</h3>
+                    <h3 className="text-2xl font-bold text-amber-100 flex items-center justify-center gap-2">
+                      <BookOpen className="w-5 h-5 text-amber-400" />
+                      {result.title}
+                    </h3>
                   </div>
 
                   {/* 签诗 */}
-                  <div className="bg-amber-950/60 rounded-lg p-6 text-center">
-                    <h4 className="text-sm font-bold text-amber-100 mb-3">签诗</h4>
-                    <p className="text-xl text-amber-100 leading-loose whitespace-pre-line">
+                  <div className="bg-gradient-to-br from-amber-950/80 to-orange-950/60 rounded-xl p-6 text-center border border-amber-400/20 shadow-inner">
+                    <h4 className="text-sm font-bold text-amber-400 mb-4 tracking-wider">签 诗</h4>
+                    <p className="text-xl text-amber-100 leading-loose whitespace-pre-line font-medium">
                       {result.poem}
                     </p>
                   </div>
 
-                  {/* 解签 */}
-                  <div className="bg-amber-950/60 rounded-lg p-6">
-                    <h4 className="text-sm font-bold text-amber-100 mb-3">解签</h4>
+                  {/* 解签总论 */}
+                  <div className="bg-amber-950/40 rounded-xl p-6 border border-amber-400/10">
+                    <h4 className="text-sm font-bold text-amber-400 mb-3 tracking-wider">解 签</h4>
                     <p className="text-amber-100 leading-relaxed">{result.meaning}</p>
                   </div>
 
+                  {/* 古人典故（可展开） */}
+                  {result.story && (
+                    <div className="bg-amber-950/30 rounded-xl overflow-hidden border border-amber-400/10">
+                      <button
+                        onClick={() => toggleSection('story')}
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-400/5 transition-colors"
+                      >
+                        <h4 className="text-sm font-bold text-amber-400 tracking-wider flex items-center gap-2">
+                          <Scroll className="w-4 h-4" />
+                          古人典故
+                        </h4>
+                        {expandedSections.story ? (
+                          <ChevronUp className="w-4 h-4 text-amber-400" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-amber-400" />
+                        )}
+                      </button>
+                      {expandedSections.story && (
+                        <div className="px-4 pb-4">
+                          <p className="text-amber-100/90 leading-relaxed text-sm">{result.story}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 分类解签（可展开） */}
+                  <div className="bg-amber-950/30 rounded-xl overflow-hidden border border-amber-400/10">
+                    <button
+                      onClick={() => toggleSection('interpretation')}
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-400/5 transition-colors"
+                    >
+                      <h4 className="text-sm font-bold text-amber-400 tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        分类解签
+                      </h4>
+                      {expandedSections.interpretation ? (
+                        <ChevronUp className="w-4 h-4 text-amber-400" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-amber-400" />
+                      )}
+                    </button>
+                    {expandedSections.interpretation && (
+                      <div className="px-4 pb-4 grid grid-cols-2 gap-3">
+                        {Object.entries(result.interpretation).map(([key, value]) => {
+                          const labels: Record<string, string> = {
+                            wealth: '求财',
+                            marriage: '婚姻',
+                            career: '事业',
+                            travel: '出行',
+                            health: '健康',
+                            lawsuit: '官司',
+                            study: '学业',
+                            lost: '失物'
+                          };
+                          return (
+                            <div key={key} className="bg-amber-900/30 rounded-lg p-3">
+                              <div className="text-amber-400 text-xs font-bold mb-1">{labels[key]}</div>
+                              <div className="text-amber-100/90 text-sm">{value}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
                   {/* 签等级说明 */}
-                  <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-lg p-4 text-center border border-amber-400/30">
-                    <p className="text-amber-100 text-sm">
-                      此签为<strong className={getLevelColor(result.level)}>{result.level}</strong>
+                  <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-xl p-5 text-center border border-amber-400/30">
+                    <p className="text-amber-100">
+                      此签为<strong className={`text-lg ${getLevelColor(result.level)}`}>{result.level}</strong>
                       {result.level.includes('上上') && '，大吉大利，万事如意。'}
                       {result.level.includes('上吉') && '，运势上佳，宜积极进取。'}
                       {result.level.includes('中吉') && '，运势平稳，需努力经营。'}
@@ -166,7 +350,7 @@ export default function FortuneStickPage() {
               <div className="text-center">
                 <Button
                   onClick={() => setResult(null)}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg shadow-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新抽签

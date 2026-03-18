@@ -1,60 +1,61 @@
-import { pgTable, serial, integer, varchar, text, jsonb, timestamp, index } from "drizzle-orm/pg-core"
+import { pgTable, index, unique, serial, integer, varchar, text, jsonb, timestamp } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-// 系统健康检查表（Supabase 内置，请勿删除）
+
+
+export const hexagrams = pgTable("hexagrams", {
+	id: serial().notNull(),
+	number: integer().notNull(),
+	name: varchar({ length: 20 }).notNull(),
+	symbol: varchar({ length: 10 }).notNull(),
+	upperTrigram: varchar("upper_trigram", { length: 10 }).notNull(),
+	lowerTrigram: varchar("lower_trigram", { length: 10 }).notNull(),
+	binary: varchar({ length: 10 }).notNull(),
+	judgement: text().notNull(),
+	judgementMeaning: text("judgement_meaning").notNull(),
+	image: text().notNull(),
+	imageMeaning: text("image_meaning").notNull(),
+	lines: jsonb().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("hexagrams_name_idx").using("btree", table.name.asc().nullsLast().op("text_ops")),
+	index("hexagrams_number_idx").using("btree", table.number.asc().nullsLast().op("int4_ops")),
+	unique("hexagrams_number_unique").on(table.number),
+]);
+
 export const healthCheck = pgTable("health_check", {
 	id: serial().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 });
 
-// 爻辞结构
-export interface HexagramLine {
-	text: string;       // 原文
-	meaning: string;    // 白话解释
-}
+export const trigrams = pgTable("trigrams", {
+	id: serial().notNull(),
+	number: integer().notNull(),
+	name: varchar({ length: 10 }).notNull(),
+	symbol: varchar({ length: 10 }).notNull(),
+	nature: varchar({ length: 10 }).notNull(),
+	attribute: varchar({ length: 20 }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("trigrams_number_idx").using("btree", table.number.asc().nullsLast().op("int4_ops")),
+	unique("trigrams_number_unique").on(table.number),
+]);
 
-// 64卦数据表
-export const hexagrams = pgTable(
-	"hexagrams",
-	{
-		id: serial().notNull(),
-		number: integer("number").notNull().unique(),        // 卦序 1-64
-		name: varchar("name", { length: 20 }).notNull(),      // 卦名
-		symbol: varchar("symbol", { length: 10 }).notNull(),  // Unicode符号
-		upperTrigram: varchar("upper_trigram", { length: 10 }).notNull(),  // 上卦
-		lowerTrigram: varchar("lower_trigram", { length: 10 }).notNull(),  // 下卦
-		binary: varchar("binary", { length: 10 }).notNull(),  // 二进制表示
-		judgement: text("judgement").notNull(),               // 卦辞
-		judgementMeaning: text("judgement_meaning").notNull(),// 卦辞白话解释
-		image: text("image").notNull(),                       // 象辞
-		imageMeaning: text("image_meaning").notNull(),        // 象辞白话解释
-		lines: jsonb("lines").notNull().$type<HexagramLine[]>(), // 爻辞（6条）
-		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-	},
-	(table) => [
-		index("hexagrams_number_idx").on(table.number),
-		index("hexagrams_name_idx").on(table.name),
-	]
-);
-
-// 八卦数据表
-export const trigrams = pgTable(
-	"trigrams",
-	{
-		id: serial().notNull(),
-		number: integer("number").notNull().unique(),         // 数字代表 1-8
-		name: varchar("name", { length: 10 }).notNull(),       // 卦名
-		symbol: varchar("symbol", { length: 10 }).notNull(),   // Unicode符号
-		nature: varchar("nature", { length: 10 }).notNull(),   // 自然象征
-		attribute: varchar("attribute", { length: 20 }).notNull(), // 属性
-		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-	},
-	(table) => [
-		index("trigrams_number_idx").on(table.number),
-	]
-);
-
-// 类型导出
-export type Hexagram = typeof hexagrams.$inferSelect;
-export type Trigram = typeof trigrams.$inferSelect;
+// 观音灵签数据表
+export const fortuneSticks = pgTable("fortune_sticks", {
+	id: serial().notNull(),
+	number: integer().notNull(),
+	title: varchar({ length: 50 }).notNull(),
+	poem: text().notNull(),
+	meaning: text().notNull(),
+	level: varchar({ length: 20 }).notNull(),
+	story: text(),
+	interpretation: jsonb().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("fortune_sticks_number_idx").using("btree", table.number.asc().nullsLast().op("int4_ops")),
+	index("fortune_sticks_level_idx").using("btree", table.level.asc().nullsLast().op("text_ops")),
+	unique("fortune_sticks_number_unique").on(table.number),
+]);
