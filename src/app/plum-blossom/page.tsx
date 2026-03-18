@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +49,9 @@ export default function PlumBlossomPage() {
   } | null>(null);
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
   
+  // 输入区域的ref，用于自动滚动
+  const inputAreaRef = useRef<HTMLDivElement>(null);
+  
   // 数据状态
   const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
   const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
@@ -94,6 +97,15 @@ export default function PlumBlossomPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // 选择方法并滚动到输入区域
+  const handleMethodSelect = (newMethod: Method) => {
+    setMethod(newMethod);
+    // 延迟滚动，确保DOM更新后再滚动
+    setTimeout(() => {
+      inputAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   // 根据数字获取八卦
   const getTrigramByNumber = (num: number): TrigramData => {
@@ -295,7 +307,7 @@ export default function PlumBlossomPage() {
                     ? 'bg-white/20 border-pink-400/50 scale-105'
                     : 'bg-white/10 border-pink-300/30 hover:bg-white/15'
                 }`}
-                onClick={() => setMethod(m.id as Method)}
+                onClick={() => handleMethodSelect(m.id as Method)}
               >
                 <CardContent className="py-6 text-center">
                   <m.icon className={`w-8 h-8 mx-auto mb-2 ${method === m.id ? 'text-pink-200' : 'text-pink-300/60'}`} />
@@ -308,7 +320,8 @@ export default function PlumBlossomPage() {
 
           {/* 输入区域 */}
           {!result && (
-            <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+            <div ref={inputAreaRef}>
+              <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-pink-100">
                   {method === 'time' && '时间起卦'}
@@ -400,6 +413,7 @@ export default function PlumBlossomPage() {
                 )}
               </CardContent>
             </Card>
+            </div>
           )}
 
           {/* 结果显示 */}
