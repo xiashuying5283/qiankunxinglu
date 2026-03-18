@@ -1,12 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Star, Clock } from 'lucide-react';
-import { trigrams, hexagrams, type Hexagram } from '@/lib/divination-data';
+import { ArrowLeft, Sparkles, Star, Clock, ChevronDown, ChevronUp, BookOpen, Loader2 } from 'lucide-react';
+
+// 类型定义
+interface LineText {
+  text: string;
+  meaning: string;
+}
+
+interface HexagramData {
+  number: number;
+  name: string;
+  symbol: string;
+  upperTrigram: string;
+  lowerTrigram: string;
+  binary: string;
+  judgement: string;
+  judgementMeaning: string;
+  image: string;
+  imageMeaning: string;
+  lines: LineText[];
+}
+
+interface TrigramData {
+  name: string;
+  symbol: string;
+  nature: string;
+  attribute: string;
+}
 
 type Method = 'time' | 'number' | 'random';
 
@@ -14,22 +40,69 @@ export default function PlumBlossomPage() {
   const [method, setMethod] = useState<Method>('time');
   const [numberInput, setNumberInput] = useState({ num1: '', num2: '', num3: '' });
   const [result, setResult] = useState<{
-    upperTrigram: typeof trigrams[0];
-    lowerTrigram: typeof trigrams[0];
-    hexagram: Hexagram;
+    upperTrigram: TrigramData;
+    lowerTrigram: TrigramData;
+    hexagram: HexagramData;
     changingLine: number;
     method: string;
     numbers?: { upper: number; lower: number; change: number };
   } | null>(null);
+  const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
+  
+  // 数据状态
+  const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
+  const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 加载数据
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/hexagrams');
+      const data = await response.json();
+      
+      if (data.needsInit) {
+        // 需要初始化数据
+        const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
+        const initData = await initResponse.json();
+        
+        if (initData.success) {
+          // 重新加载数据
+          const retryResponse = await fetch('/api/hexagrams');
+          const retryData = await retryResponse.json();
+          setHexagrams(retryData.hexagrams);
+          setTrigrams(retryData.trigrams);
+        } else {
+          setError('数据初始化失败');
+        }
+      } else if (data.hexagrams) {
+        setHexagrams(data.hexagrams);
+        setTrigrams(data.trigrams);
+      } else {
+        setError(data.error || '加载数据失败');
+      }
+    } catch (err) {
+      setError('加载数据失败，请刷新页面重试');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // 根据数字获取八卦
-  const getTrigramByNumber = (num: number) => {
+  const getTrigramByNumber = (num: number): TrigramData => {
     const remainder = num % 8;
     return trigrams[remainder === 0 ? 7 : remainder - 1];
   };
 
   // 根据上下卦找到对应的六十四卦
-  const findHexagram = (upperName: string, lowerName: string): Hexagram => {
+  const findHexagram = (upperName: string, lowerName: string): HexagramData => {
     const found = hexagrams.find(
       h => h.upperTrigram === upperName && h.lowerTrigram === lowerName
     );
@@ -38,6 +111,8 @@ export default function PlumBlossomPage() {
 
   // 时间起卦
   const divineByTime = () => {
+    if (hexagrams.length === 0 || trigrams.length === 0) return;
+    
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
@@ -67,10 +142,13 @@ export default function PlumBlossomPage() {
         change: changingLine,
       },
     });
+    setExpandedLines(new Set());
   };
 
   // 数字起卦（三个数字）
   const divineByNumber = () => {
+    if (hexagrams.length === 0 || trigrams.length === 0) return;
+    
     const num1 = parseInt(numberInput.num1) || 0;
     const num2 = parseInt(numberInput.num2) || 0;
     const num3 = parseInt(numberInput.num3) || 0;
@@ -103,10 +181,13 @@ export default function PlumBlossomPage() {
         change: changingLine,
       },
     });
+    setExpandedLines(new Set());
   };
 
   // 随机起卦
   const divineRandom = () => {
+    if (hexagrams.length === 0 || trigrams.length === 0) return;
+    
     const upperNum = Math.floor(Math.random() * 8) + 1;
     const lowerNum = Math.floor(Math.random() * 8) + 1;
     const changingLine = Math.floor(Math.random() * 6) + 1;
@@ -127,6 +208,20 @@ export default function PlumBlossomPage() {
         change: changingLine,
       },
     });
+    setExpandedLines(new Set());
+  };
+
+  // 切换爻辞展开状态
+  const toggleLine = (index: number) => {
+    setExpandedLines(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
   };
 
   const methods = [
@@ -134,6 +229,39 @@ export default function PlumBlossomPage() {
     { id: 'number', name: '数字起卦', icon: Star, description: '根据三个数字推算卦象' },
     { id: 'random', name: '随机起卦', icon: Sparkles, description: '随机生成卦象' },
   ];
+
+  // 加载中状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+          <CardContent className="py-12 flex flex-col items-center">
+            <Loader2 className="w-12 h-12 text-pink-300 animate-spin mb-4" />
+            <p className="text-pink-100">正在加载卦象数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-pink-300/30 max-w-md">
+          <CardHeader>
+            <CardTitle className="text-pink-100">加载失败</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-pink-200 mb-4">{error}</p>
+            <Button onClick={loadData} className="bg-pink-500 hover:bg-pink-600 text-white">
+              重试
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900">
@@ -343,23 +471,87 @@ export default function PlumBlossomPage() {
                   </div>
 
                   {/* 卦辞 */}
-                  <div className="bg-pink-900/40 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-bold text-pink-100 mb-2">卦辞</h4>
-                    <p className="text-pink-200">{result.hexagram.judgement}</p>
+                  <div className="bg-pink-950/60 rounded-lg p-6 mb-4">
+                    <h4 className="text-lg font-bold text-pink-100 mb-2">卦辞</h4>
+                    <p className="text-pink-100 text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
+                    <p className="text-pink-200/80 text-sm leading-relaxed border-t border-pink-600/30 pt-3 mt-3">
+                      💡 {result.hexagram.judgementMeaning}
+                    </p>
                   </div>
 
                   {/* 象辞 */}
-                  <div className="bg-pink-900/40 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-bold text-pink-100 mb-2">象辞</h4>
-                    <p className="text-pink-200">{result.hexagram.image}</p>
+                  <div className="bg-pink-950/60 rounded-lg p-6 mb-4">
+                    <h4 className="text-lg font-bold text-pink-100 mb-2">象辞</h4>
+                    <p className="text-pink-100 text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
+                    <p className="text-pink-200/80 text-sm leading-relaxed border-t border-pink-600/30 pt-3 mt-3">
+                      💡 {result.hexagram.imageMeaning}
+                    </p>
                   </div>
 
-                  {/* 动爻 */}
-                  <div className="bg-pink-900/40 rounded-lg p-4">
-                    <h4 className="text-sm font-bold text-pink-100 mb-2">
-                      动爻（第{result.changingLine}爻）
-                    </h4>
-                    <p className="text-pink-200">{result.hexagram.lines[result.changingLine - 1]}</p>
+                  {/* 爻辞 */}
+                  <div className="bg-pink-950/60 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-pink-100">爻辞（点击查看注解）</h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (expandedLines.size === 6) {
+                            setExpandedLines(new Set());
+                          } else {
+                            setExpandedLines(new Set([0, 1, 2, 3, 4, 5]));
+                          }
+                        }}
+                        className="text-pink-200 hover:text-pink-100"
+                      >
+                        {expandedLines.size === 6 ? '收起全部' : '展开全部'}
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {result.hexagram.lines.map((line, index) => (
+                        <div
+                          key={index}
+                          className={`rounded-lg overflow-hidden transition-all ${
+                            result.changingLine === index + 1
+                              ? 'bg-pink-500/20 border border-pink-400'
+                              : 'bg-pink-900/30'
+                          }`}
+                        >
+                          <div
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-pink-800/20 transition-colors"
+                            onClick={() => toggleLine(index)}
+                          >
+                            <div className="flex-1">
+                              <p className="text-pink-100 font-medium">
+                                {line.text}
+                                {result.changingLine === index + 1 && (
+                                  <span className="ml-2 text-pink-300 font-bold text-sm bg-pink-500/30 px-2 py-1 rounded">
+                                    动爻
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 text-pink-300">
+                              <BookOpen className="w-4 h-4" />
+                              {expandedLines.has(index) ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </div>
+                          </div>
+                          {expandedLines.has(index) && (
+                            <div className="px-4 pb-4 pt-0 border-t border-pink-600/20">
+                              <div className="bg-pink-900/40 rounded-lg p-4 mt-2">
+                                <p className="text-pink-200/90 leading-relaxed">
+                                  📖 {line.meaning}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -381,8 +573,11 @@ export default function PlumBlossomPage() {
                   </p>
                   <p className="mb-4">
                     第{result.changingLine}爻为动爻，象征事物发展的关键转折点。
-                    动爻提示：{result.hexagram.lines[result.changingLine - 1].split('：')[1]}
                   </p>
+                  <div className="bg-pink-950/60 rounded-lg p-4 mb-4">
+                    <p className="text-pink-100 font-medium mb-2">⚡ 动爻提示</p>
+                    <p className="text-pink-100">{result.hexagram.lines[result.changingLine - 1].meaning}</p>
+                  </div>
                   <div className="mt-4 p-4 bg-pink-950/60 rounded-lg">
                     <p className="text-sm text-pink-100">
                       <strong className="text-pink-100">温馨提示：</strong>
@@ -395,9 +590,13 @@ export default function PlumBlossomPage() {
               {/* 重新起卦 */}
               <div className="text-center">
                 <Button
-                  onClick={() => setResult(null)}
+                  onClick={() => {
+                    setResult(null);
+                    setExpandedLines(new Set());
+                  }}
                   className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
                 >
+                  <Sparkles className="w-5 h-5 mr-2" />
                   重新起卦
                 </Button>
               </div>

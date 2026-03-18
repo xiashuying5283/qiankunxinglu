@@ -1,22 +1,98 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles } from 'lucide-react';
-import { hexagrams, trigrams, type Hexagram } from '@/lib/divination-data';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2 } from 'lucide-react';
+
+// 类型定义
+interface LineText {
+  text: string;
+  meaning: string;
+}
+
+interface HexagramData {
+  number: number;
+  name: string;
+  symbol: string;
+  upperTrigram: string;
+  lowerTrigram: string;
+  binary: string;
+  judgement: string;
+  judgementMeaning: string;
+  image: string;
+  imageMeaning: string;
+  lines: LineText[];
+}
+
+interface TrigramData {
+  name: string;
+  symbol: string;
+  nature: string;
+  attribute: string;
+}
 
 export default function IChingPage() {
   const [isDivining, setIsDivining] = useState(false);
-  const [result, setResult] = useState<Hexagram | null>(null);
+  const [result, setResult] = useState<HexagramData | null>(null);
   const [changingLine, setChangingLine] = useState<number | null>(null);
   const [coinFlips, setCoinFlips] = useState<number[]>([]);
+  const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
+  
+  // 数据状态
+  const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
+  const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 加载数据
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/hexagrams');
+      const data = await response.json();
+      
+      if (data.needsInit) {
+        // 需要初始化数据
+        const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
+        const initData = await initResponse.json();
+        
+        if (initData.success) {
+          // 重新加载数据
+          const retryResponse = await fetch('/api/hexagrams');
+          const retryData = await retryResponse.json();
+          setHexagrams(retryData.hexagrams);
+          setTrigrams(retryData.trigrams);
+        } else {
+          setError('数据初始化失败');
+        }
+      } else if (data.hexagrams) {
+        setHexagrams(data.hexagrams);
+        setTrigrams(data.trigrams);
+      } else {
+        setError(data.error || '加载数据失败');
+      }
+    } catch (err) {
+      setError('加载数据失败，请刷新页面重试');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // 模拟抛铜钱占卜
   const divine = async () => {
+    if (hexagrams.length === 0) return;
+    
     setIsDivining(true);
     setCoinFlips([]);
+    setExpandedLines(new Set());
     
     // 模拟抛硬币动画
     const flips: number[] = [];
@@ -38,11 +114,57 @@ export default function IChingPage() {
     }, 1000);
   };
 
+  // 切换爻辞展开状态
+  const toggleLine = (index: number) => {
+    setExpandedLines(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
   // 获取卦象符号
   const getTrigramSymbol = (trigramName: string) => {
     const trigram = trigrams.find(t => t.name === trigramName);
     return trigram?.symbol || '';
   };
+
+  // 加载中状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+          <CardContent className="py-12 flex flex-col items-center">
+            <Loader2 className="w-12 h-12 text-amber-300 animate-spin mb-4" />
+            <p className="text-amber-100">正在加载卦象数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 max-w-md">
+          <CardHeader>
+            <CardTitle className="text-amber-100">加载失败</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-amber-200 mb-4">{error}</p>
+            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-white">
+              重试
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900">
@@ -135,36 +257,84 @@ export default function IChingPage() {
                   </div>
 
                   {/* 卦辞 */}
-                  <div className="bg-amber-900/30 rounded-lg p-6">
+                  <div className="bg-amber-950/60 rounded-lg p-6">
                     <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
-                    <p className="text-amber-200 leading-relaxed">{result.judgement}</p>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.judgement}</p>
+                    <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
+                      💡 {result.judgementMeaning}
+                    </p>
                   </div>
 
-                  {/* 彖辞 */}
-                  <div className="bg-amber-900/30 rounded-lg p-6">
+                  {/* 象辞 */}
+                  <div className="bg-amber-950/60 rounded-lg p-6">
                     <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
-                    <p className="text-amber-200 leading-relaxed">{result.image}</p>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.image}</p>
+                    <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
+                      💡 {result.imageMeaning}
+                    </p>
                   </div>
 
                   {/* 爻辞 */}
-                  <div className="bg-amber-900/30 rounded-lg p-6">
-                    <h3 className="text-lg font-bold text-amber-100 mb-4">爻辞</h3>
-                    <div className="space-y-2">
+                  <div className="bg-amber-950/60 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-amber-100">爻辞（点击查看注解）</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (expandedLines.size === 6) {
+                            setExpandedLines(new Set());
+                          } else {
+                            setExpandedLines(new Set([0, 1, 2, 3, 4, 5]));
+                          }
+                        }}
+                        className="text-amber-200 hover:text-amber-100"
+                      >
+                        {expandedLines.size === 6 ? '收起全部' : '展开全部'}
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
                       {result.lines.map((line, index) => (
                         <div
                           key={index}
-                          className={`p-3 rounded ${
+                          className={`rounded-lg overflow-hidden transition-all ${
                             changingLine === index
-                              ? 'bg-amber-500/30 border border-amber-400'
-                              : ''
+                              ? 'bg-amber-500/20 border border-amber-400'
+                              : 'bg-amber-900/30'
                           }`}
                         >
-                          <p className="text-amber-200">
-                            {line}
-                            {changingLine === index && (
-                              <span className="ml-2 text-amber-300 font-bold">（动爻）</span>
-                            )}
-                          </p>
+                          <div
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-amber-800/20 transition-colors"
+                            onClick={() => toggleLine(index)}
+                          >
+                            <div className="flex-1">
+                              <p className="text-amber-100 font-medium">
+                                {line.text}
+                                {changingLine === index && (
+                                  <span className="ml-2 text-amber-300 font-bold text-sm bg-amber-500/30 px-2 py-1 rounded">
+                                    动爻
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 text-amber-300">
+                              <BookOpen className="w-4 h-4" />
+                              {expandedLines.has(index) ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </div>
+                          </div>
+                          {expandedLines.has(index) && (
+                            <div className="px-4 pb-4 pt-0 border-t border-amber-600/20">
+                              <div className="bg-amber-900/40 rounded-lg p-4 mt-2">
+                                <p className="text-amber-200/90 leading-relaxed">
+                                  📖 {line.meaning}
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -174,14 +344,14 @@ export default function IChingPage() {
                   <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-lg p-6 border border-amber-400/30">
                     <h3 className="text-lg font-bold text-amber-100 mb-3">占卜解读</h3>
                     <p className="text-amber-100 leading-relaxed mb-4">
-                      {result.name}卦象征着{result.image.split('，')[1] || '变化与发展'}。
-                      此卦提示您在当前情况下，应当秉持{result.judgement.includes('贞') ? '正直坚毅' : '顺应自然'}的态度。
+                      {result.name}卦象征着{result.imageMeaning.split('，')[0] || '变化与发展'}。
+                      此卦提示您在当前情况下，应当秉持{result.judgementMeaning.includes('吉') ? '积极进取' : '审慎行事'}的态度。
                     </p>
                     {changingLine !== null && (
-                      <p className="text-amber-200">
-                        <strong>特别提示：</strong>
-                        {result.lines[changingLine]}
-                      </p>
+                      <div className="bg-amber-800/30 rounded-lg p-4">
+                        <p className="text-amber-200 font-medium mb-2">⚡ 动爻提示</p>
+                        <p className="text-amber-100">{result.lines[changingLine].meaning}</p>
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -194,6 +364,7 @@ export default function IChingPage() {
                     setResult(null);
                     setChangingLine(null);
                     setCoinFlips([]);
+                    setExpandedLines(new Set());
                   }}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
                 >
