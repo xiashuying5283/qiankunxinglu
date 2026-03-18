@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle } from 'lucide-react';
 
 // 类型定义
 interface LineText {
@@ -33,12 +33,32 @@ interface TrigramData {
   attribute: string;
 }
 
+// 爻的类型
+type LineType = 'old-yang' | 'young-yang' | 'old-yin' | 'young-yin';
+
+// 单次抛币结果
+interface CoinThrow {
+  coins: boolean[];        // 三枚铜钱结果：true=正，false=反
+  lineType: LineType;      // 爻的类型
+  lineValue: number;       // 6/7/8/9
+}
+
+// 占卜结果
+interface DivinationResult {
+  originalHexagram: HexagramData;   // 本卦
+  changedHexagram: HexagramData | null; // 变卦（有动爻才有）
+  coinThrows: CoinThrow[];          // 6次抛币结果
+  changingLines: number[];          // 动爻位置（1-6）
+  originalBinary: string;           // 本卦二进制
+  changedBinary: string;            // 变卦二进制
+}
+
 export default function IChingPage() {
   const [isDivining, setIsDivining] = useState(false);
-  const [result, setResult] = useState<HexagramData | null>(null);
-  const [changingLine, setChangingLine] = useState<number | null>(null);
-  const [coinFlips, setCoinFlips] = useState<number[]>([]);
+  const [result, setResult] = useState<DivinationResult | null>(null);
+  const [currentThrow, setCurrentThrow] = useState<number>(0);
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
+  const [showChangedHexagram, setShowChangedHexagram] = useState(false);
   
   // 数据状态
   const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
@@ -56,12 +76,10 @@ export default function IChingPage() {
       const data = await response.json();
       
       if (data.needsInit) {
-        // 需要初始化数据
         const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
         const initData = await initResponse.json();
         
         if (initData.success) {
-          // 重新加载数据
           const retryResponse = await fetch('/api/hexagrams');
           const retryData = await retryResponse.json();
           setHexagrams(retryData.hexagrams);
@@ -86,32 +104,110 @@ export default function IChingPage() {
     loadData();
   }, [loadData]);
 
-  // 模拟抛铜钱占卜
+  // 抛三枚铜钱
+  const throwThreeCoins = (): CoinThrow => {
+    const coins: boolean[] = [
+      Math.random() < 0.5,
+      Math.random() < 0.5,
+      Math.random() < 0.5,
+    ];
+    
+    const headsCount = coins.filter(c => c).length;
+    
+    // 根据正面数量判断爻的类型
+    // 3正 = 老阳(9) = 变爻，阳变阴
+    // 2正1反 = 少阳(7) = 阳爻，不变
+    // 1正2反 = 少阴(8) = 阴爻，不变
+    // 0正(3反) = 老阴(6) = 变爻，阴变阳
+    let lineType: LineType;
+    let lineValue: number;
+    
+    switch (headsCount) {
+      case 3:
+        lineType = 'old-yang';
+        lineValue = 9;
+        break;
+      case 2:
+        lineType = 'young-yang';
+        lineValue = 7;
+        break;
+      case 1:
+        lineType = 'young-yin';
+        lineValue = 8;
+        break;
+      default: // 0
+        lineType = 'old-yin';
+        lineValue = 6;
+    }
+    
+    return { coins, lineType, lineValue };
+  };
+
+  // 根据二进制找到对应的卦
+  const findHexagramByBinary = (binary: string): HexagramData => {
+    const found = hexagrams.find(h => h.binary === binary);
+    return found || hexagrams[0];
+  };
+
+  // 正宗铜钱占卜法
   const divine = async () => {
     if (hexagrams.length === 0) return;
     
     setIsDivining(true);
-    setCoinFlips([]);
+    setResult(null);
+    setCurrentThrow(0);
     setExpandedLines(new Set());
+    setShowChangedHexagram(false);
     
-    // 模拟抛硬币动画
-    const flips: number[] = [];
+    const coinThrows: CoinThrow[] = [];
+    
+    // 抛6次铜钱，从下往上（初爻到上爻）
     for (let i = 0; i < 6; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const flip = Math.floor(Math.random() * hexagrams.length);
-      flips.push(flip);
-      setCoinFlips([...flips]);
+      await new Promise(resolve => setTimeout(resolve, 600));
+      const throwResult = throwThreeCoins();
+      coinThrows.push(throwResult);
+      setCurrentThrow(i + 1);
     }
     
-    // 随机选择一个卦
-    const selectedHexagram = hexagrams[Math.floor(Math.random() * hexagrams.length)];
-    const randomLine = Math.floor(Math.random() * 6);
+    // 构建本卦二进制（从下往上，初爻在最右边）
+    // 阳爻=1，阴爻=0
+    const originalBinary = coinThrows
+      .map(t => (t.lineType === 'old-yang' || t.lineType === 'young-yang') ? '1' : '0')
+      .reverse()
+      .join('');
+    
+    // 找出动爻位置（老阳和老阴）
+    const changingLines: number[] = coinThrows
+      .map((t, i) => (t.lineType === 'old-yang' || t.lineType === 'old-yin') ? i + 1 : -1)
+      .filter(i => i > 0);
+    
+    // 构建变卦二进制（动爻变化）
+    const changedBinary = coinThrows
+      .map((t, i) => {
+        if (t.lineType === 'old-yang') return '0'; // 老阳变阴
+        if (t.lineType === 'old-yin') return '1';  // 老阴变阳
+        return (t.lineType === 'young-yang') ? '1' : '0';
+      })
+      .reverse()
+      .join('');
+    
+    // 找到本卦和变卦
+    const originalHexagram = findHexagramByBinary(originalBinary);
+    const changedHexagram = changingLines.length > 0 
+      ? findHexagramByBinary(changedBinary) 
+      : null;
     
     setTimeout(() => {
-      setResult(selectedHexagram);
-      setChangingLine(randomLine);
+      setResult({
+        originalHexagram,
+        changedHexagram,
+        coinThrows,
+        changingLines,
+        originalBinary,
+        changedBinary,
+      });
       setIsDivining(false);
-    }, 1000);
+    }, 500);
   };
 
   // 切换爻辞展开状态
@@ -131,6 +227,46 @@ export default function IChingPage() {
   const getTrigramSymbol = (trigramName: string) => {
     const trigram = trigrams.find(t => t.name === trigramName);
     return trigram?.symbol || '';
+  };
+
+  // 获取爻的显示符号
+  const getLineSymbol = (lineType: LineType): string => {
+    switch (lineType) {
+      case 'old-yang':
+        return '○'; // 老阳（变爻）
+      case 'young-yang':
+        return '—'; // 少阳
+      case 'old-yin':
+        return '×'; // 老阴（变爻）
+      case 'young-yin':
+        return '- -'; // 少阴
+    }
+  };
+
+  // 获取爻的颜色类
+  const getLineColorClass = (lineType: LineType): string => {
+    switch (lineType) {
+      case 'old-yang':
+        return 'text-red-400';
+      case 'old-yin':
+        return 'text-blue-400';
+      default:
+        return 'text-amber-100';
+    }
+  };
+
+  // 获取爻的名称
+  const getLineTypeName = (lineType: LineType): string => {
+    switch (lineType) {
+      case 'old-yang':
+        return '老阳（变爻）';
+      case 'young-yang':
+        return '少阳';
+      case 'old-yin':
+        return '老阴（变爻）';
+      case 'young-yin':
+        return '少阴';
+    }
   };
 
   // 加载中状态
@@ -192,27 +328,60 @@ export default function IChingPage() {
           {!result ? (
             <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-100">投掷铜钱</CardTitle>
+                <CardTitle className="text-2xl text-amber-100">铜钱占卜法</CardTitle>
                 <CardDescription className="text-amber-200/60">
                   心中默念您想问的问题，点击下方按钮开始占卜
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                {/* 铜钱动画区域 */}
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                  {[0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold transition-all duration-300 ${
-                        coinFlips.length > 0
-                          ? 'bg-amber-400 border-amber-600 text-amber-900 shadow-lg shadow-amber-500/50'
-                          : 'bg-amber-900/50 border-amber-600/30 text-amber-400/30'
-                      }`}
-                    >
-                      {coinFlips.length > 0 ? (Math.random() > 0.5 ? '正' : '反') : '币'}
-                    </div>
-                  ))}
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                {/* 占卜说明 */}
+                <div className="bg-amber-950/40 rounded-lg p-4 mb-6 max-w-lg text-center">
+                  <p className="text-amber-200/80 text-sm leading-relaxed">
+                    <strong className="text-amber-100">正宗铜钱法：</strong>
+                    每次抛三枚铜钱，共抛六次，从下往上排成六爻。
+                    三正为老阳（变爻），两正一反为少阳，一正两反为少阴，三反为老阴（变爻）。
+                  </p>
                 </div>
+
+                {/* 铜钱动画区域 */}
+                <div className="mb-6">
+                  <div className="text-center mb-2 text-amber-200">
+                    {isDivining ? `第 ${currentThrow} 次抛币（共6次）` : '准备开始'}
+                  </div>
+                  <div className="flex justify-center gap-4">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className={`w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold transition-all duration-300 ${
+                          isDivining
+                            ? 'bg-amber-400 border-amber-600 text-amber-900 shadow-lg shadow-amber-500/50 animate-bounce'
+                            : 'bg-amber-900/50 border-amber-600/30 text-amber-400/30'
+                        }`}
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        {isDivining ? (Math.random() > 0.5 ? '正' : '反') : '币'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 已抛出的爻 */}
+                {isDivining && currentThrow > 0 && (
+                  <div className="mb-6 flex gap-2">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-10 h-10 rounded border-2 flex items-center justify-center text-sm font-bold transition-all ${
+                          i < currentThrow
+                            ? 'bg-amber-500/30 border-amber-400 text-amber-100'
+                            : 'bg-amber-900/30 border-amber-600/30 text-amber-400/30'
+                        }`}
+                      >
+                        {i < currentThrow ? (i + 1) : ''}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <Button
                   onClick={divine}
@@ -232,45 +401,82 @@ export default function IChingPage() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* 卦象显示 */}
+              {/* 抛币过程展示 */}
+              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+                <CardHeader>
+                  <CardTitle className="text-xl text-amber-100">占卜过程</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-6 gap-2">
+                    {result.coinThrows.map((t, i) => (
+                      <div key={i} className="text-center">
+                        <div className="text-xs text-amber-200/60 mb-1">
+                          {['初', '二', '三', '四', '五', '上'][i]}爻
+                        </div>
+                        <div className="flex justify-center gap-1 mb-1">
+                          {t.coins.map((c, ci) => (
+                            <Circle
+                              key={ci}
+                              className={`w-3 h-3 ${c ? 'fill-amber-400 text-amber-400' : 'fill-amber-900 text-amber-700'}`}
+                            />
+                          ))}
+                        </div>
+                        <div className={`text-sm font-bold ${getLineColorClass(t.lineType)}`}>
+                          {getLineSymbol(t.lineType)}
+                        </div>
+                        <div className="text-xs text-amber-200/60">{t.lineValue}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                    <span className="text-red-400">○ 老阳（变爻，阳变阴）</span>
+                    <span className="text-blue-400">× 老阴（变爻，阴变阳）</span>
+                    <span className="text-amber-100">— 少阳</span>
+                    <span className="text-amber-100">- - 少阴</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 本卦显示 */}
               <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
                 <CardHeader className="text-center">
                   <CardTitle className="text-3xl text-amber-100 flex items-center justify-center">
-                    <span className="text-6xl mr-4">{result.symbol}</span>
-                    <span>{result.name}卦</span>
+                    <span className="text-6xl mr-4">{result.originalHexagram.symbol}</span>
+                    <span>{result.originalHexagram.name}卦</span>
+                    <span className="ml-4 text-lg text-amber-200/60">（本卦）</span>
                   </CardTitle>
                   <CardDescription className="text-amber-200/80 text-lg">
-                    第{result.number}卦 · {result.upperTrigram}上{result.lowerTrigram}下
+                    第{result.originalHexagram.number}卦 · {result.originalHexagram.upperTrigram}上{result.originalHexagram.lowerTrigram}下
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* 上下卦 */}
                   <div className="flex justify-center gap-8">
                     <div className="text-center">
-                      <div className="text-5xl mb-2">{getTrigramSymbol(result.upperTrigram)}</div>
-                      <div className="text-amber-200">{result.upperTrigram}（上卦）</div>
+                      <div className="text-5xl mb-2">{getTrigramSymbol(result.originalHexagram.upperTrigram)}</div>
+                      <div className="text-amber-200">{result.originalHexagram.upperTrigram}（上卦）</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-5xl mb-2">{getTrigramSymbol(result.lowerTrigram)}</div>
-                      <div className="text-amber-200">{result.lowerTrigram}（下卦）</div>
+                      <div className="text-5xl mb-2">{getTrigramSymbol(result.originalHexagram.lowerTrigram)}</div>
+                      <div className="text-amber-200">{result.originalHexagram.lowerTrigram}（下卦）</div>
                     </div>
                   </div>
 
                   {/* 卦辞 */}
                   <div className="bg-amber-950/60 rounded-lg p-6">
                     <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
-                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.judgement}</p>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.judgement}</p>
                     <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      💡 {result.judgementMeaning}
+                      💡 {result.originalHexagram.judgementMeaning}
                     </p>
                   </div>
 
                   {/* 象辞 */}
                   <div className="bg-amber-950/60 rounded-lg p-6">
                     <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
-                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.image}</p>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.image}</p>
                     <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      💡 {result.imageMeaning}
+                      💡 {result.originalHexagram.imageMeaning}
                     </p>
                   </div>
 
@@ -294,11 +500,11 @@ export default function IChingPage() {
                       </Button>
                     </div>
                     <div className="space-y-3">
-                      {result.lines.map((line, index) => (
+                      {result.originalHexagram.lines.map((line, index) => (
                         <div
                           key={index}
                           className={`rounded-lg overflow-hidden transition-all ${
-                            changingLine === index
+                            result.changingLines.includes(index + 1)
                               ? 'bg-amber-500/20 border border-amber-400'
                               : 'bg-amber-900/30'
                           }`}
@@ -310,7 +516,7 @@ export default function IChingPage() {
                             <div className="flex-1">
                               <p className="text-amber-100 font-medium">
                                 {line.text}
-                                {changingLine === index && (
+                                {result.changingLines.includes(index + 1) && (
                                   <span className="ml-2 text-amber-300 font-bold text-sm bg-amber-500/30 px-2 py-1 rounded">
                                     动爻
                                   </span>
@@ -339,20 +545,115 @@ export default function IChingPage() {
                       ))}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* 解读 */}
-                  <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-lg p-6 border border-amber-400/30">
-                    <h3 className="text-lg font-bold text-amber-100 mb-3">占卜解读</h3>
-                    <p className="text-amber-100 leading-relaxed mb-4">
-                      {result.name}卦象征着{result.imageMeaning.split('，')[0] || '变化与发展'}。
-                      此卦提示您在当前情况下，应当秉持{result.judgementMeaning.includes('吉') ? '积极进取' : '审慎行事'}的态度。
-                    </p>
-                    {changingLine !== null && (
-                      <div className="bg-amber-800/30 rounded-lg p-4">
-                        <p className="text-amber-200 font-medium mb-2">⚡ 动爻提示</p>
-                        <p className="text-amber-100">{result.lines[changingLine].meaning}</p>
+              {/* 变卦显示（如果有动爻） */}
+              {result.changedHexagram && (
+                <>
+                  <div className="text-center py-4">
+                    <div className="inline-flex items-center gap-4 text-4xl text-amber-300">
+                      <span>{result.originalHexagram.symbol}</span>
+                      <span className="text-2xl">→</span>
+                      <span>{result.changedHexagram.symbol}</span>
+                    </div>
+                    <p className="text-amber-200/60 mt-2">动爻变化，本卦变为之卦</p>
+                  </div>
+
+                  <Card className={`bg-white/10 backdrop-blur-md border-amber-300/30 ${showChangedHexagram ? '' : 'opacity-50'}`}>
+                    <CardHeader className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowChangedHexagram(!showChangedHexagram)}
+                          className="text-amber-200 hover:text-amber-100"
+                        >
+                          {showChangedHexagram ? '收起变卦' : '展开变卦详情'}
+                        </Button>
                       </div>
+                      <CardTitle className="text-3xl text-amber-100 flex items-center justify-center">
+                        <span className="text-6xl mr-4">{result.changedHexagram.symbol}</span>
+                        <span>{result.changedHexagram.name}卦</span>
+                        <span className="ml-4 text-lg text-amber-200/60">（变卦/之卦）</span>
+                      </CardTitle>
+                      <CardDescription className="text-amber-200/80 text-lg">
+                        第{result.changedHexagram.number}卦 · {result.changedHexagram.upperTrigram}上{result.changedHexagram.lowerTrigram}下
+                      </CardDescription>
+                    </CardHeader>
+                    {showChangedHexagram && (
+                      <CardContent className="space-y-6">
+                        {/* 卦辞 */}
+                        <div className="bg-amber-950/60 rounded-lg p-6">
+                          <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
+                          <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.changedHexagram.judgement}</p>
+                          <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
+                            💡 {result.changedHexagram.judgementMeaning}
+                          </p>
+                        </div>
+
+                        {/* 象辞 */}
+                        <div className="bg-amber-950/60 rounded-lg p-6">
+                          <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
+                          <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.changedHexagram.image}</p>
+                          <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
+                            💡 {result.changedHexagram.imageMeaning}
+                          </p>
+                        </div>
+                      </CardContent>
                     )}
+                  </Card>
+                </>
+              )}
+
+              {/* 解读 */}
+              <Card className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 border-amber-400/30">
+                <CardHeader>
+                  <CardTitle className="text-xl text-amber-100">占卜解读</CardTitle>
+                </CardHeader>
+                <CardContent className="text-amber-100 leading-relaxed space-y-4">
+                  <p>
+                    您抽得的是<strong className="text-amber-100">{result.originalHexagram.name}卦</strong>
+                    （第{result.originalHexagram.number}卦），由{result.originalHexagram.upperTrigram}卦在上、
+                    {result.originalHexagram.lowerTrigram}卦在下组成。
+                  </p>
+                  
+                  {result.changingLines.length > 0 ? (
+                    <>
+                      <p>
+                        此次占卜有<strong className="text-amber-300">{result.changingLines.length}个动爻</strong>
+                        （第{result.changingLines.join('、')}爻），动爻代表事物变化的契机。
+                      </p>
+                      <div className="bg-amber-800/30 rounded-lg p-4">
+                        <p className="font-medium text-amber-100 mb-2">⚡ 动爻爻辞指引</p>
+                        {result.changingLines.map(lineNum => (
+                          <p key={lineNum} className="text-amber-200 mb-2">
+                            <strong>第{lineNum}爻：</strong>
+                            {result.originalHexagram.lines[lineNum - 1].meaning}
+                          </p>
+                        ))}
+                      </div>
+                      {result.changedHexagram && (
+                        <p>
+                          本卦<strong>{result.originalHexagram.name}</strong>变为之卦
+                          <strong>{result.changedHexagram.name}</strong>，象征事物从
+                          {result.originalHexagram.judgementMeaning.slice(0, 20)}转向
+                          {result.changedHexagram.judgementMeaning.slice(0, 20)}。
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p>
+                      此次占卜<strong className="text-amber-300">无动爻</strong>，
+                      表示事物状态稳定，以本卦{result.originalHexagram.name}卦的卦辞为主进行解读。
+                    </p>
+                  )}
+                  
+                  <div className="mt-4 p-4 bg-amber-950/60 rounded-lg">
+                    <p className="text-sm text-amber-100">
+                      <strong className="text-amber-100">温馨提示：</strong>
+                      占卜结果仅供参考，人生道路需要自己把握。愿此卦带给您启示与指引。
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -362,9 +663,9 @@ export default function IChingPage() {
                 <Button
                   onClick={() => {
                     setResult(null);
-                    setChangingLine(null);
-                    setCoinFlips([]);
+                    setCurrentThrow(0);
                     setExpandedLines(new Set());
+                    setShowChangedHexagram(false);
                   }}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
                 >
