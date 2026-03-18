@@ -1,75 +1,242 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, PenTool } from 'lucide-react';
-import { charStrokes, trigrams } from '@/lib/divination-data';
+import { ArrowLeft, Sparkles, PenTool, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { 
+  charStrokes, 
+  charDecompositions, 
+  type CharDecomposition 
+} from '@/lib/char-divination-data';
+
+// 类型定义
+interface LineText {
+  text: string;
+  meaning: string;
+}
+
+interface HexagramData {
+  number: number;
+  name: string;
+  symbol: string;
+  upperTrigram: string;
+  lowerTrigram: string;
+  binary: string;
+  judgement: string;
+  judgementMeaning: string;
+  image: string;
+  imageMeaning: string;
+  lines: LineText[];
+}
+
+interface TrigramData {
+  name: string;
+  symbol: string;
+  nature: string;
+  attribute: string;
+}
+
+interface DivinationResult {
+  char: string;
+  strokes: number;
+  decomposition: CharDecomposition | null;
+  hexagram: HexagramData;
+  changedHexagram: HexagramData | null;
+  upperTrigram: TrigramData;
+  lowerTrigram: TrigramData;
+  changingLine: number;
+  upperStrokes: number;
+  lowerStrokes: number;
+  timeStrokes: number;
+}
 
 export default function CharDivinationPage() {
   const [inputChar, setInputChar] = useState('');
-  const [result, setResult] = useState<{
-    char: string;
-    strokes: number;
-    upperTrigram: typeof trigrams[0];
-    lowerTrigram: typeof trigrams[0];
-    interpretation: string;
-  } | null>(null);
+  const [result, setResult] = useState<DivinationResult | null>(null);
+  const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
+  const [showChangedHexagram, setShowChangedHexagram] = useState(false);
+  
+  // 数据状态
+  const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
+  const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 根据笔画数获取八卦
-  const getTrigramByStrokes = (strokes: number) => {
-    const index = strokes % 8;
-    return trigrams[index];
-  };
+  // 加载数据
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/hexagrams');
+      const data = await response.json();
+      
+      if (data.needsInit) {
+        const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
+        const initData = await initResponse.json();
+        
+        if (initData.success) {
+          const retryResponse = await fetch('/api/hexagrams');
+          const retryData = await retryResponse.json();
+          setHexagrams(retryData.hexagrams);
+          setTrigrams(retryData.trigrams);
+        } else {
+          setError('数据初始化失败');
+        }
+      } else if (data.hexagrams) {
+        setHexagrams(data.hexagrams);
+        setTrigrams(data.trigrams);
+      } else {
+        setError(data.error || '加载数据失败');
+      }
+    } catch (err) {
+      setError('加载数据失败，请刷新页面重试');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // 计算笔画数（简化版）
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // 计算笔画数
   const calculateStrokes = (char: string): number => {
     if (charStrokes[char]) {
       return charStrokes[char];
     }
-    // 如果没有预设数据，返回字符编码的简化计算
-    return (char.charCodeAt(0) % 20) + 1;
+    // 简化计算：取字符编码
+    const code = char.charCodeAt(0);
+    // CJK统一汉字范围
+    if (code >= 0x4E00 && code <= 0x9FFF) {
+      return Math.floor((code - 0x4E00) % 20) + 1;
+    }
+    return 5; // 默认笔画
   };
 
-  // 生成解读
-  const generateInterpretation = (upper: typeof trigrams[0], lower: typeof trigrams[0], char: string) => {
-    const interpretations = [
-      `${upper.name}${lower.name}卦，上${upper.nature}下${lower.nature}。`,
-      `${upper.nature}道${upper.attribute}，${lower.nature}道${lower.attribute}。`,
-      `此字\"${char}\"所成之卦，象征${upper.nature}与${lower.nature}的结合。`,
-      `上卦${upper.name}代表${upper.attribute}，下卦${lower.name}代表${lower.attribute}。`,
-      `整体运势呈现${upper.attribute}与${lower.attribute}交织的状态。`,
-    ];
-    return interpretations.join('\n');
+  // 根据数字获取八卦
+  const getTrigramByNumber = (num: number): TrigramData => {
+    const remainder = num % 8;
+    return trigrams[remainder === 0 ? 7 : remainder - 1];
   };
 
-  // 开始测字
+  // 根据上下卦找到对应的六十四卦
+  const findHexagram = (upperName: string, lowerName: string): HexagramData => {
+    const found = hexagrams.find(
+      h => h.upperTrigram === upperName && h.lowerTrigram === lowerName
+    );
+    return found || hexagrams[0];
+  };
+
+  // 测字起卦
   const divine = () => {
-    if (!inputChar.trim()) return;
+    if (!inputChar.trim() || hexagrams.length === 0 || trigrams.length === 0) return;
 
     const char = inputChar.trim().charAt(0);
     const strokes = calculateStrokes(char);
     
-    // 上卦取笔画数除以8的余数
-    const upperStrokes = strokes;
-    // 下卦取时间或随机数
-    const lowerStrokes = Math.floor(Date.now() / 1000) % 8;
+    // 正宗测字起卦法：
+    // 上卦 = 笔画数 % 8
+    // 下卦 = (笔画数 + 时辰) % 8
+    // 动爻 = (笔画数 + 时辰) % 6
     
-    const upperTrigram = getTrigramByStrokes(upperStrokes);
-    const lowerTrigram = getTrigramByStrokes(lowerStrokes);
+    const now = new Date();
+    const hour = now.getHours();
+    const timeNum = Math.floor(hour / 2) + 1; // 时辰（1-12）
     
-    const interpretation = generateInterpretation(upperTrigram, lowerTrigram, char);
-
+    const upperStrokes = strokes % 8 || 8;
+    const lowerStrokes = (strokes + timeNum) % 8 || 8;
+    const changingLine = ((strokes + timeNum) % 6) || 6;
+    
+    const upperTrigram = getTrigramByNumber(upperStrokes);
+    const lowerTrigram = getTrigramByNumber(lowerStrokes);
+    const hexagram = findHexagram(upperTrigram.name, lowerTrigram.name);
+    
+    // 计算变卦（动爻变化）
+    const binary = hexagram.binary.split('').reverse();
+    const changedBinary = binary.map((b, i) => {
+      if (i + 1 === changingLine) {
+        return b === '1' ? '0' : '1';
+      }
+      return b;
+    }).reverse().join('');
+    
+    const changedHexagram = hexagrams.find(h => h.binary === changedBinary) || null;
+    
+    // 获取字形拆解信息
+    const decomposition = charDecompositions[char] || null;
+    
     setResult({
       char,
       strokes,
+      decomposition,
+      hexagram,
+      changedHexagram,
       upperTrigram,
       lowerTrigram,
-      interpretation,
+      changingLine,
+      upperStrokes,
+      lowerStrokes,
+      timeStrokes: timeNum,
+    });
+    setExpandedLines(new Set());
+    setShowChangedHexagram(false);
+  };
+
+  // 切换爻辞展开状态
+  const toggleLine = (index: number) => {
+    setExpandedLines(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
     });
   };
+
+  // 获取八卦符号
+  const getTrigramSymbol = (trigramName: string) => {
+    const trigram = trigrams.find(t => t.name === trigramName);
+    return trigram?.symbol || '';
+  };
+
+  // 加载中状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30">
+          <CardContent className="py-12 flex flex-col items-center">
+            <Loader2 className="w-12 h-12 text-cyan-300 animate-spin mb-4" />
+            <p className="text-cyan-100">正在加载卦象数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30 max-w-md">
+          <CardHeader>
+            <CardTitle className="text-cyan-100">加载失败</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-cyan-200 mb-4">{error}</p>
+            <Button onClick={loadData} className="bg-cyan-500 hover:bg-cyan-600 text-white">
+              重试
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-900 via-blue-900 to-indigo-900">
@@ -92,121 +259,339 @@ export default function CharDivinationPage() {
           <p className="text-cyan-200/80">一字一世界，一笔一乾坤，通过文字探索命运的奥秘</p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* 输入区域 */}
-          <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30 mb-6">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-cyan-100">请输入您想测算的汉字</CardTitle>
-              <CardDescription className="text-cyan-200/60">
-                输入一个汉字，我们将根据其笔画数为您推算卦象
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-4">
-                <Input
-                  type="text"
-                  maxLength={1}
-                  value={inputChar}
-                  onChange={(e) => setInputChar(e.target.value)}
-                  placeholder="请输入一个汉字"
-                  className="bg-white/10 border-cyan-300/30 text-cyan-100 placeholder:text-cyan-200/40 text-center text-2xl h-14"
-                />
-                <Button
-                  onClick={divine}
-                  disabled={!inputChar.trim()}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-8"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  开始测字
-                </Button>
-              </div>
-
-              {/* 常用字推荐 */}
-              <div className="pt-4">
-                <p className="text-sm text-cyan-200/60 mb-2 text-center">常用测字：</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['福', '禄', '寿', '喜', '财', '爱', '缘', '命', '运', '吉'].map((char) => (
-                    <Button
-                      key={char}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputChar(char)}
-                      className="bg-white/5 border-cyan-300/20 text-cyan-200 hover:bg-white/10 hover:text-cyan-100"
-                    >
-                      {char}
-                    </Button>
-                  ))}
+          {!result && (
+            <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30 mb-6">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl text-cyan-100">请输入您想测算的汉字</CardTitle>
+                <CardDescription className="text-cyan-200/60">
+                  输入一个汉字，我们将根据其笔画数起卦推演
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* 测字规则说明 */}
+                <div className="bg-cyan-950/40 rounded-lg p-4 mb-4 text-center">
+                  <p className="text-cyan-200/80 text-sm leading-relaxed">
+                    上卦取笔画数除以八的余数，下卦取笔画数加时辰除以八的余数，
+                    动爻取笔画数加时辰除以六的余数。
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                
+                <div className="flex gap-4">
+                  <Input
+                    type="text"
+                    maxLength={1}
+                    value={inputChar}
+                    onChange={(e) => setInputChar(e.target.value)}
+                    placeholder="请输入一个汉字"
+                    className="bg-white/10 border-cyan-300/30 text-cyan-100 placeholder:text-cyan-200/40 text-center text-2xl h-14"
+                  />
+                  <Button
+                    onClick={divine}
+                    disabled={!inputChar.trim()}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-8"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    开始测字
+                  </Button>
+                </div>
+
+                {/* 常用字推荐 */}
+                <div className="pt-4">
+                  <p className="text-sm text-cyan-200/60 mb-2 text-center">常用测字：</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['福', '禄', '寿', '喜', '财', '爱', '缘', '命', '运', '吉', '安', '成', '婚', '业', '问'].map((char) => (
+                      <Button
+                        key={char}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInputChar(char)}
+                        className="bg-white/5 border-cyan-300/20 text-cyan-200 hover:bg-white/10 hover:text-cyan-100"
+                      >
+                        {char}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* 结果显示 */}
           {result && (
             <div className="space-y-6">
-              {/* 字和笔画 */}
+              {/* 字和笔画信息 */}
               <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30">
                 <CardContent className="py-8">
                   <div className="text-center">
-                    <div className="text-8xl font-bold text-cyan-100 mb-4" style={{ fontFamily: 'serif' }}>
+                    <div className="text-9xl font-bold text-cyan-100 mb-4" style={{ fontFamily: 'serif' }}>
                       {result.char}
                     </div>
-                    <div className="text-xl text-cyan-200">
-                      笔画数：<span className="text-cyan-100 font-bold">{result.strokes}</span> 画
+                    <div className="text-xl text-cyan-200 mb-2">
+                      笔画数：<span className="text-cyan-100 font-bold text-2xl">{result.strokes}</span> 画
+                    </div>
+                    <div className="flex justify-center gap-6 text-sm text-cyan-200/60">
+                      <span>上卦数：{result.upperStrokes}</span>
+                      <span>下卦数：{result.lowerStrokes}</span>
+                      <span>时辰：第{result.timeStrokes}辰</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* 字形拆解（如果有） */}
+              {result.decomposition && (() => {
+                const decomp = result.decomposition;
+                return (
+                <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-cyan-100">字形拆解</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-center gap-4 mb-4">
+                      {decomp.parts.map((part, i) => (
+                        <div key={i} className="text-center">
+                          <div className="text-4xl text-cyan-100" style={{ fontFamily: 'serif' }}>{part}</div>
+                          <div className="text-xs text-cyan-200/60 mt-1">
+                            {decomp.meanings[i]?.slice(0, 10)}...
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bg-cyan-950/60 rounded-lg p-4">
+                      <p className="text-cyan-100 leading-relaxed">
+                        {decomp.overall}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-cyan-950/40 rounded-lg p-3 text-center">
+                        <div className="text-sm text-cyan-200/60">五行属性</div>
+                        <div className="text-xl font-bold text-cyan-100">{decomp.fiveElement}</div>
+                      </div>
+                      <div className="bg-cyan-950/40 rounded-lg p-3 text-center">
+                        <div className="text-sm text-cyan-200/60">阴阳属性</div>
+                        <div className="text-xl font-bold text-cyan-100">{decomp.yinYang}</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                );
+              })()}
 
               {/* 卦象显示 */}
               <Card className="bg-white/10 backdrop-blur-md border-cyan-300/30">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-cyan-100">所成卦象</CardTitle>
+                  <CardDescription className="text-cyan-200/60">
+                    第{result.hexagram.number}卦 · {result.hexagram.name}卦 · {result.upperTrigram.name}上{result.lowerTrigram.name}下
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  {/* 卦象符号 */}
+                  <div className="text-center mb-6">
+                    <div className="text-8xl mb-2">{result.hexagram.symbol}</div>
+                  </div>
+
+                  {/* 上下卦 */}
                   <div className="flex justify-center items-center gap-8 mb-6">
                     <div className="text-center">
-                      <div className="text-6xl mb-2">{result.upperTrigram.symbol}</div>
+                      <div className="text-5xl mb-2">{result.upperTrigram.symbol}</div>
                       <div className="text-lg text-cyan-100">{result.upperTrigram.name}</div>
-                      <div className="text-sm text-cyan-200/60">（上卦·{result.upperTrigram.nature}）</div>
+                      <div className="text-sm text-cyan-200/60">上卦·{result.upperTrigram.nature}</div>
                     </div>
-                    <div className="text-4xl text-cyan-300">—</div>
+                    <div className="text-2xl text-cyan-300">+</div>
                     <div className="text-center">
-                      <div className="text-6xl mb-2">{result.lowerTrigram.symbol}</div>
+                      <div className="text-5xl mb-2">{result.lowerTrigram.symbol}</div>
                       <div className="text-lg text-cyan-100">{result.lowerTrigram.name}</div>
-                      <div className="text-sm text-cyan-200/60">（下卦·{result.lowerTrigram.nature}）</div>
+                      <div className="text-sm text-cyan-200/60">下卦·{result.lowerTrigram.nature}</div>
+                    </div>
+                    <div className="text-2xl text-cyan-300">=</div>
+                    <div className="text-center">
+                      <div className="text-5xl mb-2">{result.hexagram.symbol}</div>
+                      <div className="text-lg text-cyan-100">{result.hexagram.name}</div>
+                      <div className="text-sm text-cyan-200/60">本卦</div>
                     </div>
                   </div>
 
-                  <div className="bg-cyan-900/40 rounded-lg p-6 space-y-3">
-                    <div className="text-sm text-cyan-200/80">
-                      <strong className="text-cyan-100">上卦属性：</strong>
-                      {result.upperTrigram.nature} · {result.upperTrigram.attribute}
+                  {/* 卦辞 */}
+                  <div className="bg-cyan-950/60 rounded-lg p-6 mb-4">
+                    <h3 className="text-lg font-bold text-cyan-100 mb-2">卦辞</h3>
+                    <p className="text-cyan-100 text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
+                    <p className="text-cyan-200/80 text-sm leading-relaxed border-t border-cyan-600/30 pt-3 mt-3">
+                      💡 {result.hexagram.judgementMeaning}
+                    </p>
+                  </div>
+
+                  {/* 象辞 */}
+                  <div className="bg-cyan-950/60 rounded-lg p-6 mb-4">
+                    <h3 className="text-lg font-bold text-cyan-100 mb-2">象辞</h3>
+                    <p className="text-cyan-100 text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
+                    <p className="text-cyan-200/80 text-sm leading-relaxed border-t border-cyan-600/30 pt-3 mt-3">
+                      💡 {result.hexagram.imageMeaning}
+                    </p>
+                  </div>
+
+                  {/* 爻辞 */}
+                  <div className="bg-cyan-950/60 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-cyan-100">爻辞（点击查看注解）</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (expandedLines.size === 6) {
+                            setExpandedLines(new Set());
+                          } else {
+                            setExpandedLines(new Set([0, 1, 2, 3, 4, 5]));
+                          }
+                        }}
+                        className="text-cyan-200 hover:text-cyan-100"
+                      >
+                        {expandedLines.size === 6 ? '收起全部' : '展开全部'}
+                      </Button>
                     </div>
-                    <div className="text-sm text-cyan-200/80">
-                      <strong className="text-cyan-100">下卦属性：</strong>
-                      {result.lowerTrigram.nature} · {result.lowerTrigram.attribute}
+                    <div className="space-y-3">
+                      {result.hexagram.lines.map((line, index) => (
+                        <div
+                          key={index}
+                          className={`rounded-lg overflow-hidden transition-all ${
+                            result.changingLine === index + 1
+                              ? 'bg-cyan-500/20 border border-cyan-400'
+                              : 'bg-cyan-900/30'
+                          }`}
+                        >
+                          <div
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-cyan-800/20 transition-colors"
+                            onClick={() => toggleLine(index)}
+                          >
+                            <div className="flex-1">
+                              <p className="text-cyan-100 font-medium">
+                                {line.text}
+                                {result.changingLine === index + 1 && (
+                                  <span className="ml-2 text-cyan-300 font-bold text-sm bg-cyan-500/30 px-2 py-1 rounded">
+                                    动爻
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 text-cyan-300">
+                              {expandedLines.has(index) ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </div>
+                          </div>
+                          {expandedLines.has(index) && (
+                            <div className="px-4 pb-4 pt-0 border-t border-cyan-600/20">
+                              <div className="bg-cyan-900/40 rounded-lg p-4 mt-2">
+                                <p className="text-cyan-200/90 leading-relaxed">
+                                  📖 {line.meaning}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* 解读 */}
+              {/* 变卦显示（如果有） */}
+              {result.changedHexagram && (
+                <>
+                  <div className="text-center py-4">
+                    <div className="inline-flex items-center gap-4 text-4xl text-cyan-300">
+                      <span>{result.hexagram.symbol}</span>
+                      <span className="text-2xl">→</span>
+                      <span>{result.changedHexagram.symbol}</span>
+                    </div>
+                    <p className="text-cyan-200/60 mt-2">动爻变化，本卦变为之卦</p>
+                  </div>
+
+                  <Card className={`bg-white/10 backdrop-blur-md border-cyan-300/30 ${showChangedHexagram ? '' : 'opacity-50'}`}>
+                    <CardHeader className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowChangedHexagram(!showChangedHexagram)}
+                          className="text-cyan-200 hover:text-cyan-100"
+                        >
+                          {showChangedHexagram ? '收起变卦' : '展开变卦详情'}
+                        </Button>
+                      </div>
+                      <CardTitle className="text-2xl text-cyan-100">
+                        {result.changedHexagram.name}卦（变卦/之卦）
+                      </CardTitle>
+                      <CardDescription className="text-cyan-200/60">
+                        第{result.changedHexagram.number}卦 · {result.changedHexagram.upperTrigram}上{result.changedHexagram.lowerTrigram}下
+                      </CardDescription>
+                    </CardHeader>
+                    {showChangedHexagram && (
+                      <CardContent className="space-y-4">
+                        <div className="bg-cyan-950/60 rounded-lg p-6">
+                          <h3 className="text-lg font-bold text-cyan-100 mb-2">卦辞</h3>
+                          <p className="text-cyan-100 text-lg leading-relaxed mb-2">{result.changedHexagram.judgement}</p>
+                          <p className="text-cyan-200/80 text-sm leading-relaxed border-t border-cyan-600/30 pt-3 mt-3">
+                            💡 {result.changedHexagram.judgementMeaning}
+                          </p>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                </>
+              )}
+
+              {/* 综合解读 */}
               <Card className="bg-gradient-to-r from-cyan-900/60 to-blue-900/60 border-cyan-400/30">
                 <CardHeader>
-                  <CardTitle className="text-xl text-cyan-100">测字解读</CardTitle>
+                  <CardTitle className="text-xl text-cyan-100">测字综合解读</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 text-cyan-100 leading-relaxed">
-                    {result.interpretation.split('\n').map((line, index) => (
-                      <p key={index}>{line}</p>
-                    ))}
-                    <div className="mt-4 p-4 bg-cyan-950/60 rounded-lg">
-                      <p className="text-sm text-cyan-100">
-                        <strong className="text-cyan-100">温馨提示：</strong>
-                        测字算卦仅供参考，人生道路需要自己把握。愿此字带给您启示与力量。
+                <CardContent className="text-cyan-100 leading-relaxed space-y-4">
+                  <p>
+                    您所测之字「<strong className="text-cyan-100">{result.char}</strong>」，
+                    笔画数为<strong className="text-cyan-300">{result.strokes}</strong>画。
+                  </p>
+                  <p>
+                    以笔画起卦，得上卦<strong className="text-cyan-100">{result.upperTrigram.name}</strong>
+                    （{result.upperTrigram.nature}）、下卦<strong className="text-cyan-100">{result.lowerTrigram.name}</strong>
+                    （{result.lowerTrigram.nature}），组成<strong className="text-cyan-100">{result.hexagram.name}卦</strong>
+                    （第{result.hexagram.number}卦）。
+                  </p>
+                  <p>
+                    第<strong className="text-cyan-300">{result.changingLine}</strong>爻为动爻，
+                    动爻爻辞：{result.hexagram.lines[result.changingLine - 1].meaning}
+                  </p>
+                  
+                  {result.decomposition && (
+                    <>
+                      <div className="bg-cyan-800/30 rounded-lg p-4">
+                        <p className="font-medium text-cyan-100 mb-2">📐 字形分析</p>
+                        <p className="text-cyan-200">{result.decomposition.overall}</p>
+                      </div>
+                      <p>
+                        此字五行属<strong className="text-cyan-300">{result.decomposition.fiveElement}</strong>，
+                        阴阳属<strong className="text-cyan-300">{result.decomposition.yinYang}</strong>。
                       </p>
-                    </div>
+                    </>
+                  )}
+                  
+                  {result.changedHexagram && (
+                    <p>
+                      本卦{result.hexagram.name}变为之卦{result.changedHexagram.name}，
+                      象征事物从「{result.hexagram.judgementMeaning.slice(0, 15)}...」
+                      转向「{result.changedHexagram.judgementMeaning.slice(0, 15)}...」。
+                    </p>
+                  )}
+                  
+                  <div className="mt-4 p-4 bg-cyan-950/60 rounded-lg">
+                    <p className="text-sm text-cyan-100">
+                      <strong className="text-cyan-100">温馨提示：</strong>
+                      测字算卦仅供参考，人生道路需要自己把握。愿此字带给您启示与力量。
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -217,9 +602,12 @@ export default function CharDivinationPage() {
                   onClick={() => {
                     setInputChar('');
                     setResult(null);
+                    setExpandedLines(new Set());
+                    setShowChangedHexagram(false);
                   }}
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-12 py-6 text-lg"
                 >
+                  <Sparkles className="w-5 h-5 mr-2" />
                   重新测字
                 </Button>
               </div>
