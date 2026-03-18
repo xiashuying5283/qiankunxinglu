@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { hexagrams as hexagramsSource, trigrams as trigramsSource, type LineText } from '@/lib/hexagram-data';
-import type { HexagramLine } from '@/storage/database/shared/schema';
 
 export async function POST() {
   try {
@@ -51,7 +50,7 @@ export async function POST() {
       judgement_meaning: h.judgementMeaning,
       image: h.image,
       image_meaning: h.imageMeaning,
-      lines: h.lines as unknown as HexagramLine[],
+      lines: h.lines as unknown as LineText[],
     }));
 
     // 分批插入（每次10条）
