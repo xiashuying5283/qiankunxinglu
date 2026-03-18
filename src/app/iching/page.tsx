@@ -328,20 +328,12 @@ export default function IChingPage() {
           {!result ? (
             <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-100">铜钱占卜法</CardTitle>
+                <CardTitle className="text-2xl text-amber-100">投掷铜钱</CardTitle>
                 <CardDescription className="text-amber-200/60">
                   心中默念您想问的问题，点击下方按钮开始占卜
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-8">
-                {/* 占卜说明 */}
-                <div className="bg-amber-950/40 rounded-lg p-4 mb-6 max-w-lg text-center">
-                  <p className="text-amber-200/80 text-sm leading-relaxed">
-                    <strong className="text-amber-100">正宗铜钱法：</strong>
-                    每次抛三枚铜钱，共抛六次，从下往上排成六爻。
-                    三正为老阳（变爻），两正一反为少阳，一正两反为少阴，三反为老阴（变爻）。
-                  </p>
-                </div>
 
                 {/* 铜钱动画区域 */}
                 <div className="mb-6">
