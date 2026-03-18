@@ -260,19 +260,19 @@ export default function DailyFortunePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-4 text-center">
-                    <div className="bg-sky-900/40 rounded-lg p-4">
+                    <div className="bg-sky-950/60 rounded-lg p-4">
                       <div className="text-2xl mb-1">🎨</div>
-                      <div className="text-xs text-sky-200/60 mb-1">幸运颜色</div>
+                      <div className="text-xs text-sky-200/80 mb-1">幸运颜色</div>
                       <div className="font-bold text-sky-100">{fortune.luckyColor}</div>
                     </div>
-                    <div className="bg-sky-900/40 rounded-lg p-4">
+                    <div className="bg-sky-950/60 rounded-lg p-4">
                       <div className="text-2xl mb-1">🔢</div>
-                      <div className="text-xs text-sky-200/60 mb-1">幸运数字</div>
+                      <div className="text-xs text-sky-200/80 mb-1">幸运数字</div>
                       <div className="font-bold text-sky-100">{fortune.luckyNumber}</div>
                     </div>
-                    <div className="bg-sky-900/40 rounded-lg p-4">
+                    <div className="bg-sky-950/60 rounded-lg p-4">
                       <div className="text-2xl mb-1">🧭</div>
-                      <div className="text-xs text-sky-200/60 mb-1">幸运方位</div>
+                      <div className="text-xs text-sky-200/80 mb-1">幸运方位</div>
                       <div className="font-bold text-sky-100">{fortune.luckyDirection}</div>
                     </div>
                   </div>
@@ -280,10 +280,10 @@ export default function DailyFortunePage() {
               </Card>
 
               {/* 今日建议 */}
-              <Card className="bg-gradient-to-r from-sky-600/20 to-blue-600/20 border-sky-400/30">
+              <Card className="bg-gradient-to-r from-sky-900/60 to-blue-900/60 border-sky-400/30">
                 <CardContent className="py-6">
                   <h4 className="font-bold text-sky-100 mb-2">💡 今日建议</h4>
-                  <p className="text-sky-200">{fortune.advice}</p>
+                  <p className="text-sky-100">{fortune.advice}</p>
                 </CardContent>
               </Card>
 

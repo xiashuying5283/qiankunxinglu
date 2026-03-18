@@ -192,17 +192,17 @@ export default function CharDivinationPage() {
               </Card>
 
               {/* 解读 */}
-              <Card className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border-cyan-400/30">
+              <Card className="bg-gradient-to-r from-cyan-900/60 to-blue-900/60 border-cyan-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-cyan-100">测字解读</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4 text-cyan-200 leading-relaxed">
+                  <div className="space-y-4 text-cyan-100 leading-relaxed">
                     {result.interpretation.split('\n').map((line, index) => (
                       <p key={index}>{line}</p>
                     ))}
-                    <div className="mt-4 p-4 bg-cyan-900/40 rounded-lg">
-                      <p className="text-sm">
+                    <div className="mt-4 p-4 bg-cyan-950/60 rounded-lg">
+                      <p className="text-sm text-cyan-100">
                         <strong className="text-cyan-100">温馨提示：</strong>
                         测字算卦仅供参考，人生道路需要自己把握。愿此字带给您启示与力量。
                       </p>

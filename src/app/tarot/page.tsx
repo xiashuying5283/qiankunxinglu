@@ -197,12 +197,12 @@ export default function TarotPage() {
               </div>
 
               {/* 综合解读 */}
-              <Card className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border-purple-400/30">
+              <Card className="bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border-purple-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-purple-100">综合解读</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-purple-200 leading-relaxed">
+                  <p className="text-purple-100 leading-relaxed">
                     {selectedSpread === 'single' && (
                       <>
                         这张{drawnCards[0].card.name}牌{' '}

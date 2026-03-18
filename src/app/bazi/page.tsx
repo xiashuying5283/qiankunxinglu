@@ -355,7 +355,7 @@ export default function BaziPage() {
               </Card>
 
               {/* 命理分析 */}
-              <Card className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 border-amber-400/30">
+              <Card className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 border-amber-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-amber-100 flex items-center">
                     <User className="w-5 h-5 mr-2" />
@@ -365,15 +365,15 @@ export default function BaziPage() {
                 <CardContent>
                   <div className="space-y-3">
                     {result.analysis.split('\n').map((line, i) => (
-                      <p key={i} className="text-amber-200 leading-relaxed">{line}</p>
+                      <p key={i} className="text-amber-100 leading-relaxed">{line}</p>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
               {/* 温馨提示 */}
-              <div className="bg-amber-900/30 rounded-lg p-4 text-center">
-                <p className="text-xs text-amber-200/60">
+              <div className="bg-amber-950/50 rounded-lg p-4 text-center">
+                <p className="text-xs text-amber-200/80">
                   八字命理仅供参考，命运掌握在自己手中。切勿过度迷信，应以积极乐观的态度面对人生。
                 </p>
               </div>

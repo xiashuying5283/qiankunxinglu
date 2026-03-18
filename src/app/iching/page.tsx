@@ -171,14 +171,14 @@ export default function IChingPage() {
                   </div>
 
                   {/* 解读 */}
-                  <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-lg p-6 border border-amber-400/30">
+                  <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-lg p-6 border border-amber-400/30">
                     <h3 className="text-lg font-bold text-amber-100 mb-3">占卜解读</h3>
-                    <p className="text-amber-200 leading-relaxed mb-4">
+                    <p className="text-amber-100 leading-relaxed mb-4">
                       {result.name}卦象征着{result.image.split('，')[1] || '变化与发展'}。
                       此卦提示您在当前情况下，应当秉持{result.judgement.includes('贞') ? '正直坚毅' : '顺应自然'}的态度。
                     </p>
                     {changingLine !== null && (
-                      <p className="text-amber-300">
+                      <p className="text-amber-200">
                         <strong>特别提示：</strong>
                         {result.lines[changingLine]}
                       </p>

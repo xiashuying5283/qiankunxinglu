@@ -206,21 +206,21 @@ export default function DreamInterpretPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-indigo-900/40 rounded-lg p-6">
+                <div className="bg-indigo-950/60 rounded-lg p-6">
                   <h4 className="text-sm font-bold text-indigo-100 mb-3 flex items-center">
                     <Moon className="w-4 h-4 mr-2" />
                     梦境解析
                   </h4>
-                  <p className="text-indigo-200 leading-relaxed">{result.meaning}</p>
+                  <p className="text-indigo-100 leading-relaxed">{result.meaning}</p>
                 </div>
 
-                <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-lg p-6 border border-indigo-400/30">
+                <div className="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 rounded-lg p-6 border border-indigo-400/30">
                   <h4 className="text-sm font-bold text-indigo-100 mb-3">💡 温馨提示</h4>
-                  <p className="text-indigo-200 leading-relaxed">{result.advice}</p>
+                  <p className="text-indigo-100 leading-relaxed">{result.advice}</p>
                 </div>
 
-                <div className="bg-indigo-900/30 rounded-lg p-4 text-center">
-                  <p className="text-xs text-indigo-200/60">
+                <div className="bg-indigo-950/50 rounded-lg p-4 text-center">
+                  <p className="text-xs text-indigo-200/80">
                     梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
                   </p>
                 </div>

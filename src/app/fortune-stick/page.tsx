@@ -135,22 +135,22 @@ export default function FortuneStickPage() {
                   </div>
 
                   {/* 签诗 */}
-                  <div className="bg-amber-900/40 rounded-lg p-6 text-center">
+                  <div className="bg-amber-950/60 rounded-lg p-6 text-center">
                     <h4 className="text-sm font-bold text-amber-100 mb-3">签诗</h4>
-                    <p className="text-xl text-amber-200 leading-loose whitespace-pre-line">
+                    <p className="text-xl text-amber-100 leading-loose whitespace-pre-line">
                       {result.poem}
                     </p>
                   </div>
 
                   {/* 解签 */}
-                  <div className="bg-amber-900/40 rounded-lg p-6">
+                  <div className="bg-amber-950/60 rounded-lg p-6">
                     <h4 className="text-sm font-bold text-amber-100 mb-3">解签</h4>
-                    <p className="text-amber-200 leading-relaxed">{result.meaning}</p>
+                    <p className="text-amber-100 leading-relaxed">{result.meaning}</p>
                   </div>
 
                   {/* 签等级说明 */}
-                  <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-lg p-4 text-center border border-amber-400/30">
-                    <p className="text-amber-200 text-sm">
+                  <div className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 rounded-lg p-4 text-center border border-amber-400/30">
+                    <p className="text-amber-100 text-sm">
                       此签为<strong className={getLevelColor(result.level)}>{result.level}</strong>
                       {result.level.includes('上上') && '，大吉大利，万事如意。'}
                       {result.level.includes('上吉') && '，运势上佳，宜积极进取。'}

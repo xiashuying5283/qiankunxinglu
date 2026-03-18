@@ -316,17 +316,17 @@ export default function MatchPage() {
                   <CardTitle className="text-xl text-rose-100">缘分解读</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-rose-200 leading-relaxed">{result.description}</p>
+                  <p className="text-rose-100 leading-relaxed">{result.description}</p>
                 </CardContent>
               </Card>
 
               {/* 感情建议 */}
-              <Card className="bg-gradient-to-r from-rose-600/20 to-pink-600/20 border-rose-400/30">
+              <Card className="bg-gradient-to-r from-rose-900/60 to-pink-900/60 border-rose-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-rose-100">感情建议</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-rose-200 leading-relaxed">{result.advice}</p>
+                  <p className="text-rose-100 leading-relaxed">{result.advice}</p>
                 </CardContent>
               </Card>
 

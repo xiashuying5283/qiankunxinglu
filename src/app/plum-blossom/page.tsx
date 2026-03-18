@@ -365,11 +365,11 @@ export default function PlumBlossomPage() {
               </Card>
 
               {/* 解读 */}
-              <Card className="bg-gradient-to-r from-pink-600/20 to-rose-600/20 border-pink-400/30">
+              <Card className="bg-gradient-to-r from-pink-900/60 to-rose-900/60 border-pink-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-pink-100">梅花易数解读</CardTitle>
                 </CardHeader>
-                <CardContent className="text-pink-200 leading-relaxed">
+                <CardContent className="text-pink-100 leading-relaxed">
                   <p className="mb-4">
                     此卦为<strong className="text-pink-100">{result.hexagram.name}卦</strong>
                     （第{result.hexagram.number}卦），由{result.upperTrigram.name}卦（{result.upperTrigram.nature}）在上、
@@ -383,8 +383,8 @@ export default function PlumBlossomPage() {
                     第{result.changingLine}爻为动爻，象征事物发展的关键转折点。
                     动爻提示：{result.hexagram.lines[result.changingLine - 1].split('：')[1]}
                   </p>
-                  <div className="mt-4 p-4 bg-pink-900/40 rounded-lg">
-                    <p className="text-sm">
+                  <div className="mt-4 p-4 bg-pink-950/60 rounded-lg">
+                    <p className="text-sm text-pink-100">
                       <strong className="text-pink-100">温馨提示：</strong>
                       梅花易数以数明理，仅供参考。人生道路需要自己把握，愿此卦带给您启示。
                     </p>
