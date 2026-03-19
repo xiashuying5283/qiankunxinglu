@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Moon, Search, Sparkles, History, Bot, BookOpen, Trash2, Clock, ChevronRight, Loader2 } from 'lucide-react';
+import { LoginDialog } from '@/components/auth/LoginDialog';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 解析结果类型
 interface InterpretationResult {
@@ -54,6 +57,7 @@ const getSessionId = () => {
 };
 
 export default function DreamInterpretPage() {
+  const { isLoggedIn } = useAuth();
   const [mode, setMode] = useState<'keyword' | 'ai'>('ai'); // 默认AI模式
   const [keyword, setKeyword] = useState('');
   const [dreamContent, setDreamContent] = useState('');
@@ -66,6 +70,11 @@ export default function DreamInterpretPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  
+  // 登录弹窗状态
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [pendingDreamContent, setPendingDreamContent] = useState<string>('');
+  
   const resultRef = useRef<HTMLDivElement>(null);
   const sessionId = useRef('');
 
@@ -227,6 +236,13 @@ export default function DreamInterpretPage() {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
 
+      // 检查登录状态
+      if (!isLoggedIn) {
+        // 未登录，保存结果并显示登录弹窗
+        setPendingDreamContent(dreamContent);
+        setShowLoginDialog(true);
+      }
+
     } catch (error) {
       console.error('AI解梦失败:', error);
       setAiResult('解梦过程中出现错误，请稍后重试。');
@@ -277,13 +293,18 @@ export default function DreamInterpretPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-indigo-200 hover:text-indigo-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-indigo-200 hover:text-indigo-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <UserMenu />
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-8">
@@ -735,6 +756,14 @@ export default function DreamInterpretPage() {
           )}
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        title="登录保存解梦记录"
+        description="登录后可以保存您的解梦记录，随时查看历史"
+      />
     </div>
   );
 }

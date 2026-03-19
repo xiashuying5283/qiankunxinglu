@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Moon, BookOpen, Sparkles } from 'lucide-react';
+import { UserMenu } from '@/components/auth/UserMenu';
 import { majorArcana, minorArcana, wandsCards, cupsCards, swordsCards, pentaclesCards, suitNames, allTarotCards } from '@/lib/divination-data';
 
 export default function LearnTarotPage() {
@@ -16,13 +17,18 @@ export default function LearnTarotPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-violet-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-purple-200 hover:text-purple-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-purple-200 hover:text-purple-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <UserMenu />
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-12">

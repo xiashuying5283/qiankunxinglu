@@ -754,7 +754,7 @@ export default function IChingPage() {
         onOpenChange={setShowLoginDialog}
         title="登录后查看大师解读"
         description="登录后可以获得AI大师解读，并保存您的占卜记录"
-        onGuestLogin={handleLoginSuccess}
+        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );

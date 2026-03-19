@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, GraduationCap, Wand2, Sun, Calendar, User } from 'lucide-react';
+import { Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, GraduationCap, Wand2, Sun, Calendar } from 'lucide-react';
+import { UserMenu } from '@/components/auth/UserMenu';
 
 export default function Home() {
   const divinationFeatures = [
@@ -98,6 +99,11 @@ export default function Home() {
 
       {/* 主内容 */}
       <div className="relative z-10 container mx-auto px-4 py-12">
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-end mb-8">
+          <UserMenu />
+        </div>
+        
         {/* 标题区域 */}
         <div className="text-center mb-16">
           <div className="flex items-center justify-center mb-6">

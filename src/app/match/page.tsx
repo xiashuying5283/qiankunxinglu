@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Heart, Sparkles, History, Trash2, Calendar, Clock, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { LoginDialog } from '@/components/auth/LoginDialog';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 生成唯一会话ID
 function generateSessionId(): string {
@@ -101,6 +104,8 @@ const hourOptions = [
 ];
 
 export default function MatchPage() {
+  const { isLoggedIn } = useAuth();
+  
   // 表单状态
   const [name1, setName1] = useState('');
   const [birth1, setBirth1] = useState('');
@@ -115,6 +120,10 @@ export default function MatchPage() {
   const [aiInterpretation, setAiInterpretation] = useState('');
   const [isInterpreting, setIsInterpreting] = useState(false);
   const [savedRecordId, setSavedRecordId] = useState<number | null>(null);
+
+  // 登录弹窗状态
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [pendingMatchData, setPendingMatchData] = useState<MatchResult | null>(null);
 
   // 历史记录
   const [showHistory, setShowHistory] = useState(false);
@@ -205,15 +214,32 @@ export default function MatchPage() {
 
       setResult(calcData.data);
 
-      // 开始AI解读
-      setIsInterpreting(true);
-      await streamInterpretation(calcData.data);
+      // 检查登录状态
+      if (!isLoggedIn) {
+        // 未登录，保存结果并显示登录弹窗
+        setPendingMatchData(calcData.data);
+        setShowLoginDialog(true);
+        setIsMatching(false);
+      } else {
+        // 已登录，开始AI解读
+        setIsInterpreting(true);
+        await streamInterpretation(calcData.data);
+      }
 
     } catch (error) {
       console.error('Match error:', error);
       alert(error instanceof Error ? error.message : '匹配失败，请稍后重试');
-    } finally {
       setIsMatching(false);
+    }
+  };
+
+  // 登录成功后继续解读
+  const handleLoginSuccess = () => {
+    setShowLoginDialog(false);
+    if (pendingMatchData) {
+      setIsInterpreting(true);
+      streamInterpretation(pendingMatchData);
+      setPendingMatchData(null);
     }
   };
 
@@ -329,13 +355,18 @@ export default function MatchPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-900 via-pink-900 to-red-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-rose-200 hover:text-rose-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-rose-200 hover:text-rose-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <UserMenu />
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-8">
@@ -747,6 +778,15 @@ export default function MatchPage() {
           )}
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        title="登录查看姻缘解读"
+        description="登录后可以获得AI大师解读，并保存您的匹配记录"
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }

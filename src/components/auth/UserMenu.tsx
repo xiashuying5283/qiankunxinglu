@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,41 +11,68 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, UserCircle2, Mail } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, LogIn, UserPlus } from 'lucide-react';
+import { LoginDialog } from './LoginDialog';
 
-interface UserMenuProps {
-  onLogout?: () => void;
-}
-
-export function UserMenu({ onLogout }: UserMenuProps) {
+export function UserMenu() {
   const { user, logout, isLoading } = useAuth();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   if (isLoading) {
     return (
-      <Button variant="ghost" size="icon" disabled>
+      <Button variant="ghost" size="icon" disabled className="text-white/70">
         <User className="h-5 w-5 animate-pulse" />
       </Button>
     );
   }
 
   if (!user) {
-    return null;
+    return (
+      <>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowLoginDialog(true)}
+            className="text-white/70 hover:text-white hover:bg-white/10"
+          >
+            <LogIn className="h-4 w-4 mr-1" />
+            登录
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowLoginDialog(true)}
+            className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+          >
+            <UserPlus className="h-4 w-4 mr-1" />
+            注册
+          </Button>
+        </div>
+        <LoginDialog
+          open={showLoginDialog}
+          onOpenChange={setShowLoginDialog}
+          title="登录账户"
+          description="登录后可以保存您的占卜记录，随时查看历史"
+        />
+      </>
+    );
   }
 
   const handleLogout = async () => {
     await logout();
-    onLogout?.();
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="sm" className="relative text-white/80 hover:text-white hover:bg-white/10">
           {user.isGuest ? (
-            <UserCircle2 className="h-5 w-5" />
+            <UserCircle2 className="h-5 w-5 mr-2" />
           ) : (
-            <User className="h-5 w-5" />
+            <User className="h-5 w-5 mr-2" />
           )}
+          <span className="max-w-[100px] truncate">{user.name || '用户'}</span>
           {user.isGuest && (
             <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-500" />
           )}
@@ -66,7 +94,7 @@ export function UserMenu({ onLogout }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           退出登录
         </DropdownMenuItem>

@@ -19,7 +19,7 @@ interface LoginDialogProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  onGuestLogin?: () => void;
+  onLoginSuccess?: () => void;
 }
 
 export function LoginDialog({
@@ -27,7 +27,7 @@ export function LoginDialog({
   onOpenChange,
   title = '登录后查看占卜结果',
   description = '登录后可以保存您的占卜记录，随时查看历史',
-  onGuestLogin,
+  onLoginSuccess,
 }: LoginDialogProps) {
   const { login, register, loginAsGuest } = useAuth();
   
@@ -53,6 +53,7 @@ export function LoginDialog({
     if (result.success) {
       onOpenChange(false);
       resetForm();
+      onLoginSuccess?.();
     } else {
       setError(result.error || '登录失败');
     }
@@ -71,6 +72,7 @@ export function LoginDialog({
     if (result.success) {
       onOpenChange(false);
       resetForm();
+      onLoginSuccess?.();
     } else {
       setError(result.error || '注册失败');
     }
@@ -88,7 +90,7 @@ export function LoginDialog({
     if (result.success) {
       onOpenChange(false);
       resetForm();
-      onGuestLogin?.();
+      onLoginSuccess?.();
     } else {
       setError(result.error || '游客登录失败');
     }

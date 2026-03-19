@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Users } from 'lucide-react';
+import { UserMenu } from '@/components/auth/UserMenu';
 
 // 十二生肖数据
 const zodiacs = [
@@ -125,13 +126,18 @@ export default function DailyFortunePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-900 via-blue-900 to-indigo-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-sky-200 hover:text-sky-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-sky-200 hover:text-sky-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <UserMenu />
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-12">

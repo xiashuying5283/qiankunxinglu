@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Scroll, ChevronDown, ChevronUp, BookOpen, Sparkles } from 'lucide-react';
+import { UserMenu } from '@/components/auth/UserMenu';
 
 interface FortuneInterpretation {
   wealth: string;
@@ -132,13 +133,18 @@ export default function FortuneStickPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-yellow-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-amber-200 hover:text-amber-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-amber-200 hover:text-amber-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <UserMenu />
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-12">
