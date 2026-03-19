@@ -13,12 +13,16 @@ export const users = pgTable("users", {
 	// 第三方登录相关
 	provider: varchar({ length: 20 }), // oauth提供商: google, github
 	providerId: varchar("provider_id", { length: 100 }), // 第三方平台的用户ID
+	// 密码重置相关
+	resetToken: varchar("reset_token", { length: 100 }),
+	resetTokenExpires: timestamp("reset_token_expires", { withTimezone: true, mode: 'string' }),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
 	index("users_email_idx").using("btree", table.email.asc().nullsLast().op("text_ops")),
 	index("users_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
 	index("users_provider_idx").using("btree", table.provider.asc().nullsLast().op("text_ops")),
+	index("users_reset_token_idx").using("btree", table.resetToken.asc().nullsLast().op("text_ops")),
 ]);
 
 export const hexagrams = pgTable("hexagrams", {

@@ -253,6 +253,16 @@ export function LoginDialog({
                 </div>
               </div>
 
+              {/* 忘记密码链接 */}
+              <div className="flex justify-end">
+                <a
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  忘记密码？
+                </a>
+              </div>
+
               {error && (
                 <p className="text-sm text-red-500">{error}</p>
               )}
