@@ -4,164 +4,51 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ArrowLeft, Calendar, Sparkles, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Sparkles, User, Star, Compass } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
-
-// 天干
-const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-// 地支
-const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-// 五行
-const wuXing = ['金', '木', '水', '火', '土'];
-// 十二生肖
-const shengXiao = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-
-// 天干五行
-const tianGanWuXing: Record<string, string> = {
-  '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-  '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
-};
-
-// 地支生肖
-const diZhiShengXiao: Record<string, string> = {
-  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔', '辰': '龙', '巳': '蛇',
-  '午': '马', '未': '羊', '申': '猴', '酉': '鸡', '戌': '狗', '亥': '猪'
-};
-
-// 地支五行
-const diZhiWuXing: Record<string, string> = {
-  '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火',
-  '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水'
-};
-
-// 计算年柱
-function getYearPillar(year: number): { gan: string; zhi: string } {
-  const ganIndex = (year - 4) % 10;
-  const zhiIndex = (year - 4) % 12;
-  return {
-    gan: tianGan[ganIndex >= 0 ? ganIndex : ganIndex + 10],
-    zhi: diZhi[zhiIndex >= 0 ? zhiIndex : zhiIndex + 12]
-  };
-}
-
-// 计算月柱（简化计算）
-function getMonthPillar(year: number, month: number): { gan: string; zhi: string } {
-  const yearGanIndex = (year - 4) % 10;
-  const ganIndex = (yearGanIndex % 5 * 2 + month) % 10;
-  const zhiIndex = (month + 1) % 12;
-  return {
-    gan: tianGan[ganIndex],
-    zhi: diZhi[zhiIndex]
-  };
-}
-
-// 计算日柱（简化算法）
-function getDayPillar(year: number, month: number, day: number): { gan: string; zhi: string } {
-  const baseDate = new Date(1900, 0, 31);
-  const targetDate = new Date(year, month - 1, day);
-  const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
-  const ganIndex = diffDays % 10;
-  const zhiIndex = diffDays % 12;
-  return {
-    gan: tianGan[ganIndex >= 0 ? ganIndex : ganIndex + 10],
-    zhi: diZhi[zhiIndex >= 0 ? zhiIndex : zhiIndex + 12]
-  };
-}
-
-// 计算时柱
-function getHourPillar(dayGan: string, hour: number): { gan: string; zhi: string } {
-  const dayGanIndex = tianGan.indexOf(dayGan);
-  const zhiIndex = Math.floor((hour + 1) / 2) % 12;
-  const ganIndex = (dayGanIndex % 5 * 2 + Math.floor(zhiIndex / 2)) % 10;
-  return {
-    gan: tianGan[ganIndex],
-    zhi: diZhi[zhiIndex]
-  };
-}
-
-// 五行分析
-function analyzeWuXing(bazi: { gan: string; zhi: string }[]): Record<string, number> {
-  const count: Record<string, number> = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
-  
-  bazi.forEach(pillar => {
-    const ganWX = tianGanWuXing[pillar.gan];
-    const zhiWX = diZhiWuXing[pillar.zhi];
-    if (ganWX) count[ganWX]++;
-    if (zhiWX) count[zhiWX]++;
-  });
-  
-  return count;
-}
-
-interface BaziResult {
-  year: { gan: string; zhi: string };
-  month: { gan: string; zhi: string };
-  day: { gan: string; zhi: string };
-  hour: { gan: string; zhi: string };
-  shengXiao: string;
-  wuXingCount: Record<string, number>;
-  dominantWuXing: string;
-  missingWuXing: string[];
-  analysis: string;
-}
+import { BirthDateSelector } from '@/components/BirthDateSelector';
+import { 
+  calculateDetailedBazi, 
+  type DetailedBaziData,
+  type CalendarType,
+  tianGanWuXing,
+  diZhiShengXiao,
+  getLunarMonthName,
+  getLunarDayName
+} from '@/lib/bazi-calculator';
 
 export default function BaziPage() {
-  const [year, setYear] = useState('');
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
-  const [hour, setHour] = useState('');
-  const [result, setResult] = useState<BaziResult | null>(null);
+  const [birthDate, setBirthDate] = useState<CalendarType>({
+    isLunar: false,
+    year: 0,
+    month: 0,
+    day: 0,
+    hour: 12
+  });
+  const [result, setResult] = useState<DetailedBaziData | null>(null);
 
   const calculate = () => {
-    const y = parseInt(year);
-    const m = parseInt(month);
-    const d = parseInt(day);
-    const h = parseInt(hour) || 12;
-
-    if (!y || !m || !d || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) {
-      alert('请输入有效的出生日期');
+    if (!birthDate.year || !birthDate.month || !birthDate.day) {
+      alert('请输入完整的出生日期');
       return;
     }
 
-    const yearPillar = getYearPillar(y);
-    const monthPillar = getMonthPillar(y, m);
-    const dayPillar = getDayPillar(y, m, d);
-    const hourPillar = getHourPillar(dayPillar.gan, h);
+    if (birthDate.year < 1900 || birthDate.year > 2100) {
+      alert('请输入有效的年份（1900-2100）');
+      return;
+    }
 
-    const bazi = [yearPillar, monthPillar, dayPillar, hourPillar];
-    const wuXingCount = analyzeWuXing(bazi);
-    
-    // 找出最旺和缺失的五行
-    const sortedWuXing = Object.entries(wuXingCount).sort((a, b) => b[1] - a[1]);
-    const dominantWuXing = sortedWuXing[0][0];
-    const missingWuXing = sortedWuXing.filter(([_, count]) => count === 0).map(([name]) => name);
-
-    // 生成分析
-    const analysisList = [
-      `您的八字中，${dominantWuXing}气较旺，性格上可能表现为${getWuXingCharacter(dominantWuXing)}。`,
-      missingWuXing.length > 0 
-        ? `五行缺${missingWuXing.join('、')}，建议通过姓名、饰品或日常行为来补足。`
-        : '五行齐全，人生较为平衡。',
-      `生肖属${diZhiShengXiao[yearPillar.zhi]}，为人${getShengXiaoCharacter(diZhiShengXiao[yearPillar.zhi])}。`,
-      `日主为${dayPillar.gan}，代表自身，五行属${tianGanWuXing[dayPillar.gan]}。`,
-    ];
-
-    setResult({
-      year: yearPillar,
-      month: monthPillar,
-      day: dayPillar,
-      hour: hourPillar,
-      shengXiao: diZhiShengXiao[yearPillar.zhi],
-      wuXingCount,
-      dominantWuXing,
-      missingWuXing,
-      analysis: analysisList.join('\n')
-    });
+    try {
+      const baziResult = calculateDetailedBazi(birthDate);
+      setResult(baziResult);
+    } catch (error) {
+      console.error('计算错误:', error);
+      alert('计算失败，请检查日期是否正确');
+    }
   };
 
   // 五行性格特征
-  function getWuXingCharacter(wx: string): string {
+  const getWuXingCharacter = (wx: string): string => {
     const chars: Record<string, string> = {
       '金': '刚毅果断、讲义气、有领导力',
       '木': '仁慈善良、有爱心、富有创造力',
@@ -170,10 +57,10 @@ export default function BaziPage() {
       '土': '稳重踏实、诚实守信、有责任感'
     };
     return chars[wx] || '';
-  }
+  };
 
   // 生肖性格特征
-  function getShengXiaoCharacter(sx: string): string {
+  const getShengXiaoCharacter = (sx: string): string => {
     const chars: Record<string, string> = {
       '鼠': '机灵聪明，善于理财',
       '牛': '勤劳踏实，做事稳重',
@@ -189,7 +76,7 @@ export default function BaziPage() {
       '猪': '憨厚善良，福气满满'
     };
     return chars[sx] || '';
-  }
+  };
 
   // 五行颜色
   const wuXingColors: Record<string, string> = {
@@ -198,6 +85,20 @@ export default function BaziPage() {
     '水': 'from-blue-500 to-blue-600',
     '火': 'from-red-500 to-red-600',
     '土': 'from-amber-500 to-amber-600'
+  };
+
+  // 十神颜色
+  const shiShenColors: Record<string, string> = {
+    '比肩': 'text-blue-300',
+    '劫财': 'text-blue-400',
+    '食神': 'text-green-300',
+    '伤官': 'text-green-400',
+    '正财': 'text-yellow-300',
+    '偏财': 'text-yellow-400',
+    '正官': 'text-purple-300',
+    '七杀': 'text-purple-400',
+    '正印': 'text-pink-300',
+    '偏印': 'text-pink-400'
   };
 
   return (
@@ -223,7 +124,8 @@ export default function BaziPage() {
             <h1 className="text-4xl font-bold text-amber-100">生辰八字</h1>
             <Calendar className="w-10 h-10 text-amber-300 ml-3" />
           </div>
-          <p className="text-amber-200/80">输入出生时间，推算您的八字命盘</p>
+          <p className="text-amber-200/80">基于 lunar-javascript 精确算法，输入出生时间推算八字命盘</p>
+          <p className="text-xs text-amber-300/60 mt-1">精确计算：年柱以立春为界，月柱以节气为界</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -232,60 +134,16 @@ export default function BaziPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl text-amber-100">输入出生信息</CardTitle>
               <CardDescription className="text-amber-200/60">
-                请输入公历（阳历）出生日期和时间
+                支持公历（阳历）和农历（阴历）输入
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm text-amber-200 mb-2">年份</label>
-                  <Input
-                    type="number"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    placeholder="1990"
-                    className="bg-white/10 border-amber-300/30 text-amber-100 placeholder:text-amber-200/40 text-center h-12"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-amber-200 mb-2">月份</label>
-                  <Input
-                    type="number"
-                    value={month}
-                    onChange={(e) => setMonth(e.target.value)}
-                    placeholder="6"
-                    min="1"
-                    max="12"
-                    className="bg-white/10 border-amber-300/30 text-amber-100 placeholder:text-amber-200/40 text-center h-12"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-amber-200 mb-2">日期</label>
-                  <Input
-                    type="number"
-                    value={day}
-                    onChange={(e) => setDay(e.target.value)}
-                    placeholder="15"
-                    min="1"
-                    max="31"
-                    className="bg-white/10 border-amber-300/30 text-amber-100 placeholder:text-amber-200/40 text-center h-12"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-amber-200 mb-2">时辰</label>
-                  <Input
-                    type="number"
-                    value={hour}
-                    onChange={(e) => setHour(e.target.value)}
-                    placeholder="12"
-                    min="0"
-                    max="23"
-                    className="bg-white/10 border-amber-300/30 text-amber-100 placeholder:text-amber-200/40 text-center h-12"
-                  />
-                </div>
-              </div>
+              <BirthDateSelector
+                value={birthDate}
+                onChange={setBirthDate}
+              />
 
-              <div className="text-center">
+              <div className="text-center mt-6">
                 <Button
                   onClick={calculate}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
@@ -305,27 +163,53 @@ export default function BaziPage() {
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-amber-100">八字命盘</CardTitle>
                   <CardDescription className="text-amber-200/60">
-                    生肖：{result.shengXiao}
+                    生肖：{result.shengxiao} | 日主：{result.day.gan}（{tianGanWuXing[result.day.gan]}命）
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-4 gap-4 text-center">
                     {[
-                      { label: '年柱', pillar: result.year },
-                      { label: '月柱', pillar: result.month },
-                      { label: '日柱', pillar: result.day },
-                      { label: '时柱', pillar: result.hour }
+                      { label: '年柱', pillar: result.year, shishen: result.shishen.yearGan, nayin: result.nayin.year },
+                      { label: '月柱', pillar: result.month, shishen: result.shishen.monthGan, nayin: result.nayin.month },
+                      { label: '日柱', pillar: result.day, shishen: '日主', nayin: result.nayin.day },
+                      { label: '时柱', pillar: result.hour, shishen: result.shishen.hourGan, nayin: result.nayin.hour }
                     ].map((item, i) => (
                       <div key={i} className="bg-amber-900/40 rounded-lg p-4">
                         <div className="text-xs text-amber-200/60 mb-2">{item.label}</div>
-                        <div className="text-2xl font-bold text-amber-100 mb-1">{item.pillar.gan}</div>
-                        <div className="text-2xl font-bold text-amber-100">{item.pillar.zhi}</div>
-                        <div className="text-xs text-amber-300/80 mt-2">
-                          {tianGanWuXing[item.pillar.gan]} · {diZhiShengXiao[item.pillar.zhi]}
+                        <div className="text-3xl font-bold text-amber-100 mb-1">{item.pillar.gan}</div>
+                        <div className="text-3xl font-bold text-amber-100">{item.pillar.zhi}</div>
+                        <div className={`text-xs mt-2 ${shiShenColors[item.shishen] || 'text-amber-300/80'}`}>
+                          {item.shishen}
                         </div>
+                        <div className="text-xs text-amber-300/60 mt-1">{item.nayin}</div>
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* 节气信息 */}
+              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+                <CardHeader>
+                  <CardTitle className="text-xl text-amber-100 flex items-center">
+                    <Compass className="w-5 h-5 mr-2" />
+                    节气信息
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-amber-900/40 rounded-lg p-3">
+                      <div className="text-sm text-amber-200/60 mb-1">上一个节气</div>
+                      <div className="text-amber-100">{result.jieqi.prev || '无'}</div>
+                    </div>
+                    <div className="bg-amber-900/40 rounded-lg p-3">
+                      <div className="text-sm text-amber-200/60 mb-1">下一个节气</div>
+                      <div className="text-amber-100">{result.jieqi.next || '无'}</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-amber-200/60 mt-3">
+                    * 年柱以立春为界，月柱以节气为界。这是精确计算的关键。
+                  </p>
                 </CardContent>
               </Card>
 
@@ -336,27 +220,82 @@ export default function BaziPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-5 gap-3 mb-4">
-                    {wuXing.map((wx) => (
+                    {['金', '木', '水', '火', '土'].map((wx) => (
                       <div key={wx} className="text-center">
                         <div className={`w-full h-24 rounded-lg bg-gradient-to-b ${wuXingColors[wx]} flex items-center justify-center`}>
-                          <span className="text-3xl font-bold text-white">{result.wuXingCount[wx]}</span>
+                          <span className="text-3xl font-bold text-white">{result.wuxing[wx]}</span>
                         </div>
                         <div className="text-sm text-amber-200 mt-2">{wx}</div>
                       </div>
                     ))}
                   </div>
                   
-                  <div className="bg-amber-900/40 rounded-lg p-4 mt-4">
-                    <div className="text-sm text-amber-200/60 mb-1">最旺五行</div>
-                    <div className="text-lg font-bold text-amber-100">{result.dominantWuXing}</div>
-                  </div>
-                  
-                  {result.missingWuXing.length > 0 && (
-                    <div className="bg-red-900/30 rounded-lg p-4 mt-4 border border-red-400/30">
-                      <div className="text-sm text-red-200/80 mb-1">⚠️ 缺失五行</div>
-                      <div className="text-lg font-bold text-red-200">{result.missingWuXing.join('、')}</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-amber-900/40 rounded-lg p-4">
+                      <div className="text-sm text-amber-200/60 mb-1">最旺五行</div>
+                      <div className="text-lg font-bold text-amber-100">{result.dominantWuXing}</div>
+                      <div className="text-xs text-amber-300/80 mt-1">{getWuXingCharacter(result.dominantWuXing)}</div>
                     </div>
-                  )}
+                    
+                    {result.missingWuXing.length > 0 && (
+                      <div className="bg-red-900/30 rounded-lg p-4 border border-red-400/30">
+                        <div className="text-sm text-red-200/80 mb-1">⚠️ 缺失五行</div>
+                        <div className="text-lg font-bold text-red-200">{result.missingWuXing.join('、')}</div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 神煞信息 */}
+              {result.shensha.length > 0 && (
+                <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-amber-100 flex items-center">
+                      <Star className="w-5 h-5 mr-2" />
+                      神煞
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {result.shensha.map((ss, i) => (
+                        <span 
+                          key={i} 
+                          className="px-3 py-1 bg-purple-500/30 rounded-full text-purple-200 text-sm"
+                        >
+                          {ss}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-xs text-amber-200/60">
+                      <p>• 天乙贵人：逢凶化吉，有贵人相助</p>
+                      <p>• 文昌贵人：聪明好学，利于学业考试</p>
+                      <p>• 桃花：人缘好，异性缘佳</p>
+                      <p>• 驿马：奔波走动，适合外出发展</p>
+                      <p>• 华盖：孤独清高，有艺术天赋</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 胎元命宫 */}
+              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+                <CardHeader>
+                  <CardTitle className="text-xl text-amber-100">胎元 · 命宫</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-amber-900/40 rounded-lg p-3">
+                      <div className="text-sm text-amber-200/60 mb-1">胎元</div>
+                      <div className="text-xl font-bold text-amber-100">{result.taiyuan}</div>
+                      <div className="text-xs text-amber-300/60 mt-1">受胎之月，先天体质</div>
+                    </div>
+                    <div className="bg-amber-900/40 rounded-lg p-3">
+                      <div className="text-sm text-amber-200/60 mb-1">命宫</div>
+                      <div className="text-xl font-bold text-amber-100">{result.minggong}</div>
+                      <div className="text-xs text-amber-300/60 mt-1">命运归宿，人生方向</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -370,9 +309,29 @@ export default function BaziPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {result.analysis.split('\n').map((line, i) => (
-                      <p key={i} className="text-amber-100 leading-relaxed">{line}</p>
-                    ))}
+                    <p className="text-amber-100 leading-relaxed">
+                      您的八字中，{result.dominantWuXing}气较旺，性格上可能表现为{getWuXingCharacter(result.dominantWuXing)}。
+                    </p>
+                    {result.missingWuXing.length > 0 ? (
+                      <p className="text-amber-100 leading-relaxed">
+                        五行缺{result.missingWuXing.join('、')}，建议通过姓名、饰品或日常行为来补足。
+                      </p>
+                    ) : (
+                      <p className="text-amber-100 leading-relaxed">
+                        五行齐全，人生较为平衡。
+                      </p>
+                    )}
+                    <p className="text-amber-100 leading-relaxed">
+                      生肖属{result.shengxiao}，为人{getShengXiaoCharacter(result.shengxiao)}。
+                    </p>
+                    <p className="text-amber-100 leading-relaxed">
+                      日主为{result.day.gan}，代表自身，五行属{tianGanWuXing[result.day.gan]}，纳音{result.nayin.day}。
+                    </p>
+                    {result.shensha.length > 0 && (
+                      <p className="text-amber-100 leading-relaxed">
+                        命带{result.shensha.join('、')}等吉星，是命局中的亮点。
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -380,6 +339,7 @@ export default function BaziPage() {
               {/* 温馨提示 */}
               <div className="bg-amber-950/50 rounded-lg p-4 text-center">
                 <p className="text-xs text-amber-200/80">
+                  本命盘基于 lunar-javascript 精确算法计算，年柱以立春为界，月柱以节气为界。
                   八字命理仅供参考，命运掌握在自己手中。切勿过度迷信，应以积极乐观的态度面对人生。
                 </p>
               </div>

@@ -5,11 +5,18 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Heart, Sparkles, History, Trash2, Calendar, Clock, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Heart, Sparkles, History, Trash2, User, ChevronDown, ChevronUp, Moon, Sun } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
+import { 
+  solarToLunar, 
+  lunarToSolar, 
+  getLunarMonthName, 
+  getLunarDayName,
+  type CalendarType
+} from '@/lib/bazi-calculator';
 
 // 生成唯一会话ID
 function generateSessionId(): string {
@@ -104,16 +111,28 @@ const hourOptions = [
   { value: 23, label: '子时 (23:00-01:00)' },
 ];
 
+// 出生日期状态
+interface BirthDateState {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  isLunar: boolean;
+  lunarDisplay: string;
+}
+
 export default function MatchPage() {
   const { isLoggedIn } = useAuth();
   
-  // 表单状态
+  // 表单状态 - 支持公农历
   const [name1, setName1] = useState('');
-  const [birth1, setBirth1] = useState('');
-  const [hour1, setHour1] = useState(12);
+  const [birth1, setBirth1] = useState<BirthDateState>({
+    year: 0, month: 0, day: 0, hour: 12, isLunar: false, lunarDisplay: ''
+  });
   const [name2, setName2] = useState('');
-  const [birth2, setBirth2] = useState('');
-  const [hour2, setHour2] = useState(12);
+  const [birth2, setBirth2] = useState<BirthDateState>({
+    year: 0, month: 0, day: 0, hour: 12, isLunar: false, lunarDisplay: ''
+  });
 
   // UI状态
   const [isMatching, setIsMatching] = useState(false);
@@ -138,6 +157,75 @@ export default function MatchPage() {
   useEffect(() => {
     sessionId.current = getSessionId();
   }, []);
+
+  // 更新农历显示
+  const updateLunarDisplay = (birth: BirthDateState, setBirth: (b: BirthDateState) => void) => {
+    if (!birth.year || !birth.month || !birth.day) {
+      setBirth({ ...birth, lunarDisplay: '' });
+      return;
+    }
+
+    if (birth.isLunar) {
+      const solar = lunarToSolar(birth.year, birth.month, birth.day);
+      if (solar) {
+        setBirth({ 
+          ...birth, 
+          lunarDisplay: `公历 ${solar.year}年${solar.month}月${solar.day}日` 
+        });
+      }
+    } else {
+      const lunar = solarToLunar(birth.year, birth.month, birth.day);
+      if (lunar) {
+        setBirth({ 
+          ...birth, 
+          lunarDisplay: `农历 ${getLunarMonthName(lunar.month)}${getLunarDayName(lunar.day)}` 
+        });
+      }
+    }
+  };
+
+  // 切换公农历
+  const toggleCalendarType = (birth: BirthDateState, setBirth: (b: BirthDateState) => void) => {
+    const newIsLunar = !birth.isLunar;
+    
+    if (birth.year && birth.month && birth.day) {
+      if (newIsLunar) {
+        // 公历转农历
+        const lunar = solarToLunar(birth.year, birth.month, birth.day);
+        if (lunar) {
+          const newBirth: BirthDateState = {
+            ...birth,
+            isLunar: newIsLunar,
+            year: lunar.year,
+            month: lunar.month,
+            day: lunar.day,
+            lunarDisplay: `公历 ${birth.year}年${birth.month}月${birth.day}日`
+          };
+          setBirth(newBirth);
+        } else {
+          setBirth({ ...birth, isLunar: newIsLunar, lunarDisplay: '' });
+        }
+      } else {
+        // 农历转公历
+        const solar = lunarToSolar(birth.year, birth.month, birth.day);
+        if (solar) {
+          const newBirth: BirthDateState = {
+            ...birth,
+            isLunar: newIsLunar,
+            year: solar.year,
+            month: solar.month,
+            day: solar.day,
+            lunarDisplay: `农历 ${getLunarMonthName(birth.month)}${getLunarDayName(birth.day)}`
+          };
+          setBirth(newBirth);
+        } else {
+          setBirth({ ...birth, isLunar: newIsLunar, lunarDisplay: '' });
+        }
+      }
+    } else {
+      setBirth({ ...birth, isLunar: newIsLunar });
+    }
+  };
 
   // 获取历史记录
   const fetchHistory = async () => {
@@ -182,7 +270,8 @@ export default function MatchPage() {
 
   // 开始匹配
   const startMatch = async () => {
-    if (!name1.trim() || !birth1 || !name2.trim() || !birth2) {
+    if (!name1.trim() || !birth1.year || !birth1.month || !birth1.day ||
+        !name2.trim() || !birth2.year || !birth2.month || !birth2.day) {
       alert('请填写完整的双方信息');
       return;
     }
@@ -199,11 +288,13 @@ export default function MatchPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name1: name1.trim(),
-          birth1,
-          hour1,
+          birth1: `${birth1.year}-${birth1.month}-${birth1.day}`,
+          hour1: birth1.hour,
+          isLunar1: birth1.isLunar,
           name2: name2.trim(),
-          birth2,
-          hour2
+          birth2: `${birth2.year}-${birth2.month}-${birth2.day}`,
+          hour2: birth2.hour,
+          isLunar2: birth2.isLunar
         })
       });
 
@@ -217,12 +308,10 @@ export default function MatchPage() {
 
       // 检查登录状态
       if (!isLoggedIn) {
-        // 未登录，保存结果并显示登录弹窗
         setPendingMatchData(calcData.data);
         setShowLoginDialog(true);
         setIsMatching(false);
       } else {
-        // 已登录，开始AI解读
         setIsInterpreting(true);
         await streamInterpretation(calcData.data);
       }
@@ -272,7 +361,6 @@ export default function MatchPage() {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             if (data === '[DONE]') {
-              // 保存记录
               await saveRecord(matchData, fullText);
               break;
             }
@@ -281,7 +369,6 @@ export default function MatchPage() {
               if (parsed.content) {
                 fullText += parsed.content;
                 setAiInterpretation(fullText);
-                // 滚动到底部
                 setTimeout(() => {
                   interpretationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 50);
@@ -325,11 +412,9 @@ export default function MatchPage() {
   // 重置表单
   const reset = () => {
     setName1('');
-    setBirth1('');
-    setHour1(12);
+    setBirth1({ year: 0, month: 0, day: 0, hour: 12, isLunar: false, lunarDisplay: '' });
     setName2('');
-    setBirth2('');
-    setHour2(12);
+    setBirth2({ year: 0, month: 0, day: 0, hour: 12, isLunar: false, lunarDisplay: '' });
     setResult(null);
     setAiInterpretation('');
     setSavedRecordId(null);
@@ -353,6 +438,112 @@ export default function MatchPage() {
     return 'text-rose-300';
   };
 
+  // 日期输入组件
+  const DateInput = ({ 
+    birth, 
+    setBirth, 
+    label 
+  }: { 
+    birth: BirthDateState; 
+    setBirth: (b: BirthDateState) => void;
+    label: string;
+  }) => (
+    <div className="space-y-3">
+      {/* 日历类型切换 */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {birth.isLunar ? (
+            <Moon className="w-4 h-4 text-purple-300" />
+          ) : (
+            <Sun className="w-4 h-4 text-yellow-300" />
+          )}
+          <span className="text-sm text-rose-200">
+            {birth.isLunar ? '农历' : '公历'}
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => toggleCalendarType(birth, setBirth)}
+          className="text-rose-300 hover:text-rose-100 hover:bg-white/10 h-7 px-2 text-xs"
+        >
+          切换为{birth.isLunar ? '公历' : '农历'}
+        </Button>
+      </div>
+
+      {/* 日期输入 */}
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <Input
+            type="number"
+            value={birth.year || ''}
+            onChange={(e) => {
+              const year = parseInt(e.target.value) || 0;
+              const newBirth = { ...birth, year };
+              setBirth(newBirth);
+              updateLunarDisplay(newBirth, setBirth);
+            }}
+            placeholder="年"
+            className="bg-white/10 border-rose-300/30 text-rose-100 placeholder:text-rose-200/40 text-center h-10"
+          />
+        </div>
+        <div>
+          <Input
+            type="number"
+            value={birth.month || ''}
+            onChange={(e) => {
+              const month = parseInt(e.target.value) || 0;
+              const newBirth = { ...birth, month };
+              setBirth(newBirth);
+              updateLunarDisplay(newBirth, setBirth);
+            }}
+            placeholder="月"
+            min="1"
+            max="12"
+            className="bg-white/10 border-rose-300/30 text-rose-100 placeholder:text-rose-200/40 text-center h-10"
+          />
+        </div>
+        <div>
+          <Input
+            type="number"
+            value={birth.day || ''}
+            onChange={(e) => {
+              const day = parseInt(e.target.value) || 0;
+              const newBirth = { ...birth, day };
+              setBirth(newBirth);
+              updateLunarDisplay(newBirth, setBirth);
+            }}
+            placeholder="日"
+            min="1"
+            max={birth.isLunar ? 30 : 31}
+            className="bg-white/10 border-rose-300/30 text-rose-100 placeholder:text-rose-200/40 text-center h-10"
+          />
+        </div>
+      </div>
+
+      {/* 时辰选择 */}
+      <select
+        value={birth.hour}
+        onChange={(e) => setBirth({ ...birth, hour: parseInt(e.target.value) })}
+        className="w-full h-10 rounded-md bg-white/10 border border-rose-300/30 text-rose-100 px-3"
+      >
+        {hourOptions.map(opt => (
+          <option key={opt.value} value={opt.value} className="bg-rose-900 text-rose-100">
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      {/* 农历/公历对应显示 */}
+      {birth.lunarDisplay && (
+        <div className="text-xs text-rose-300/80 bg-rose-900/30 rounded px-3 py-2">
+          对应{birth.isLunar ? '公历' : '农历'}：{birth.lunarDisplay}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-900 via-pink-900 to-red-900">
       <div className="container mx-auto px-4 py-8">
@@ -365,7 +556,6 @@ export default function MatchPage() {
             </Button>
           </Link>
           
-          {/* 用户菜单 */}
           <UserMenu />
         </div>
 
@@ -376,7 +566,7 @@ export default function MatchPage() {
             <h1 className="text-4xl font-bold text-rose-100">姻缘匹配</h1>
             <Heart className="w-10 h-10 text-rose-300 ml-3 fill-rose-400" />
           </div>
-          <p className="text-rose-200/80">基于八字命理与生肖配对，测算你们的缘分指数</p>
+          <p className="text-rose-200/80">基于 lunar-javascript 精确算法，支持公农历输入</p>
         </div>
 
         <div className="max-w-5xl mx-auto">
@@ -470,7 +660,7 @@ export default function MatchPage() {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-rose-100">输入双方信息</CardTitle>
                 <CardDescription className="text-rose-200/60">
-                  请输入公历（阳历）出生日期和时辰，系统将计算八字命盘
+                  支持公历（阳历）和农历（阴历）输入，系统将精确计算八字命盘
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
@@ -480,7 +670,7 @@ export default function MatchPage() {
                     <User className="w-5 h-5 mr-2" />
                     第一位
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-rose-200 mb-2">姓名</label>
                       <Input
@@ -491,29 +681,7 @@ export default function MatchPage() {
                         className="bg-white/10 border-rose-300/30 text-rose-100 placeholder:text-rose-200/40 text-center h-12"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm text-rose-200 mb-2">出生日期</label>
-                      <Input
-                        type="date"
-                        value={birth1}
-                        onChange={(e) => setBirth1(e.target.value)}
-                        className="bg-white/10 border-rose-300/30 text-rose-100 h-12"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm text-rose-200 mb-2">出生时辰</label>
-                      <select
-                        value={hour1}
-                        onChange={(e) => setHour1(parseInt(e.target.value))}
-                        className="w-full h-12 rounded-md bg-white/10 border border-rose-300/30 text-rose-100 px-3"
-                      >
-                        {hourOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-rose-900 text-rose-100">
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <DateInput birth={birth1} setBirth={setBirth1} label="出生日期" />
                   </div>
                 </div>
 
@@ -530,7 +698,7 @@ export default function MatchPage() {
                     <User className="w-5 h-5 mr-2" />
                     第二位
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-rose-200 mb-2">姓名</label>
                       <Input
@@ -541,36 +709,14 @@ export default function MatchPage() {
                         className="bg-white/10 border-rose-300/30 text-rose-100 placeholder:text-rose-200/40 text-center h-12"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm text-rose-200 mb-2">出生日期</label>
-                      <Input
-                        type="date"
-                        value={birth2}
-                        onChange={(e) => setBirth2(e.target.value)}
-                        className="bg-white/10 border-rose-300/30 text-rose-100 h-12"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm text-rose-200 mb-2">出生时辰</label>
-                      <select
-                        value={hour2}
-                        onChange={(e) => setHour2(parseInt(e.target.value))}
-                        className="w-full h-12 rounded-md bg-white/10 border border-rose-300/30 text-rose-100 px-3"
-                      >
-                        {hourOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-rose-900 text-rose-100">
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <DateInput birth={birth2} setBirth={setBirth2} label="出生日期" />
                   </div>
                 </div>
 
                 <div className="text-center pt-4">
                   <Button
                     onClick={startMatch}
-                    disabled={!name1.trim() || !birth1 || !name2.trim() || !birth2}
+                    disabled={!name1.trim() || !birth1.year || !name2.trim() || !birth2.year}
                     className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white px-12 py-6 text-lg"
                   >
                     <Heart className="w-5 h-5 mr-2 fill-white" />
@@ -590,7 +736,7 @@ export default function MatchPage() {
                   <Sparkles className="w-8 h-8 text-rose-300 absolute -top-2 -right-2 animate-spin" />
                 </div>
                 <p className="text-xl text-rose-200 mt-6">正在测算缘分...</p>
-                <p className="text-sm text-rose-200/60 mt-2">计算八字命盘与生肖配对</p>
+                <p className="text-sm text-rose-200/60 mt-2">使用 lunar-javascript 精确计算八字</p>
               </CardContent>
             </Card>
           )}
@@ -735,7 +881,7 @@ export default function MatchPage() {
                 </CardContent>
               </Card>
 
-              {/* AI解读 - 固定高度 */}
+              {/* AI解读 */}
               <Card className="bg-gradient-to-r from-rose-900/60 to-pink-900/60 border-rose-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-rose-100 flex items-center">

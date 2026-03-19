@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   parseBirthDate,
-  calculateBazi,
+  calculateBaziFromSolar,
   analyzeMatch,
   type BaziResult
 } from '@/lib/match-algorithm';
@@ -9,7 +9,10 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name1, birth1, hour1, name2, birth2, hour2 } = body;
+    const { 
+      name1, birth1, hour1, isLunar1,
+      name2, birth2, hour2, isLunar2 
+    } = body;
 
     // 参数验证
     if (!name1 || !birth1 || hour1 === undefined || !name2 || !birth2 || hour2 === undefined) {
@@ -30,9 +33,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 计算八字
-    const bazi1 = calculateBazi(date1.year, date1.month, date1.day, hour1);
-    const bazi2 = calculateBazi(date2.year, date2.month, date2.day, hour2);
+    // 计算八字（使用 lunar-javascript 精确算法，支持公历/农历）
+    const bazi1 = calculateBaziFromSolar(date1.year, date1.month, date1.day, hour1, isLunar1 || false);
+    const bazi2 = calculateBaziFromSolar(date2.year, date2.month, date2.day, hour2, isLunar2 || false);
 
     // 进行匹配分析
     const matchResult = analyzeMatch(bazi1, bazi2);

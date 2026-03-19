@@ -1,36 +1,20 @@
 /**
  * 姻缘匹配算法库
- * 包含：八字计算、生肖配对、八字配对、综合评分
+ * 包含：八字计算（基于lunar-javascript）、生肖配对、八字配对、综合评分
  */
 
-// ==================== 基础数据 ====================
-
-// 天干
-export const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-// 地支
-export const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-// 五行
-export const wuXing = ['金', '木', '水', '火', '土'];
-// 十二生肖
-export const shengXiao = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-
-// 天干五行
-export const tianGanWuXing: Record<string, string> = {
-  '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-  '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
-};
-
-// 地支五行
-export const diZhiWuXing: Record<string, string> = {
-  '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火',
-  '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水'
-};
-
-// 地支生肖
-export const diZhiShengXiao: Record<string, string> = {
-  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔', '辰': '龙', '巳': '蛇',
-  '午': '马', '未': '羊', '申': '猴', '酉': '鸡', '戌': '狗', '亥': '猪'
-};
+import {
+  calculateBazi as calculateBaziFromLunar,
+  type BaziData,
+  type CalendarType,
+  tianGan,
+  diZhi,
+  wuXing,
+  shengXiao,
+  tianGanWuXing,
+  diZhiWuXing,
+  diZhiShengXiao
+} from './bazi-calculator';
 
 // ==================== 生肖配对数据 ====================
 
@@ -78,102 +62,42 @@ export const xiangXing: [string, string, string][] = [
   ['牛', '狗', '羊'], // 丑戌未三刑
 ];
 
+// ==================== 类型导出 ====================
+
+// 导出 BaziResult 类型（与 BaziData 相同）
+export type BaziResult = BaziData;
+
 // ==================== 八字计算函数 ====================
 
-export interface BaziResult {
-  year: { gan: string; zhi: string };
-  month: { gan: string; zhi: string };
-  day: { gan: string; zhi: string };
-  hour: { gan: string; zhi: string };
-  shengxiao: string;
-  wuxing: Record<string, number>;
-  dominantWuXing: string;
-  missingWuXing: string[];
-}
-
-// 计算年柱
-function getYearPillar(year: number): { gan: string; zhi: string } {
-  const ganIndex = (year - 4) % 10;
-  const zhiIndex = (year - 4) % 12;
-  return {
-    gan: tianGan[ganIndex >= 0 ? ganIndex : ganIndex + 10],
-    zhi: diZhi[zhiIndex >= 0 ? zhiIndex : zhiIndex + 12]
+/**
+ * 计算完整八字（使用 lunar-javascript 精确算法）
+ * @param year 公历年
+ * @param month 公历月
+ * @param day 公历日
+ * @param hour 时辰（0-23）
+ * @param isLunar 是否农历（默认 false）
+ */
+export function calculateBaziFromSolar(
+  year: number, 
+  month: number, 
+  day: number, 
+  hour: number,
+  isLunar: boolean = false
+): BaziResult {
+  const input: CalendarType = {
+    isLunar,
+    year,
+    month,
+    day,
+    hour
   };
-}
-
-// 计算月柱
-function getMonthPillar(year: number, month: number): { gan: string; zhi: string } {
-  const yearGanIndex = (year - 4) % 10;
-  const ganIndex = (yearGanIndex % 5 * 2 + month) % 10;
-  const zhiIndex = (month + 1) % 12;
-  return {
-    gan: tianGan[ganIndex],
-    zhi: diZhi[zhiIndex]
-  };
-}
-
-// 计算日柱
-function getDayPillar(year: number, month: number, day: number): { gan: string; zhi: string } {
-  const baseDate = new Date(1900, 0, 31);
-  const targetDate = new Date(year, month - 1, day);
-  const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
-  const ganIndex = diffDays % 10;
-  const zhiIndex = diffDays % 12;
-  return {
-    gan: tianGan[ganIndex >= 0 ? ganIndex : ganIndex + 10],
-    zhi: diZhi[zhiIndex >= 0 ? zhiIndex : zhiIndex + 12]
-  };
-}
-
-// 计算时柱
-function getHourPillar(dayGan: string, hour: number): { gan: string; zhi: string } {
-  const dayGanIndex = tianGan.indexOf(dayGan);
-  const zhiIndex = Math.floor((hour + 1) / 2) % 12;
-  const ganIndex = (dayGanIndex % 5 * 2 + Math.floor(zhiIndex / 2)) % 10;
-  return {
-    gan: tianGan[ganIndex],
-    zhi: diZhi[zhiIndex]
-  };
-}
-
-// 五行分析
-function analyzeWuXing(bazi: { gan: string; zhi: string }[]): Record<string, number> {
-  const count: Record<string, number> = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
   
-  bazi.forEach(pillar => {
-    const ganWX = tianGanWuXing[pillar.gan];
-    const zhiWX = diZhiWuXing[pillar.zhi];
-    if (ganWX) count[ganWX]++;
-    if (zhiWX) count[zhiWX]++;
-  });
-  
-  return count;
+  return calculateBaziFromLunar(input);
 }
 
-// 计算完整八字
+// 保持原有函数签名兼容（公历输入）
 export function calculateBazi(year: number, month: number, day: number, hour: number): BaziResult {
-  const yearPillar = getYearPillar(year);
-  const monthPillar = getMonthPillar(year, month);
-  const dayPillar = getDayPillar(year, month, day);
-  const hourPillar = getHourPillar(dayPillar.gan, hour);
-
-  const bazi = [yearPillar, monthPillar, dayPillar, hourPillar];
-  const wuxing = analyzeWuXing(bazi);
-  
-  const sortedWuXing = Object.entries(wuxing).sort((a, b) => b[1] - a[1]);
-  const dominantWuXing = sortedWuXing[0][0];
-  const missingWuXing = sortedWuXing.filter(([_, count]) => count === 0).map(([name]) => name);
-
-  return {
-    year: yearPillar,
-    month: monthPillar,
-    day: dayPillar,
-    hour: hourPillar,
-    shengxiao: diZhiShengXiao[yearPillar.zhi],
-    wuxing,
-    dominantWuXing,
-    missingWuXing
-  };
+  return calculateBaziFromSolar(year, month, day, hour, false);
 }
 
 // ==================== 生肖配对分析 ====================
@@ -458,3 +382,6 @@ export function getLevelDescription(level: string): string {
   };
   return descriptions[level] || '';
 }
+
+// 重新导出基础数据供其他模块使用
+export { tianGan, diZhi, wuXing, shengXiao, tianGanWuXing, diZhiWuXing, diZhiShengXiao };
