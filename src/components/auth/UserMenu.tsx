@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, UserCircle2, Mail, History } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, History, RefreshCw } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
 // 提供商显示名称
@@ -72,6 +72,12 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  // 切换账号：先登出，然后显示登录对话框
+  const handleSwitchAccount = async () => {
+    await logout();
+    setShowLoginDialog(true);
   };
 
   return (
@@ -135,6 +141,15 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {!user.isGuest && (
+          <>
+            <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              切换账号
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           退出登录

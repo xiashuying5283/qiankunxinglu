@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
-import { generateAuthorizationUrl, generateOAuthState, isOAuthConfigured } from '@/lib/oauth';
+import { NextRequest, NextResponse } from 'next/server';
+import { generateOAuthState, isOAuthConfigured } from '@/lib/oauth';
 
 /**
  * 发起 Google OAuth 登录
  * GET /api/auth/oauth/google
+ * 
+ * 支持参数:
+ * - force: 如果为 true，强制重新选择账号
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get('force') === 'true';
+
     // 检查 Google OAuth 是否已配置
     if (!isOAuthConfigured('google')) {
       return NextResponse.json(
@@ -19,10 +25,27 @@ export async function GET() {
     const state = generateOAuthState();
 
     // 生成授权 URL
-    const authUrl = generateAuthorizationUrl('google', state);
+    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+    const redirectUri = `${baseUrl}/api/auth/oauth/google/callback`;
+    
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID || '');
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', 'openid email profile');
+    authUrl.searchParams.set('state', state);
+    
+    // 添加 prompt=select_account 让用户选择账号
+    authUrl.searchParams.set('prompt', 'select_account');
 
-    // 创建响应并设置 state cookie
-    const response = NextResponse.redirect(authUrl);
+    // 创建响应
+    const response = NextResponse.redirect(authUrl.toString());
+    
+    // 如果强制重新登录，先清除当前的登录状态
+    if (force) {
+      response.cookies.delete('auth_token');
+    }
+    
     response.cookies.set('oauth_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
