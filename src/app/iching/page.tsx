@@ -15,6 +15,7 @@ import {
   getQuestionPlaceholder,
   getQuestionHint
 } from '@/components/QuestionCategorySelector';
+import { useHexagramData } from '@/lib/hexagram-preload';
 
 // 类型定义
 interface LineText {
@@ -82,49 +83,8 @@ export default function IChingPage() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingDivinationResult, setPendingDivinationResult] = useState<DivinationResult | null>(null);
   
-  // 数据状态
-  const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
-  const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // 加载数据
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/hexagrams');
-      const data = await response.json();
-      
-      if (data.needsInit) {
-        const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
-        const initData = await initResponse.json();
-        
-        if (initData.success) {
-          const retryResponse = await fetch('/api/hexagrams');
-          const retryData = await retryResponse.json();
-          setHexagrams(retryData.hexagrams);
-          setTrigrams(retryData.trigrams);
-        } else {
-          setError('数据初始化失败');
-        }
-      } else if (data.hexagrams) {
-        setHexagrams(data.hexagrams);
-        setTrigrams(data.trigrams);
-      } else {
-        setError(data.error || '加载数据失败');
-      }
-    } catch (err) {
-      setError('加载数据失败，请刷新页面重试');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // 使用预加载数据服务
+  const { hexagrams, trigrams, isLoading, error, refresh } = useHexagramData();
 
   // 抛三枚铜钱
   const throwThreeCoins = (): CoinThrow => {
@@ -434,7 +394,7 @@ export default function IChingPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-amber-200 mb-4">{error}</p>
-            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-white">
+            <Button onClick={refresh} className="bg-amber-500 hover:bg-amber-600 text-white">
               重试
             </Button>
           </CardContent>

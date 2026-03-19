@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inspector } from 'react-dev-inspector';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { PreloadProvider } from '@/components/PreloadProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -73,10 +74,12 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`antialiased`}>
-        <AuthProvider>
-          {isDev && <Inspector />}
-          {children}
-        </AuthProvider>
+        <PreloadProvider>
+          <AuthProvider>
+            {isDev && <Inspector />}
+            {children}
+          </AuthProvider>
+        </PreloadProvider>
       </body>
     </html>
   );
