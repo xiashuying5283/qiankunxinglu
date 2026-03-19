@@ -41,16 +41,16 @@ const spreadPositions: Record<SpreadType, string[]> = {
   single: ['当前状态'],
   three: ['过去', '现在', '未来'],
   celtic: [
-    '当前状态',
-    '阻碍因素',
-    '潜意识',
-    '过去影响',
-    '可能结果',
-    '近期未来',
-    '你的态度',
-    '外部环境',
-    '希望与恐惧',
-    '最终结果'
+    '现状',        // 1. 中心十字 - 现在的状况
+    '阻碍',        // 2. 横跨牌 - 阻碍或挑战
+    '根基',        // 3. 下方 - 潜意识、根基
+    '过去',        // 4. 左侧 - 过去的影响
+    '目标',        // 5. 上方 - 目标、理想
+    '未来',        // 6. 右侧 - 近期未来
+    '自我',        // 7. 权杖第1张 - 你的态度
+    '环境',        // 8. 权杖第2张 - 外部环境
+    '恐惧',        // 9. 权杖第3张 - 希望与恐惧
+    '结果'         // 10. 权杖第4张 - 最终结果
   ]
 };
 
@@ -235,10 +235,10 @@ export default function TarotPage() {
     const shuffled = [...tarotCards].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, numCards);
     
-    // 随机正逆位
+    // 随机正逆位（50%概率）
     const drawn: DrawnCard[] = selected.map(card => ({
       card,
-      isReversed: Math.random() < 0.25
+      isReversed: Math.random() < 0.5
     }));
     
     // 动画显示抽牌
