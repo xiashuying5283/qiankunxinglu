@@ -146,3 +146,45 @@ body {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* 自定义滚动条样式 */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-amber-600\/50::-webkit-scrollbar-thumb {
+  background-color: rgba(217, 119, 6, 0.5);
+  border-radius: 9999px;
+}
+
+.scrollbar-thumb-purple-600\/50::-webkit-scrollbar-thumb {
+  background-color: rgba(147, 51, 234, 0.5);
+  border-radius: 9999px;
+}
+
+.scrollbar-thumb-rose-600\/50::-webkit-scrollbar-thumb {
+  background-color: rgba(225, 29, 72, 0.5);
+  border-radius: 9999px;
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* 通用滚动条样式 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}

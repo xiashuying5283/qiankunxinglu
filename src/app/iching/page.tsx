@@ -534,202 +534,51 @@ export default function IChingPage() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* 抛币过程展示 */}
+              {/* 本卦显示 - 精简版 */}
               <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
-                <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">占卜过程</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-6 gap-2">
-                    {result.coinThrows.map((t, i) => (
-                      <div key={i} className="text-center">
-                        <div className="text-xs text-amber-200/60 mb-1">
-                          {['初', '二', '三', '四', '五', '上'][i]}爻
-                        </div>
-                        <div className="flex justify-center gap-1 mb-1">
-                          {t.coins.map((c, ci) => (
-                            <Circle
-                              key={ci}
-                              className={`w-3 h-3 ${c ? 'fill-amber-400 text-amber-400' : 'fill-amber-900 text-amber-700'}`}
-                            />
-                          ))}
-                        </div>
-                        <div className={`text-sm font-bold ${getLineColorClass(t.lineType)}`}>
-                          {getLineSymbol(t.lineType)}
-                        </div>
-                        <div className="text-xs text-amber-200/60">{t.lineValue}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                    <span className="text-red-400">○ 老阳（变爻，阳变阴）</span>
-                    <span className="text-blue-400">× 老阴（变爻，阴变阳）</span>
-                    <span className="text-amber-100">— 少阳</span>
-                    <span className="text-amber-100">- - 少阴</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 本卦显示 */}
-              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-3xl text-amber-100 flex items-center justify-center">
-                    <span className="text-6xl mr-4">{result.originalHexagram.symbol}</span>
-                    <span>{result.originalHexagram.name}卦</span>
-                    <span className="ml-4 text-lg text-amber-200/60">（本卦）</span>
-                  </CardTitle>
-                  <CardDescription className="text-amber-200/80 text-lg">
-                    第{result.originalHexagram.number}卦 · {result.originalHexagram.upperTrigram}上{result.originalHexagram.lowerTrigram}下
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* 上下卦 */}
-                  <div className="flex justify-center gap-8">
+                <CardHeader className="text-center pb-2">
+                  <div className="flex items-center justify-center gap-8">
+                    {/* 本卦 */}
                     <div className="text-center">
-                      <div className="text-5xl mb-2">{getTrigramSymbol(result.originalHexagram.upperTrigram)}</div>
-                      <div className="text-amber-200">{result.originalHexagram.upperTrigram}（上卦）</div>
+                      <div className="text-5xl mb-2">{result.originalHexagram.symbol}</div>
+                      <CardTitle className="text-2xl text-amber-100">{result.originalHexagram.name}卦</CardTitle>
+                      <CardDescription className="text-amber-200/60 text-sm">本卦 · 第{result.originalHexagram.number}卦</CardDescription>
                     </div>
-                    <div className="text-center">
-                      <div className="text-5xl mb-2">{getTrigramSymbol(result.originalHexagram.lowerTrigram)}</div>
-                      <div className="text-amber-200">{result.originalHexagram.lowerTrigram}（下卦）</div>
-                    </div>
-                  </div>
-
-                  {/* 卦辞 */}
-                  <div className="bg-amber-950/60 rounded-lg p-6">
-                    <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
-                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.judgement}</p>
-                    <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      {result.originalHexagram.judgementMeaning}
-                    </p>
-                  </div>
-
-                  {/* 象辞 */}
-                  <div className="bg-amber-950/60 rounded-lg p-6">
-                    <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
-                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.image}</p>
-                    <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      {result.originalHexagram.imageMeaning}
-                    </p>
-                  </div>
-
-                  {/* 爻辞 */}
-                  <div className="bg-amber-950/60 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-amber-100">爻辞（点击查看注解）</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (expandedLines.size === 6) {
-                            setExpandedLines(new Set());
-                          } else {
-                            setExpandedLines(new Set([0, 1, 2, 3, 4, 5]));
-                          }
-                        }}
-                        className="text-amber-200 hover:text-amber-100"
-                      >
-                        {expandedLines.size === 6 ? '收起全部' : '展开全部'}
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      {result.originalHexagram.lines.map((line, index) => (
-                        <div
-                          key={index}
-                          className={`rounded-lg overflow-hidden transition-all ${
-                            result.changingLines.includes(index + 1)
-                              ? 'bg-amber-500/20 border border-amber-400'
-                              : 'bg-amber-900/30'
-                          }`}
-                        >
-                          <div
-                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-amber-800/20 transition-colors"
-                            onClick={() => toggleLine(index)}
-                          >
-                            <div className="flex-1">
-                              <p className="text-amber-100 font-medium">
-                                {line.text}
-                                {result.changingLines.includes(index + 1) && (
-                                  <span className="ml-2 text-amber-300 font-bold text-sm bg-amber-500/30 px-2 py-1 rounded">
-                                    动爻
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 text-amber-300">
-                              <BookOpen className="w-4 h-4" />
-                              {expandedLines.has(index) ? (
-                                <ChevronUp className="w-4 h-4" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4" />
-                              )}
-                            </div>
-                          </div>
-                          {expandedLines.has(index) && (
-                            <div className="px-4 pb-4 pt-0 border-t border-amber-600/20">
-                              <div className="bg-amber-900/40 rounded-lg p-4 mt-2">
-                                <p className="text-amber-200/90 leading-relaxed">
-                                  {line.meaning}
-                                </p>
-                              </div>
-                            </div>
-                          )}
+                    
+                    {/* 变卦（如果有动爻） */}
+                    {result.changedHexagram && (
+                      <>
+                        <div className="text-3xl text-amber-400">→</div>
+                        <div className="text-center">
+                          <div className="text-5xl mb-2">{result.changedHexagram.symbol}</div>
+                          <CardTitle className="text-2xl text-amber-100">{result.changedHexagram.name}卦</CardTitle>
+                          <CardDescription className="text-amber-200/60 text-sm">变卦 · 第{result.changedHexagram.number}卦</CardDescription>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 变卦显示（如果有动爻） */}
-              {result.changedHexagram && (
-                <>
-                  <div className="text-center py-4">
-                    <div className="inline-flex items-center gap-4 text-4xl text-amber-300">
-                      <span>{result.originalHexagram.symbol}</span>
-                      <span className="text-2xl">→</span>
-                      <span>{result.changedHexagram.symbol}</span>
-                    </div>
-                    <p className="text-amber-200/60 mt-2">动爻变化，本卦变为之卦</p>
-                  </div>
-
-                  <Card className={`bg-white/10 backdrop-blur-md border-amber-300/30 ${showChangedHexagram ? '' : 'opacity-50'}`}>
-                    <CardHeader className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowChangedHexagram(!showChangedHexagram)}
-                          className="text-amber-200 hover:text-amber-100"
-                        >
-                          {showChangedHexagram ? '收起变卦' : '展开变卦详情'}
-                        </Button>
-                      </div>
-                      <CardTitle className="text-3xl text-amber-100 flex items-center justify-center">
-                        <span className="text-6xl mr-4">{result.changedHexagram.symbol}</span>
-                        <span>{result.changedHexagram.name}卦</span>
-                        <span className="ml-4 text-lg text-amber-200/60">（变卦/之卦）</span>
-                      </CardTitle>
-                      <CardDescription className="text-amber-200/80 text-lg">
-                        第{result.changedHexagram.number}卦 · {result.changedHexagram.upperTrigram}上{result.changedHexagram.lowerTrigram}下
-                      </CardDescription>
-                    </CardHeader>
-                    {showChangedHexagram && (
-                      <CardContent className="space-y-6">
-                        <div className="bg-amber-950/60 rounded-lg p-6">
-                          <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
-                          <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.changedHexagram.judgement}</p>
-                          <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                            {result.changedHexagram.judgementMeaning}
-                          </p>
-                        </div>
-                      </CardContent>
+                      </>
                     )}
-                  </Card>
-                </>
-              )}
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {/* 动爻信息 */}
+                  {result.changingLines.length > 0 ? (
+                    <div className="text-center mb-4">
+                      <span className="text-amber-200">动爻：</span>
+                      <span className="text-amber-100 font-bold">
+                        {result.changingLines.map(l => ['初', '二', '三', '四', '五', '上'][l-1] + '爻').join('、')}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-center mb-4 text-amber-200/60">无动爻，以卦辞为主</div>
+                  )}
+                  
+                  {/* 卦辞 - 仅展示原文，不展开 */}
+                  <div className="bg-amber-950/60 rounded-lg p-4 text-center">
+                    <p className="text-amber-100 text-lg">{result.originalHexagram.judgement}</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* AI大师解读 */}
+              {/* AI大师解读 - 固定高度 */}
               <Card className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 border-amber-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-amber-100 flex items-center">
@@ -747,18 +596,20 @@ export default function IChingPage() {
                       <p className="text-amber-200 animate-pulse">大师正在为您解读卦象...</p>
                     </div>
                   ) : (
-                    <div className="prose prose-invert prose-amber max-w-none">
-                      <div
-                        className="text-amber-100 leading-relaxed whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{
-                          __html: aiInterpretation
-                            .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-200 mt-6 mb-3">$1</h2>')
-                            .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-200">$1</strong>')
-                        }}
-                      />
+                    <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-amber-600/50 scrollbar-track-transparent">
+                      <div className="prose prose-invert prose-amber max-w-none">
+                        <div
+                          className="text-amber-100 leading-relaxed whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: aiInterpretation
+                              .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-200 mt-6 mb-3">$1</h2>')
+                              .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-200">$1</strong>')
+                          }}
+                        />
+                      </div>
+                      <div ref={interpretationRef} />
                     </div>
                   )}
-                  <div ref={interpretationRef} />
                 </CardContent>
               </Card>
 

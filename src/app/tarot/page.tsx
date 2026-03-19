@@ -657,7 +657,7 @@ export default function TarotPage() {
                 </Card>
               )}
 
-              {/* AI大师解读 */}
+              {/* AI大师解读 - 固定高度 */}
               {allRevealed && (
                 <Card className="bg-gradient-to-r from-purple-900/60 to-violet-900/60 border-purple-400/30">
                   <CardHeader>
@@ -676,18 +676,20 @@ export default function TarotPage() {
                         <p className="text-purple-200 animate-pulse">大师正在为您解读牌面...</p>
                       </div>
                     ) : (
-                      <div className="prose prose-invert prose-purple max-w-none">
-                        <div
-                          className="text-purple-100 leading-relaxed whitespace-pre-wrap"
-                          dangerouslySetInnerHTML={{
-                            __html: aiInterpretation
-                              .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-purple-200 mt-6 mb-3">$1</h2>')
-                              .replace(/\*\*(.+?)\*\*/g, '<strong class="text-purple-200">$1</strong>')
-                          }}
-                        />
+                      <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-600/50 scrollbar-track-transparent">
+                        <div className="prose prose-invert prose-purple max-w-none">
+                          <div
+                            className="text-purple-100 leading-relaxed whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{
+                              __html: aiInterpretation
+                                .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-purple-200 mt-6 mb-3">$1</h2>')
+                                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-purple-200">$1</strong>')
+                            }}
+                          />
+                        </div>
+                        <div ref={interpretationRef} />
                       </div>
                     )}
-                    <div ref={interpretationRef} />
                   </CardContent>
                 </Card>
               )}

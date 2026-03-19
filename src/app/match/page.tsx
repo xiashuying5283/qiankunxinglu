@@ -734,7 +734,7 @@ export default function MatchPage() {
                 </CardContent>
               </Card>
 
-              {/* AI解读 */}
+              {/* AI解读 - 固定高度 */}
               <Card className="bg-gradient-to-r from-rose-900/60 to-pink-900/60 border-rose-400/30">
                 <CardHeader>
                   <CardTitle className="text-xl text-rose-100 flex items-center">
@@ -744,17 +744,19 @@ export default function MatchPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-invert prose-rose max-w-none">
-                    <div
-                      className="text-rose-100 leading-relaxed whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{
-                        __html: aiInterpretation
-                          .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-rose-200 mt-4 mb-2">$1</h2>')
-                          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-rose-200">$1</strong>')
-                      }}
-                    />
+                  <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-rose-600/50 scrollbar-track-transparent">
+                    <div className="prose prose-invert prose-rose max-w-none">
+                      <div
+                        className="text-rose-100 leading-relaxed whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: aiInterpretation
+                            .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-rose-200 mt-4 mb-2">$1</h2>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong class="text-rose-200">$1</strong>')
+                        }}
+                      />
+                    </div>
+                    <div ref={interpretationRef} />
                   </div>
-                  <div ref={interpretationRef} />
                 </CardContent>
               </Card>
 
