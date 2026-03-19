@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,22 @@ import { Input } from '@/components/ui/input';
 import { Lock, Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function ResetPasswordPage() {
+// 加载状态组件
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center p-4">
+      <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 w-full max-w-md">
+        <CardContent className="py-12 flex flex-col items-center">
+          <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
+          <p className="text-purple-100">正在验证链接...</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// 重置密码内容组件
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { refreshUser } = useAuth();
@@ -105,16 +120,7 @@ export default function ResetPasswordPage() {
 
   // 加载中
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center p-4">
-        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 w-full max-w-md">
-          <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
-            <p className="text-purple-100">正在验证链接...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   // 成功页面
@@ -223,5 +229,14 @@ export default function ResetPasswordPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// 主页面组件，用 Suspense 包裹
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
