@@ -114,11 +114,14 @@ export default function Home() {
         {/* 标题区域 */}
         <div className="text-center mb-16">
           <div className="flex items-center justify-center mb-6">
-            <Sparkles className="w-12 h-12 text-amber-400 mr-3" />
+            <img 
+              src="/logo.png" 
+              alt="占卜问卦" 
+              className="w-16 h-16 mr-4 rounded-full shadow-lg shadow-purple-500/30"
+            />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent">
-              易经占卜
+              占卜问卦
             </h1>
-            <Sparkles className="w-12 h-12 text-amber-400 ml-3" />
           </div>
           <p className="text-xl text-purple-200 mb-4">探索古老智慧，指引人生方向</p>
           <p className="text-sm text-gray-400 max-w-2xl mx-auto">

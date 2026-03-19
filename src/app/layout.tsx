@@ -23,12 +23,17 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Divination App' }],
   generator: 'Coze Code',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     title: '占卜问卦 | 神秘命运解读',
     description:
       '融合周易、塔罗、测字、梅花易数等传统占卜智慧，为您提供专业的命运解读服务。',
     type: 'website',
     locale: 'zh_CN',
+    images: ['/logo.png'],
   },
   robots: {
     index: true,
