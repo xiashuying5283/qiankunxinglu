@@ -1,11 +1,6 @@
 [project]
 requires = ["nodejs-24"]
 
-# 环境变量配置
-[env]
-GITHUB_CLIENT_ID = "Ov23li3IHs3NsHEE4NFa"
-GITHUB_CLIENT_SECRET = "cf09b23e2dffc38e90c8e53a0983dc365f173701"
-
 [dev]
 build = ["bash", "./scripts/prepare.sh"]
 run = ["bash", "./scripts/dev.sh"]
