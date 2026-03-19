@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, User, Mail, Lock, UserCircle2, ShieldCheck } from 'lucide-react';
+import { Loader2, User, Mail, Lock, UserCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
 import { SliderCaptcha } from '@/components/ui/slider-captcha';
 
 // Google SVG 图标
@@ -82,11 +82,11 @@ export function LoginDialog({
   // 验证码状态
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'guest' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'guest' | 'oauth'>('login');
 
   // OAuth 状态
   const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ google: false, github: false });
-  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<'google' | 'github' | null>(null);
 
   // 获取 OAuth 配置状态
   useEffect(() => {
@@ -109,28 +109,38 @@ export function LoginDialog({
   const handleCaptchaVerify = (success: boolean) => {
     if (success) {
       setCaptchaVerified(true);
-      // 执行待处理的操作
-      setTimeout(() => {
-        executePendingAction();
-      }, 500);
+      // 不自动执行，等用户点击确认按钮
     }
   };
 
   // 执行待处理的操作
   const executePendingAction = async () => {
-    if (!pendingAction) return;
-
-    if (pendingAction === 'login') {
-      await executeLogin();
-    } else if (pendingAction === 'register') {
-      await executeRegister();
-    } else if (pendingAction === 'guest') {
-      await executeGuestLogin();
+    switch (pendingAction) {
+      case 'login':
+        await executeLogin();
+        break;
+      case 'register':
+        await executeRegister();
+        break;
+      case 'guest':
+        await executeGuestLogin();
+        break;
+      case 'oauth':
+        if (pendingOAuthProvider) {
+          triggerOAuthLogin(pendingOAuthProvider);
+        }
+        break;
     }
 
-    setPendingAction(null);
+    resetCaptchaState();
+  };
+
+  // 重置验证码状态（不重置表单）
+  const resetCaptchaState = () => {
     setShowCaptcha(false);
     setCaptchaVerified(false);
+    setPendingAction('login');
+    setPendingOAuthProvider(null);
   };
 
   // 执行登录
@@ -178,64 +188,39 @@ export function LoginDialog({
     }
   };
 
+  // 触发 OAuth 登录
+  const triggerOAuthLogin = (provider: 'google' | 'github') => {
+    window.location.href = `/api/auth/oauth/${provider}`;
+  };
+
   // 处理登录（显示验证码）
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!captchaVerified) {
-      setPendingAction('login');
-      setShowCaptcha(true);
-      return;
-    }
-
-    await executeLogin();
+    setPendingAction('login');
+    setShowCaptcha(true);
   };
 
   // 处理注册（显示验证码）
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!captchaVerified) {
-      setPendingAction('register');
-      setShowCaptcha(true);
-      return;
-    }
-
-    await executeRegister();
+    setPendingAction('register');
+    setShowCaptcha(true);
   };
 
   // 处理游客登录（显示验证码）
   const handleGuestLogin = async () => {
     setError('');
-    
-    if (!captchaVerified) {
-      setPendingAction('guest');
-      setShowCaptcha(true);
-      return;
-    }
-
-    await executeGuestLogin();
+    setPendingAction('guest');
+    setShowCaptcha(true);
   };
 
-  // 处理第三方登录（需要验证码）
+  // 处理 OAuth 登录（显示验证码）
   const handleOAuthLogin = (provider: 'google' | 'github') => {
-    if (!captchaVerified) {
-      setPendingAction(null); // OAuth 不需要等待
-      setShowCaptcha(true);
-      // 存储 provider 以便验证后使用
-      sessionStorage.setItem('oauth_provider', provider);
-      return;
-    }
-
-    triggerOAuthLogin(provider);
-  };
-
-  // 触发 OAuth 登录
-  const triggerOAuthLogin = (provider: 'google' | 'github') => {
-    setIsOAuthLoading(true);
-    window.location.href = `/api/auth/oauth/${provider}`;
+    setPendingOAuthProvider(provider);
+    setPendingAction('oauth');
+    setShowCaptcha(true);
   };
 
   // 重置表单
@@ -244,24 +229,16 @@ export function LoginDialog({
     setPassword('');
     setName('');
     setError('');
-    setShowCaptcha(false);
-    setCaptchaVerified(false);
-    setPendingAction(null);
+    resetCaptchaState();
   };
-
-  // 验证码验证成功后的 OAuth 登录
-  useEffect(() => {
-    if (captchaVerified && showCaptcha && !pendingAction) {
-      const provider = sessionStorage.getItem('oauth_provider') as 'google' | 'github' | null;
-      if (provider) {
-        sessionStorage.removeItem('oauth_provider');
-        triggerOAuthLogin(provider);
-      }
-    }
-  }, [captchaVerified, showCaptcha, pendingAction]);
 
   // 是否显示第三方登录
   const showOAuth = oauthStatus.google || oauthStatus.github;
+
+  // 获取 OAuth 提供商的中文名称
+  const getOAuthProviderName = (provider: 'google' | 'github') => {
+    return provider === 'google' ? 'Google' : 'GitHub';
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -282,16 +259,102 @@ export function LoginDialog({
               onVerify={handleCaptchaVerify}
               onRefresh={() => setCaptchaVerified(false)}
             />
+            
             <Button 
               variant="ghost" 
               className="w-full mt-4"
-              onClick={() => {
-                setShowCaptcha(false);
-                setPendingAction(null);
-              }}
+              onClick={resetCaptchaState}
             >
               返回
             </Button>
+          </div>
+        )}
+
+        {/* 验证成功确认区域 */}
+        {showCaptcha && captchaVerified && (
+          <div className="py-4">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            
+            <p className="text-center text-lg font-medium mb-6">验证通过</p>
+            
+            {/* OAuth 登录确认 */}
+            {pendingAction === 'oauth' && pendingOAuthProvider && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-muted/50 border">
+                  <div className="flex items-center gap-3">
+                    {pendingOAuthProvider === 'google' ? (
+                      <GoogleIcon className="w-10 h-10" />
+                    ) : (
+                      <GitHubIcon className="w-10 h-10" />
+                    )}
+                    <div>
+                      <p className="font-medium">使用 {getOAuthProviderName(pendingOAuthProvider)} 登录</p>
+                      <p className="text-sm text-muted-foreground">
+                        将跳转到 {getOAuthProviderName(pendingOAuthProvider)} 进行授权
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={resetCaptchaState}
+                  >
+                    取消
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    onClick={() => triggerOAuthLogin(pendingOAuthProvider)}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    确认登录
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* 邮箱登录/注册/游客登录确认 */}
+            {pendingAction !== 'oauth' && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-muted/50 border">
+                  <p className="text-sm text-muted-foreground text-center">
+                    {pendingAction === 'login' && '即将使用邮箱密码登录'}
+                    {pendingAction === 'register' && '即将创建新账号'}
+                    {pendingAction === 'guest' && '即将以游客身份登录'}
+                  </p>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={resetCaptchaState}
+                  >
+                    取消
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    onClick={executePendingAction}
+                    disabled={isLoading || isGuestLoading}
+                  >
+                    {(isLoading || isGuestLoading) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        处理中...
+                      </>
+                    ) : (
+                      '确认'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -435,7 +498,6 @@ export function LoginDialog({
                       variant="outline"
                       className="w-full"
                       onClick={() => handleOAuthLogin('google')}
-                      disabled={isOAuthLoading}
                     >
                       <GoogleIcon className="w-5 h-5 mr-2" />
                       使用 Google 登录
@@ -446,7 +508,6 @@ export function LoginDialog({
                       variant="outline"
                       className="w-full"
                       onClick={() => handleOAuthLogin('github')}
-                      disabled={isOAuthLoading}
                     >
                       <GitHubIcon className="w-5 h-5 mr-2" />
                       使用 GitHub 登录
