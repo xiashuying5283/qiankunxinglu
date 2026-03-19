@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw } from 'lucide-react';
+import { LoginDialog } from '@/components/auth/LoginDialog';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 类型定义
 interface TarotCard {
@@ -59,6 +62,7 @@ const spreadNames: Record<SpreadType, string> = {
 };
 
 export default function TarotPage() {
+  const { isLoggedIn } = useAuth();
   const [question, setQuestion] = useState('');
   const [spreadType, setSpreadType] = useState<SpreadType>('three');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -71,6 +75,10 @@ export default function TarotPage() {
   const [aiInterpretation, setAiInterpretation] = useState('');
   const [isInterpreting, setIsInterpreting] = useState(false);
   const interpretationRef = useRef<HTMLDivElement>(null);
+  
+  // 登录弹窗状态
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [pendingCards, setPendingCards] = useState<DrawnCard[] | null>(null);
   
   // 数据状态
   const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
@@ -190,6 +198,7 @@ export default function TarotPage() {
     setShowCards([]);
     setAllRevealed(false);
     setAiInterpretation('');
+    setPendingCards(null);
     
     const numCards = spreadType === 'single' ? 1 : spreadType === 'three' ? 3 : 10;
     
@@ -213,14 +222,32 @@ export default function TarotPage() {
     setShowCards(new Array(numCards).fill(false));
     setIsDrawing(false);
     
-    // 延迟后自动翻牌并开始AI解读
+    // 延迟后自动翻牌
     setTimeout(() => {
       const allTrue = new Array(numCards).fill(true);
       setShowCards(allTrue);
       setAllRevealed(true);
-      // 开始AI解读
-      streamInterpretation(drawn);
+      
+      // 检查登录状态
+      if (!isLoggedIn) {
+        // 未登录，保存结果并显示登录弹窗
+        setPendingCards(drawn);
+        setShowLoginDialog(true);
+      } else {
+        // 已登录，开始AI解读
+        streamInterpretation(drawn);
+      }
     }, numCards * 500 + 1000);
+  };
+
+  // 登录成功后的回调
+  const handleLoginSuccess = () => {
+    setShowLoginDialog(false);
+    // 如果有待处理的卡牌，开始AI解读
+    if (pendingCards) {
+      streamInterpretation(pendingCards);
+      setPendingCards(null);
+    }
   };
 
   // 翻转单张牌
@@ -233,10 +260,15 @@ export default function TarotPage() {
       // 检查是否全部翻开
       if (newState.every(Boolean) && !allRevealed) {
         setAllRevealed(true);
-        // 全部翻开后开始AI解读
-        setTimeout(() => {
-          streamInterpretation(drawnCards);
-        }, 500);
+        // 检查登录状态
+        if (!isLoggedIn) {
+          setPendingCards(drawnCards);
+          setShowLoginDialog(true);
+        } else {
+          setTimeout(() => {
+            streamInterpretation(drawnCards);
+          }, 500);
+        }
       }
       return newState;
     });
@@ -246,10 +278,16 @@ export default function TarotPage() {
   const revealAll = () => {
     setShowCards(new Array(drawnCards.length).fill(true));
     setAllRevealed(true);
-    // 开始AI解读
-    setTimeout(() => {
-      streamInterpretation(drawnCards);
-    }, 500);
+    
+    // 检查登录状态
+    if (!isLoggedIn) {
+      setPendingCards(drawnCards);
+      setShowLoginDialog(true);
+    } else {
+      setTimeout(() => {
+        streamInterpretation(drawnCards);
+      }, 500);
+    }
   };
 
   // 重置
@@ -259,6 +297,7 @@ export default function TarotPage() {
     setShowCards([]);
     setAllRevealed(false);
     setAiInterpretation('');
+    setPendingCards(null);
   };
 
   // 获取牌组符号
@@ -308,13 +347,20 @@ export default function TarotPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-purple-200 hover:text-purple-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-purple-200 hover:text-purple-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <div className="flex items-center gap-2">
+            <UserMenu />
+          </div>
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-12">
@@ -633,6 +679,15 @@ export default function TarotPage() {
           )}
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        title="登录后查看大师解读"
+        description="登录后可以获得AI大师解读，并保存您的占卜记录"
+        onGuestLogin={handleLoginSuccess}
+      />
 
       {/* 添加翻转动画CSS */}
       <style jsx global>{`

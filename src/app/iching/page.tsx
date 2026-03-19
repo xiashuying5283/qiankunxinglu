@@ -4,7 +4,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User } from 'lucide-react';
+import { LoginDialog } from '@/components/auth/LoginDialog';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 类型定义
 interface LineText {
@@ -54,6 +57,7 @@ interface DivinationResult {
 }
 
 export default function IChingPage() {
+  const { isLoggedIn } = useAuth();
   const [question, setQuestion] = useState('');
   const [isDivining, setIsDivining] = useState(false);
   const [result, setResult] = useState<DivinationResult | null>(null);
@@ -65,6 +69,10 @@ export default function IChingPage() {
   const [aiInterpretation, setAiInterpretation] = useState('');
   const [isInterpreting, setIsInterpreting] = useState(false);
   const interpretationRef = useRef<HTMLDivElement>(null);
+  
+  // 登录弹窗状态
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [pendingDivinationResult, setPendingDivinationResult] = useState<DivinationResult | null>(null);
   
   // 数据状态
   const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
@@ -275,9 +283,27 @@ export default function IChingPage() {
     setTimeout(() => {
       setResult(divinationResult);
       setIsDivining(false);
-      // 开始AI解读
-      streamInterpretation(divinationResult);
+      
+      // 检查登录状态
+      if (!isLoggedIn) {
+        // 未登录，保存结果并显示登录弹窗
+        setPendingDivinationResult(divinationResult);
+        setShowLoginDialog(true);
+      } else {
+        // 已登录，开始AI解读
+        streamInterpretation(divinationResult);
+      }
     }, 500);
+  };
+
+  // 登录成功后的回调
+  const handleLoginSuccess = () => {
+    setShowLoginDialog(false);
+    // 如果有待处理的占卜结果，开始AI解读
+    if (pendingDivinationResult) {
+      streamInterpretation(pendingDivinationResult);
+      setPendingDivinationResult(null);
+    }
   };
 
   // 切换爻辞展开状态
@@ -326,6 +352,7 @@ export default function IChingPage() {
     setExpandedLines(new Set());
     setShowChangedHexagram(false);
     setAiInterpretation('');
+    setPendingDivinationResult(null);
   };
 
   // 加载中状态
@@ -364,13 +391,20 @@ export default function IChingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
-        <Link href="/">
-          <Button variant="ghost" className="mb-6 text-amber-200 hover:text-amber-100 hover:bg-white/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Button>
-        </Link>
+        {/* 顶部导航栏 */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-amber-200 hover:text-amber-100 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+          
+          {/* 用户菜单 */}
+          <div className="flex items-center gap-2">
+            <UserMenu />
+          </div>
+        </div>
 
         {/* 标题 */}
         <div className="text-center mb-12">
@@ -713,6 +747,15 @@ export default function IChingPage() {
           )}
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        title="登录后查看大师解读"
+        description="登录后可以获得AI大师解读，并保存您的占卜记录"
+        onGuestLogin={handleLoginSuccess}
+      />
     </div>
   );
 }
