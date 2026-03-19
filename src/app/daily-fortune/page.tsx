@@ -606,8 +606,7 @@ export default function DailyFortunePage() {
               <div className="text-center pt-4">
                 <Button
                   onClick={handleReset}
-                  variant="outline"
-                  className="border-sky-400/50 text-sky-100 hover:bg-sky-700/40 px-8"
+                  className="bg-sky-600 hover:bg-sky-500 text-white px-8 py-2 font-medium"
                 >
                   选择其他生肖
                 </Button>
