@@ -1,12 +1,36 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, GraduationCap, Wand2, Sun, Calendar } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { refreshUser } = useAuth();
+
+  // 处理 OAuth 登录成功后的状态刷新
+  useEffect(() => {
+    const loginStatus = searchParams.get('login');
+    const error = searchParams.get('error');
+
+    if (loginStatus === 'success') {
+      // 刷新用户状态
+      refreshUser();
+      // 清除 URL 参数
+      router.replace('/');
+    }
+
+    if (error) {
+      console.error('OAuth login error:', error);
+      // 可以在这里显示错误提示
+    }
+  }, [searchParams, refreshUser, router]);
   const divinationFeatures = [
     {
       title: '周易占卜',
