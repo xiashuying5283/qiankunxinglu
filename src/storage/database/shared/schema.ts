@@ -59,3 +59,31 @@ export const fortuneSticks = pgTable("fortune_sticks", {
 	index("fortune_sticks_level_idx").using("btree", table.level.asc().nullsLast().op("text_ops")),
 	unique("fortune_sticks_number_unique").on(table.number),
 ]);
+
+// 梦境关键词表
+export const dreamKeywords = pgTable("dream_keywords", {
+	id: serial().notNull(),
+	keyword: varchar({ length: 50 }).notNull(),
+	category: varchar({ length: 20 }).notNull(), // 自然、动物、人物、情景、物品
+	meaning: text().notNull(),
+	advice: text().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("dream_keywords_keyword_idx").using("btree", table.keyword.asc().nullsLast().op("text_ops")),
+	index("dream_keywords_category_idx").using("btree", table.category.asc().nullsLast().op("text_ops")),
+	unique("dream_keywords_keyword_unique").on(table.keyword),
+]);
+
+// 梦境记录表
+export const dreamRecords = pgTable("dream_records", {
+	id: serial().notNull(),
+	sessionId: varchar("session_id", { length: 100 }).notNull(), // 用户会话ID
+	dreamContent: text("dream_content").notNull(), // 梦境内容描述
+	keywords: jsonb().notNull().$type<string[]>(), // 提取的关键词
+	interpretation: text().notNull(), // AI解析结果
+	advice: text().notNull(), // 建议
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("dream_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
+	index("dream_records_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+]);
