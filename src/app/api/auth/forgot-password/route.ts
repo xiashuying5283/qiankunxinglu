@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { isMailConfigured, sendPasswordResetEmail } from '@/lib/mail';
 
 // 生成随机令牌
 function generateResetToken(): string {
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     if (user.provider) {
       return NextResponse.json({
         success: true,
-        message: '该账户使用第三方登录，请直接使用对应的登录方式',
+        message: '如果该邮箱已注册，您将收到重置密码的邮件',
       });
     }
 
@@ -82,29 +82,51 @@ export async function POST(request: NextRequest) {
     // 生成重置链接
     const resetUrl = `${getBaseUrl()}/reset-password?token=${resetToken}`;
 
-    // 在生产环境中，这里应该发送邮件
-    // 由于当前环境可能没有配置邮件服务，我们在开发模式下直接返回链接
+    // 检查邮件服务是否已配置
+    const mailConfigured = isMailConfigured();
     const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
 
-    if (isDev) {
-      // 开发模式：直接返回重置链接（方便测试）
-      console.log(`[DEV] Password reset link for ${email}: ${resetUrl}`);
+    if (mailConfigured) {
+      // 发送邮件
+      const result = await sendPasswordResetEmail(email, resetUrl);
       
+      if (result.success) {
+        return NextResponse.json({
+          success: true,
+          message: '重置密码邮件已发送，请查收邮件',
+        });
+      } else {
+        // 邮件发送失败，开发环境下返回链接
+        if (isDev) {
+          console.log(`[DEV] Password reset link for ${email}: ${resetUrl}`);
+          return NextResponse.json({
+            success: true,
+            message: '邮件发送失败，请使用下方链接',
+            dev_reset_url: resetUrl,
+          });
+        }
+        
+        return NextResponse.json({
+          success: false,
+          error: '邮件发送失败，请稍后重试',
+        });
+      }
+    }
+
+    // 邮件服务未配置，开发环境下返回链接
+    if (isDev) {
+      console.log(`[DEV] Password reset link for ${email}: ${resetUrl}`);
       return NextResponse.json({
         success: true,
-        message: '重置链接已生成',
-        // 仅在开发环境返回链接
+        message: '重置链接已生成（邮件服务未配置）',
         dev_reset_url: resetUrl,
       });
     }
 
-    // 生产环境：发送邮件（需要配置邮件服务）
-    // TODO: 实现邮件发送逻辑
-    // await sendPasswordResetEmail(email, resetUrl);
-
+    // 生产环境但未配置邮件服务
     return NextResponse.json({
-      success: true,
-      message: '如果该邮箱已注册，您将收到重置密码的邮件',
+      success: false,
+      error: '邮件服务未配置，请联系管理员',
     });
   } catch (error) {
     console.error('Forgot password error:', error);
