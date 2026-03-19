@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,27 +38,33 @@ type LineType = 'old-yang' | 'young-yang' | 'old-yin' | 'young-yin';
 
 // 单次抛币结果
 interface CoinThrow {
-  coins: boolean[];        // 三枚铜钱结果：true=正，false=反
-  lineType: LineType;      // 爻的类型
-  lineValue: number;       // 6/7/8/9
+  coins: boolean[];
+  lineType: LineType;
+  lineValue: number;
 }
 
 // 占卜结果
 interface DivinationResult {
-  originalHexagram: HexagramData;   // 本卦
-  changedHexagram: HexagramData | null; // 变卦（有动爻才有）
-  coinThrows: CoinThrow[];          // 6次抛币结果
-  changingLines: number[];          // 动爻位置（1-6）
-  originalBinary: string;           // 本卦二进制
-  changedBinary: string;            // 变卦二进制
+  originalHexagram: HexagramData;
+  changedHexagram: HexagramData | null;
+  coinThrows: CoinThrow[];
+  changingLines: number[];
+  originalBinary: string;
+  changedBinary: string;
 }
 
 export default function IChingPage() {
+  const [question, setQuestion] = useState('');
   const [isDivining, setIsDivining] = useState(false);
   const [result, setResult] = useState<DivinationResult | null>(null);
   const [currentThrow, setCurrentThrow] = useState<number>(0);
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
   const [showChangedHexagram, setShowChangedHexagram] = useState(false);
+  
+  // AI解读状态
+  const [aiInterpretation, setAiInterpretation] = useState('');
+  const [isInterpreting, setIsInterpreting] = useState(false);
+  const interpretationRef = useRef<HTMLDivElement>(null);
   
   // 数据状态
   const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
@@ -114,11 +120,6 @@ export default function IChingPage() {
     
     const headsCount = coins.filter(c => c).length;
     
-    // 根据正面数量判断爻的类型
-    // 3正 = 老阳(9) = 变爻，阳变阴
-    // 2正1反 = 少阳(7) = 阳爻，不变
-    // 1正2反 = 少阴(8) = 阴爻，不变
-    // 0正(3反) = 老阴(6) = 变爻，阴变阳
     let lineType: LineType;
     let lineValue: number;
     
@@ -135,7 +136,7 @@ export default function IChingPage() {
         lineType = 'young-yin';
         lineValue = 8;
         break;
-      default: // 0
+      default:
         lineType = 'old-yin';
         lineValue = 6;
     }
@@ -149,6 +150,71 @@ export default function IChingPage() {
     return found || hexagrams[0];
   };
 
+  // 流式AI解读
+  const streamInterpretation = async (divinationResult: DivinationResult) => {
+    setIsInterpreting(true);
+    setAiInterpretation('');
+
+    try {
+      const res = await fetch('/api/divination/interpret', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'iching',
+          question: question || '请为我解读这卦的含义',
+          hexagram: divinationResult.originalHexagram,
+          changingLines: divinationResult.changingLines,
+          changedHexagram: divinationResult.changedHexagram ? {
+            name: divinationResult.changedHexagram.name,
+            number: divinationResult.changedHexagram.number,
+            judgement: divinationResult.changedHexagram.judgement,
+            judgementMeaning: divinationResult.changedHexagram.judgementMeaning
+          } : null
+        })
+      });
+
+      const reader = res.body?.getReader();
+      if (!reader) {
+        throw new Error('无法获取响应流');
+      }
+
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                fullText += parsed.content;
+                setAiInterpretation(fullText);
+                setTimeout(() => {
+                  interpretationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 50);
+              }
+            } catch {
+              // 忽略解析错误
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Interpretation error:', error);
+      setAiInterpretation('AI解读生成失败，请稍后重试');
+    } finally {
+      setIsInterpreting(false);
+    }
+  };
+
   // 正宗铜钱占卜法
   const divine = async () => {
     if (hexagrams.length === 0) return;
@@ -158,6 +224,7 @@ export default function IChingPage() {
     setCurrentThrow(0);
     setExpandedLines(new Set());
     setShowChangedHexagram(false);
+    setAiInterpretation('');
     
     const coinThrows: CoinThrow[] = [];
     
@@ -169,23 +236,22 @@ export default function IChingPage() {
       setCurrentThrow(i + 1);
     }
     
-    // 构建本卦二进制（从下往上，初爻在最右边）
-    // 阳爻=1，阴爻=0
+    // 构建本卦二进制
     const originalBinary = coinThrows
       .map(t => (t.lineType === 'old-yang' || t.lineType === 'young-yang') ? '1' : '0')
       .reverse()
       .join('');
     
-    // 找出动爻位置（老阳和老阴）
+    // 找出动爻位置
     const changingLines: number[] = coinThrows
       .map((t, i) => (t.lineType === 'old-yang' || t.lineType === 'old-yin') ? i + 1 : -1)
       .filter(i => i > 0);
     
-    // 构建变卦二进制（动爻变化）
+    // 构建变卦二进制
     const changedBinary = coinThrows
       .map((t, i) => {
-        if (t.lineType === 'old-yang') return '0'; // 老阳变阴
-        if (t.lineType === 'old-yin') return '1';  // 老阴变阳
+        if (t.lineType === 'old-yang') return '0';
+        if (t.lineType === 'old-yin') return '1';
         return (t.lineType === 'young-yang') ? '1' : '0';
       })
       .reverse()
@@ -197,16 +263,20 @@ export default function IChingPage() {
       ? findHexagramByBinary(changedBinary) 
       : null;
     
+    const divinationResult: DivinationResult = {
+      originalHexagram,
+      changedHexagram,
+      coinThrows,
+      changingLines,
+      originalBinary,
+      changedBinary,
+    };
+
     setTimeout(() => {
-      setResult({
-        originalHexagram,
-        changedHexagram,
-        coinThrows,
-        changingLines,
-        originalBinary,
-        changedBinary,
-      });
+      setResult(divinationResult);
       setIsDivining(false);
+      // 开始AI解读
+      streamInterpretation(divinationResult);
     }, 500);
   };
 
@@ -232,41 +302,30 @@ export default function IChingPage() {
   // 获取爻的显示符号
   const getLineSymbol = (lineType: LineType): string => {
     switch (lineType) {
-      case 'old-yang':
-        return '○'; // 老阳（变爻）
-      case 'young-yang':
-        return '—'; // 少阳
-      case 'old-yin':
-        return '×'; // 老阴（变爻）
-      case 'young-yin':
-        return '- -'; // 少阴
+      case 'old-yang': return '○';
+      case 'young-yang': return '—';
+      case 'old-yin': return '×';
+      case 'young-yin': return '- -';
     }
   };
 
   // 获取爻的颜色类
   const getLineColorClass = (lineType: LineType): string => {
     switch (lineType) {
-      case 'old-yang':
-        return 'text-red-400';
-      case 'old-yin':
-        return 'text-blue-400';
-      default:
-        return 'text-amber-100';
+      case 'old-yang': return 'text-red-400';
+      case 'old-yin': return 'text-blue-400';
+      default: return 'text-amber-100';
     }
   };
 
-  // 获取爻的名称
-  const getLineTypeName = (lineType: LineType): string => {
-    switch (lineType) {
-      case 'old-yang':
-        return '老阳（变爻）';
-      case 'young-yang':
-        return '少阳';
-      case 'old-yin':
-        return '老阴（变爻）';
-      case 'young-yin':
-        return '少阴';
-    }
+  // 重置占卜
+  const reset = () => {
+    setQuestion('');
+    setResult(null);
+    setCurrentThrow(0);
+    setExpandedLines(new Set());
+    setShowChangedHexagram(false);
+    setAiInterpretation('');
   };
 
   // 加载中状态
@@ -334,6 +393,18 @@ export default function IChingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-8">
+                {/* 问题输入 */}
+                <div className="w-full max-w-lg mb-6">
+                  <label className="block text-sm text-amber-200 mb-2 text-center">您想问什么事？（可选）</label>
+                  <textarea
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    placeholder="例如：我的事业运势如何？这段感情会有结果吗？"
+                    className="w-full h-24 bg-white/10 border border-amber-300/30 rounded-lg p-4 text-amber-100 placeholder:text-amber-200/40 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                    disabled={isDivining}
+                  />
+                </div>
+
                 {/* 占卜说明 */}
                 <div className="bg-amber-950/40 rounded-lg p-4 mb-6 max-w-lg text-center">
                   <p className="text-amber-200/80 text-sm leading-relaxed">
@@ -466,7 +537,7 @@ export default function IChingPage() {
                     <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
                     <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.judgement}</p>
                     <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      💡 {result.originalHexagram.judgementMeaning}
+                      {result.originalHexagram.judgementMeaning}
                     </p>
                   </div>
 
@@ -475,7 +546,7 @@ export default function IChingPage() {
                     <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
                     <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.originalHexagram.image}</p>
                     <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                      💡 {result.originalHexagram.imageMeaning}
+                      {result.originalHexagram.imageMeaning}
                     </p>
                   </div>
 
@@ -535,7 +606,7 @@ export default function IChingPage() {
                             <div className="px-4 pb-4 pt-0 border-t border-amber-600/20">
                               <div className="bg-amber-900/40 rounded-lg p-4 mt-2">
                                 <p className="text-amber-200/90 leading-relaxed">
-                                  📖 {line.meaning}
+                                  {line.meaning}
                                 </p>
                               </div>
                             </div>
@@ -582,21 +653,11 @@ export default function IChingPage() {
                     </CardHeader>
                     {showChangedHexagram && (
                       <CardContent className="space-y-6">
-                        {/* 卦辞 */}
                         <div className="bg-amber-950/60 rounded-lg p-6">
                           <h3 className="text-lg font-bold text-amber-100 mb-2">卦辞</h3>
                           <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.changedHexagram.judgement}</p>
                           <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                            💡 {result.changedHexagram.judgementMeaning}
-                          </p>
-                        </div>
-
-                        {/* 象辞 */}
-                        <div className="bg-amber-950/60 rounded-lg p-6">
-                          <h3 className="text-lg font-bold text-amber-100 mb-2">象辞</h3>
-                          <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.changedHexagram.image}</p>
-                          <p className="text-amber-200/80 text-sm leading-relaxed border-t border-amber-600/30 pt-3 mt-3">
-                            💡 {result.changedHexagram.imageMeaning}
+                            {result.changedHexagram.judgementMeaning}
                           </p>
                         </div>
                       </CardContent>
@@ -605,67 +666,43 @@ export default function IChingPage() {
                 </>
               )}
 
-              {/* 解读 */}
+              {/* AI大师解读 */}
               <Card className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 border-amber-400/30">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">占卜解读</CardTitle>
+                  <CardTitle className="text-xl text-amber-100 flex items-center">
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    大师解读
+                    {isInterpreting && <span className="ml-2 text-sm text-amber-300 animate-pulse">生成中...</span>}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="text-amber-100 leading-relaxed space-y-4">
-                  <p>
-                    您抽得的是<strong className="text-amber-100">{result.originalHexagram.name}卦</strong>
-                    （第{result.originalHexagram.number}卦），由{result.originalHexagram.upperTrigram}卦在上、
-                    {result.originalHexagram.lowerTrigram}卦在下组成。
-                  </p>
-                  
-                  {result.changingLines.length > 0 ? (
-                    <>
-                      <p>
-                        此次占卜有<strong className="text-amber-300">{result.changingLines.length}个动爻</strong>
-                        （第{result.changingLines.join('、')}爻），动爻代表事物变化的契机。
-                      </p>
-                      <div className="bg-amber-800/30 rounded-lg p-4">
-                        <p className="font-medium text-amber-100 mb-2">⚡ 动爻爻辞指引</p>
-                        {result.changingLines.map(lineNum => (
-                          <p key={lineNum} className="text-amber-200 mb-2">
-                            <strong>第{lineNum}爻：</strong>
-                            {result.originalHexagram.lines[lineNum - 1].meaning}
-                          </p>
-                        ))}
+                <CardContent>
+                  {isInterpreting && !aiInterpretation ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="relative mb-4">
+                        <Sparkles className="w-12 h-12 text-amber-400 animate-pulse" />
                       </div>
-                      {result.changedHexagram && (
-                        <p>
-                          本卦<strong>{result.originalHexagram.name}</strong>变为之卦
-                          <strong>{result.changedHexagram.name}</strong>，象征事物从
-                          {result.originalHexagram.judgementMeaning.slice(0, 20)}转向
-                          {result.changedHexagram.judgementMeaning.slice(0, 20)}。
-                        </p>
-                      )}
-                    </>
+                      <p className="text-amber-200 animate-pulse">大师正在为您解读卦象...</p>
+                    </div>
                   ) : (
-                    <p>
-                      此次占卜<strong className="text-amber-300">无动爻</strong>，
-                      表示事物状态稳定，以本卦{result.originalHexagram.name}卦的卦辞为主进行解读。
-                    </p>
+                    <div className="prose prose-invert prose-amber max-w-none">
+                      <div
+                        className="text-amber-100 leading-relaxed whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: aiInterpretation
+                            .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-200 mt-6 mb-3">$1</h2>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-200">$1</strong>')
+                        }}
+                      />
+                    </div>
                   )}
-                  
-                  <div className="mt-4 p-4 bg-amber-950/60 rounded-lg">
-                    <p className="text-sm text-amber-100">
-                      <strong className="text-amber-100">温馨提示：</strong>
-                      占卜结果仅供参考，人生道路需要自己把握。愿此卦带给您启示与指引。
-                    </p>
-                  </div>
+                  <div ref={interpretationRef} />
                 </CardContent>
               </Card>
 
               {/* 重新占卜按钮 */}
               <div className="text-center">
                 <Button
-                  onClick={() => {
-                    setResult(null);
-                    setCurrentThrow(0);
-                    setExpandedLines(new Set());
-                    setShowChangedHexagram(false);
-                  }}
+                  onClick={reset}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
