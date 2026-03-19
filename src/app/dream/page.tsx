@@ -503,8 +503,32 @@ export default function DreamInterpretPage() {
             </Card>
           )}
 
+          {/* AI解析中状态 */}
+          {isLoading && !parsedResult && (
+            <div ref={resultRef}>
+              <Card className="bg-white/10 backdrop-blur-md border-indigo-300/30 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-indigo-100 text-center flex items-center justify-center">
+                    <Moon className="w-6 h-6 mr-2" />
+                    梦境解析
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="relative">
+                      <Moon className="w-16 h-16 text-indigo-400 animate-pulse" />
+                      <Sparkles className="w-6 h-6 text-purple-400 absolute -top-1 -right-1 animate-spin" />
+                    </div>
+                    <p className="text-xl text-indigo-200 mt-6 animate-pulse">正在解析梦境...</p>
+                    <p className="text-sm text-indigo-300/60 mt-2">请稍候，大师正在为您解梦</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* AI解析结果 */}
-          {(aiResult || parsedResult) && (
+          {parsedResult && !isLoading && (
             <div ref={resultRef}>
               <Card className="bg-white/10 backdrop-blur-md border-indigo-300/30 mb-6">
                 <CardHeader>
@@ -514,95 +538,85 @@ export default function DreamInterpretPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {parsedResult ? (
-                    <>
-                      {/* 梦境概括 */}
-                      <div className="text-center">
-                        <p className="text-xl text-indigo-100">{parsedResult.summary}</p>
-                      </div>
+                  {/* 梦境概括 */}
+                  <div className="text-center">
+                    <p className="text-xl text-indigo-100">{parsedResult.summary}</p>
+                  </div>
 
-                      {/* 梦境符号 */}
-                      {parsedResult.symbols && parsedResult.symbols.length > 0 && (
-                        <div className="bg-indigo-950/60 rounded-lg p-6">
-                          <h4 className="text-sm font-bold text-indigo-100 mb-4 flex items-center">
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            梦境符号解析
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {parsedResult.symbols.map((s, i) => (
-                              <div key={i} className="bg-indigo-900/40 rounded-lg p-3 flex items-start gap-2">
-                                <ChevronRight className="w-4 h-4 text-indigo-400 mt-1 flex-shrink-0" />
-                                <div>
-                                  <span className="font-bold text-indigo-100">{s.symbol}</span>
-                                  <span className="text-indigo-200/80 ml-2">{s.meaning}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 详细解析 */}
-                      <div className="bg-indigo-950/60 rounded-lg p-6">
-                        <h4 className="text-sm font-bold text-indigo-100 mb-3 flex items-center">
-                          <Moon className="w-4 h-4 mr-2" />
-                          详细解析
-                        </h4>
-                        <p className="text-indigo-100 leading-relaxed">{parsedResult.interpretation}</p>
-                      </div>
-
-                      {/* 心理学分析 */}
-                      {parsedResult.psychology && (
-                        <div className="bg-indigo-950/40 rounded-lg p-6 border border-indigo-400/20">
-                          <h4 className="text-sm font-bold text-indigo-300 mb-3">🧠 心理学视角</h4>
-                          <p className="text-indigo-100/90 leading-relaxed">{parsedResult.psychology}</p>
-                        </div>
-                      )}
-
-                      {/* 运势预测 */}
-                      {parsedResult.fortune && (
-                        <div className="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 rounded-lg p-6 border border-indigo-400/30">
-                          <h4 className="text-sm font-bold text-indigo-100 mb-4 text-center">运势预测</h4>
-                          <div className="grid grid-cols-5 gap-2 text-center">
-                            <div>
-                              <div className={`text-lg font-bold ${getFortuneColor(parsedResult.fortune.overall)}`}>
-                                {parsedResult.fortune.overall}
-                              </div>
-                              <div className="text-xs text-indigo-300/60">整体</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-indigo-100">{parsedResult.fortune.career}</div>
-                              <div className="text-xs text-indigo-300/60">事业</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-indigo-100">{parsedResult.fortune.love}</div>
-                              <div className="text-xs text-indigo-300/60">感情</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-indigo-100">{parsedResult.fortune.wealth}</div>
-                              <div className="text-xs text-indigo-300/60">财运</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-indigo-100">{parsedResult.fortune.health}</div>
-                              <div className="text-xs text-indigo-300/60">健康</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 建议 */}
-                      {parsedResult.advice && (
-                        <div className="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 rounded-lg p-6 border border-indigo-400/30">
-                          <h4 className="text-sm font-bold text-indigo-100 mb-3">💡 温馨建议</h4>
-                          <p className="text-indigo-100 leading-relaxed">{parsedResult.advice}</p>
-                        </div>
-                      )}
-                    </>
-                  ) : (
+                  {/* 梦境符号 */}
+                  {parsedResult.symbols && parsedResult.symbols.length > 0 && (
                     <div className="bg-indigo-950/60 rounded-lg p-6">
-                      <pre className="text-indigo-100 leading-relaxed whitespace-pre-wrap font-sans">
-                        {aiResult}
-                      </pre>
+                      <h4 className="text-sm font-bold text-indigo-100 mb-4 flex items-center">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        梦境符号解析
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {parsedResult.symbols.map((s, i) => (
+                          <div key={i} className="bg-indigo-900/40 rounded-lg p-3 flex items-start gap-2">
+                            <ChevronRight className="w-4 h-4 text-indigo-400 mt-1 flex-shrink-0" />
+                            <div>
+                              <span className="font-bold text-indigo-100">{s.symbol}</span>
+                              <span className="text-indigo-200/80 ml-2">{s.meaning}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 详细解析 */}
+                  <div className="bg-indigo-950/60 rounded-lg p-6">
+                    <h4 className="text-sm font-bold text-indigo-100 mb-3 flex items-center">
+                      <Moon className="w-4 h-4 mr-2" />
+                      详细解析
+                    </h4>
+                    <p className="text-indigo-100 leading-relaxed">{parsedResult.interpretation}</p>
+                  </div>
+
+                  {/* 心理学分析 */}
+                  {parsedResult.psychology && (
+                    <div className="bg-indigo-950/40 rounded-lg p-6 border border-indigo-400/20">
+                      <h4 className="text-sm font-bold text-indigo-300 mb-3">心理学视角</h4>
+                      <p className="text-indigo-100/90 leading-relaxed">{parsedResult.psychology}</p>
+                    </div>
+                  )}
+
+                  {/* 运势预测 */}
+                  {parsedResult.fortune && (
+                    <div className="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 rounded-lg p-6 border border-indigo-400/30">
+                      <h4 className="text-sm font-bold text-indigo-100 mb-4 text-center">运势预测</h4>
+                      <div className="grid grid-cols-5 gap-2 text-center">
+                        <div>
+                          <div className={`text-lg font-bold ${getFortuneColor(parsedResult.fortune.overall)}`}>
+                            {parsedResult.fortune.overall}
+                          </div>
+                          <div className="text-xs text-indigo-300/60">整体</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-indigo-100">{parsedResult.fortune.career}</div>
+                          <div className="text-xs text-indigo-300/60">事业</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-indigo-100">{parsedResult.fortune.love}</div>
+                          <div className="text-xs text-indigo-300/60">感情</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-indigo-100">{parsedResult.fortune.wealth}</div>
+                          <div className="text-xs text-indigo-300/60">财运</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-indigo-100">{parsedResult.fortune.health}</div>
+                          <div className="text-xs text-indigo-300/60">健康</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 建议 */}
+                  {parsedResult.advice && (
+                    <div className="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 rounded-lg p-6 border border-indigo-400/30">
+                      <h4 className="text-sm font-bold text-indigo-100 mb-3">温馨建议</h4>
+                      <p className="text-indigo-100 leading-relaxed">{parsedResult.advice}</p>
                     </div>
                   )}
 
