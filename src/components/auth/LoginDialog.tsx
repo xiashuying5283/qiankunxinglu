@@ -181,43 +181,6 @@ export function LoginDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        {/* 第三方登录按钮 */}
-        {showOAuth && (
-          <div className="space-y-3">
-            {oauthStatus.google && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleOAuthLogin('google')}
-                disabled={isOAuthLoading}
-              >
-                <GoogleIcon className="w-5 h-5 mr-2" />
-                使用 Google 登录
-              </Button>
-            )}
-            {oauthStatus.github && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleOAuthLogin('github')}
-                disabled={isOAuthLoading}
-              >
-                <GitHubIcon className="w-5 h-5 mr-2" />
-                使用 GitHub 登录
-              </Button>
-            )}
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">或者使用邮箱</span>
-              </div>
-            </div>
-          </div>
-        )}
-
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'register'); setError(''); }}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">登录</TabsTrigger>
@@ -336,6 +299,45 @@ export function LoginDialog({
             </form>
           </TabsContent>
         </Tabs>
+
+        {/* 第三方登录按钮 - 放在账号密码登录之后 */}
+        {showOAuth && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">或者使用第三方登录</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {oauthStatus.google && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleOAuthLogin('google')}
+                  disabled={isOAuthLoading}
+                >
+                  <GoogleIcon className="w-5 h-5 mr-2" />
+                  使用 Google 登录
+                </Button>
+              )}
+              {oauthStatus.github && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleOAuthLogin('github')}
+                  disabled={isOAuthLoading}
+                >
+                  <GitHubIcon className="w-5 h-5 mr-2" />
+                  使用 GitHub 登录
+                </Button>
+              )}
+            </div>
+          </>
+        )}
 
         {/* 游客登录 */}
         <div className="relative mt-4">
