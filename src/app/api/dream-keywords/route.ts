@@ -1,10 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { dreamKeywordsData, categories, DreamKeywordData } from '@/lib/dream-keywords-data';
+import { withCache, clearCache } from '@/lib/cache';
+
+// 缓存键
+const CACHE_KEY = 'dream_keywords_data';
+// 缓存时间：15分钟
+const CACHE_TTL = 15 * 60 * 1000;
+
+// 获取所有关键词数据（带缓存）
+async function getAllKeywords() {
+  return withCache(CACHE_KEY, async () => {
+    const client = getSupabaseClient();
+    const { data, error } = await client
+      .from('dream_keywords')
+      .select('*')
+      .order('category')
+      .order('keyword');
+    
+    if (error) throw error;
+    return data || [];
+  }, CACHE_TTL);
+}
 
 /**
  * 初始化梦境关键词数据
- * POST /api/dream-keywords/init
+ * POST /api/dream-keywords
  */
 export async function POST() {
   try {
@@ -47,6 +68,9 @@ export async function POST() {
       }
       insertedCount += batch.length;
     }
+
+    // 清除缓存
+    clearCache(CACHE_KEY);
 
     return NextResponse.json({
       success: true,
@@ -107,65 +131,33 @@ export async function GET(request: NextRequest) {
 
     // 按分类获取
     if (categoryQuery) {
-      const { data, error } = await client
-        .from('dream_keywords')
-        .select('*')
-        .eq('category', categoryQuery)
-        .order('keyword');
-
-      if (error) {
-        return NextResponse.json({
-          success: false,
-          message: '查询失败',
-          error: error.message
-        }, { status: 500 });
-      }
+      const allKeywords = await getAllKeywords();
+      const filtered = allKeywords.filter(k => k.category === categoryQuery);
 
       return NextResponse.json({
         success: true,
         category: categoryQuery,
-        data
+        data: filtered
       });
     }
 
     // 搜索关键词
     if (searchQuery) {
-      const { data, error } = await client
-        .from('dream_keywords')
-        .select('*')
-        .or(`keyword.ilike.%${searchQuery}%,meaning.ilike.%${searchQuery}%`)
-        .order('keyword')
-        .limit(20);
-
-      if (error) {
-        return NextResponse.json({
-          success: false,
-          message: '搜索失败',
-          error: error.message
-        }, { status: 500 });
-      }
+      const allKeywords = await getAllKeywords();
+      const filtered = allKeywords.filter(k => 
+        k.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        k.meaning.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 20);
 
       return NextResponse.json({
         success: true,
         query: searchQuery,
-        data
+        data: filtered
       });
     }
 
     // 获取所有关键词
-    const { data, error } = await client
-      .from('dream_keywords')
-      .select('*')
-      .order('category')
-      .order('keyword');
-
-    if (error) {
-      return NextResponse.json({
-        success: false,
-        message: '获取失败',
-        error: error.message
-      }, { status: 500 });
-    }
+    const data = await getAllKeywords();
 
     // 按分类整理
     const groupedData: Record<string, DreamKeywordData[]> = {};
@@ -173,7 +165,7 @@ export async function GET(request: NextRequest) {
       groupedData[cat] = [];
     });
     
-    data?.forEach(item => {
+    data.forEach(item => {
       if (groupedData[item.category]) {
         groupedData[item.category].push({
           keyword: item.keyword,
@@ -186,7 +178,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      count: data?.length || 0,
+      count: data.length,
       categories,
       data: groupedData
     });
@@ -195,6 +187,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       message: '获取失败',
+      needsInit: true,
       error: String(error)
     }, { status: 500 });
   }

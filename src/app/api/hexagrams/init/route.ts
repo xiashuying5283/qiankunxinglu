@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { hexagrams as hexagramsSource, trigrams as trigramsSource, type LineText } from '@/lib/hexagram-data';
+import { clearCache } from '@/lib/cache';
+
+// 缓存键（与 route.ts 保持一致）
+const CACHE_KEY = 'hexagrams_data';
 
 export async function POST() {
   try {
@@ -64,6 +68,9 @@ export async function POST() {
       }
     }
 
+    // 清除缓存，确保下次请求获取最新数据
+    clearCache(CACHE_KEY);
+
     return NextResponse.json({ 
       success: true,
       message: '数据初始化成功',
@@ -83,6 +90,9 @@ export async function DELETE() {
     // 清空数据（按依赖顺序删除）
     await client.from('hexagrams').delete().neq('id', 0);
     await client.from('trigrams').delete().neq('id', 0);
+    
+    // 清除缓存
+    clearCache(CACHE_KEY);
     
     return NextResponse.json({ 
       success: true,
