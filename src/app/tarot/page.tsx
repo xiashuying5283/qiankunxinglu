@@ -121,6 +121,32 @@ export default function TarotPage() {
     loadCards();
   }, []);
 
+  // 保存占卜记录
+  const saveDivinationRecord = async (cards: DrawnCard[], interpretation: string) => {
+    try {
+      await fetch('/api/divination/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'tarot',
+          question: question || null,
+          result: {
+            spreadType,
+            spreadName: spreadNames[spreadType],
+            cards: cards.map((dc, index) => ({
+              name: dc.card.name,
+              isReversed: dc.isReversed,
+              position: spreadPositions[spreadType][index]
+            }))
+          },
+          aiInterpretation: interpretation,
+        }),
+      });
+    } catch (error) {
+      console.error('保存占卜记录失败:', error);
+    }
+  };
+
   // 流式AI解读
   const streamInterpretation = async (cards: DrawnCard[]) => {
     setIsInterpreting(true);
@@ -180,6 +206,9 @@ export default function TarotPage() {
           }
         }
       }
+      
+      // 保存占卜记录
+      await saveDivinationRecord(cards, fullText);
     } catch (error) {
       console.error('Interpretation error:', error);
       setAiInterpretation('AI解读生成失败，请稍后重试');

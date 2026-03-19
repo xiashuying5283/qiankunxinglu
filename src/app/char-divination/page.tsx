@@ -185,6 +185,46 @@ export default function CharDivinationPage() {
     });
     setExpandedLines(new Set());
     setShowChangedHexagram(false);
+    
+    // 保存占卜记录
+    saveDivinationRecord({
+      char,
+      strokes,
+      decomposition,
+      hexagram,
+      changedHexagram,
+      upperTrigram,
+      lowerTrigram,
+      changingLine,
+      upperStrokes,
+      lowerStrokes,
+      timeStrokes: timeNum,
+    });
+  };
+
+  // 保存占卜记录
+  const saveDivinationRecord = async (divinationResult: DivinationResult) => {
+    try {
+      await fetch('/api/divination/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'char',
+          question: null,
+          result: {
+            char: divinationResult.char,
+            strokes: divinationResult.strokes,
+            hexagramName: divinationResult.hexagram.name,
+            hexagramNumber: divinationResult.hexagram.number,
+            changingLine: divinationResult.changingLine,
+            changedHexagramName: divinationResult.changedHexagram?.name,
+          },
+          aiInterpretation: divinationResult.hexagram.judgement,
+        }),
+      });
+    } catch (error) {
+      console.error('保存占卜记录失败:', error);
+    }
   };
 
   // 切换爻辞展开状态

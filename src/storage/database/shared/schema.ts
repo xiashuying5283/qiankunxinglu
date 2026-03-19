@@ -124,3 +124,24 @@ export const matchRecords = pgTable("match_records", {
 	index("match_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
 	index("match_records_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
 ]);
+
+// 统一占卜记录表（周易、塔罗、观音灵签、测字、梅花易数等）
+export const divinationRecords = pgTable("divination_records", {
+	id: serial().notNull(),
+	userId: varchar("user_id", { length: 36 }),
+	sessionId: varchar("session_id", { length: 100 }).notNull(),
+	// 占卜类型: iching(周易), tarot(塔罗), fortune_stick(观音灵签), char(测字), plum_blossom(梅花易数)
+	type: varchar({ length: 20 }).notNull(),
+	// 问题/输入
+	question: text(),
+	// 占卜结果（JSON格式，根据类型不同结构不同）
+	result: jsonb().notNull(),
+	// AI解读
+	aiInterpretation: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("divination_records_type_idx").using("btree", table.type.asc().nullsLast().op("text_ops")),
+	index("divination_records_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("divination_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
+	index("divination_records_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+]);

@@ -40,6 +40,30 @@ export default function FortuneStickPage() {
   const [shakeOffset, setShakeOffset] = useState(0);
   const [stickNumber, setStickNumber] = useState<number | null>(null);
 
+  // 保存占卜记录
+  const saveDivinationRecord = async (stick: FortuneStick) => {
+    try {
+      await fetch('/api/divination/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'fortune_stick',
+          question: null,
+          result: {
+            number: stick.number,
+            title: stick.title,
+            level: stick.level,
+            poem: stick.poem,
+            meaning: stick.meaning,
+          },
+          aiInterpretation: stick.meaning,
+        }),
+      });
+    } catch (error) {
+      console.error('保存占卜记录失败:', error);
+    }
+  };
+
   // 检查数据库是否已初始化
   useEffect(() => {
     const checkInit = async () => {
@@ -94,6 +118,9 @@ export default function FortuneStickPage() {
         setResult(data.data);
         setIsDrawing(false);
         setTimeout(() => setShowResult(true), 100);
+        
+        // 保存占卜记录
+        await saveDivinationRecord(data.data);
       }
     } catch (error) {
       console.error('抽签失败:', error);

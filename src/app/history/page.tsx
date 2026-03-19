@@ -3,14 +3,26 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, History, Moon, Heart, Clock, Trash2, ChevronRight, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ArrowLeft, History, Moon, Heart, Clock, Trash2, ChevronRight, Loader2, BookOpen, Star, Scroll, PenTool, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { LoginDialog } from '@/components/auth/LoginDialog';
+
+interface DivinationRecord {
+  id: number;
+  type: 'iching' | 'tarot' | 'fortune_stick' | 'char' | 'plum_blossom';
+  category: 'divination';
+  title: string;
+  question: string | null;
+  result: { [key: string]: unknown };
+  aiInterpretation: string | null;
+  createdAt: string;
+}
 
 interface DreamRecord {
   id: number;
   type: 'dream';
+  category: 'dream';
   title: string;
   content: string;
   interpretation: string;
@@ -20,6 +32,7 @@ interface DreamRecord {
 interface MatchRecord {
   id: number;
   type: 'match';
+  category: 'match';
   title: string;
   score: number;
   level: string;
@@ -30,22 +43,19 @@ interface MatchRecord {
   };
   baziMatch: {
     score: number;
-    dayPillarRelation: string;
-    wuxingComplement: string;
-    description: string;
   };
   aiInterpretation: string | null;
   createdAt: string;
 }
 
-type Record = DreamRecord | MatchRecord;
+type Record = DivinationRecord | DreamRecord | MatchRecord;
 
 export default function HistoryPage() {
   const [records, setRecords] = useState<Record[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [expandedRecord, setExpandedRecord] = useState<number | null>(null);
+  const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadRecords();
@@ -80,11 +90,14 @@ export default function HistoryPage() {
     }
   };
 
-  const deleteRecord = async (id: number, type: 'dream' | 'match') => {
+  const deleteRecord = async (id: number, type: string) => {
     if (!confirm('确定要删除这条记录吗？')) return;
 
     try {
-      const endpoint = type === 'dream' ? '/api/dream/records' : '/api/match/records';
+      let endpoint = '/api/divination/records';
+      if (type === 'dream') endpoint = '/api/dream/records';
+      else if (type === 'match') endpoint = '/api/match/records';
+      
       const res = await fetch(`${endpoint}?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       
@@ -106,10 +119,89 @@ export default function HistoryPage() {
     });
   };
 
-  const getTypeInfo = (type: 'dream' | 'match') => {
-    return type === 'dream' 
-      ? { icon: <Moon className="w-5 h-5" />, label: '解梦', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' }
-      : { icon: <Heart className="w-5 h-5" />, label: '姻缘', color: 'text-rose-400', bgColor: 'bg-rose-500/20' };
+  const getTypeInfo = (type: string) => {
+    switch (type) {
+      case 'iching':
+        return { icon: <BookOpen className="w-5 h-5" />, label: '周易占卜', color: 'text-amber-400', bgColor: 'bg-amber-500/20' };
+      case 'tarot':
+        return { icon: <Star className="w-5 h-5" />, label: '塔罗占卜', color: 'text-purple-400', bgColor: 'bg-purple-500/20' };
+      case 'fortune_stick':
+        return { icon: <Scroll className="w-5 h-5" />, label: '观音灵签', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' };
+      case 'char':
+        return { icon: <PenTool className="w-5 h-5" />, label: '测字算卦', color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' };
+      case 'plum_blossom':
+        return { icon: <Sparkles className="w-5 h-5" />, label: '梅花易数', color: 'text-pink-400', bgColor: 'bg-pink-500/20' };
+      case 'dream':
+        return { icon: <Moon className="w-5 h-5" />, label: '周公解梦', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' };
+      case 'match':
+        return { icon: <Heart className="w-5 h-5" />, label: '姻缘匹配', color: 'text-rose-400', bgColor: 'bg-rose-500/20' };
+      default:
+        return { icon: <History className="w-5 h-5" />, label: '占卜记录', color: 'text-gray-400', bgColor: 'bg-gray-500/20' };
+    }
+  };
+
+  const renderExpandedContent = (record: Record) => {
+    if (record.type === 'dream') {
+      return (
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-bold text-purple-200 mb-2">梦境内容</h4>
+            <p className="text-purple-100/90 leading-relaxed">{record.content}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-purple-200 mb-2">解读结果</h4>
+            <div className="bg-purple-950/40 rounded-lg p-4 text-purple-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+              {record.interpretation}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (record.type === 'match') {
+      return (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-rose-950/30 rounded-lg p-3">
+              <div className="text-sm text-rose-200/60 mb-1">生肖配对</div>
+              <div className="text-rose-100">{record.shengxiaoMatch.relation} - {record.shengxiaoMatch.score}分</div>
+            </div>
+            <div className="bg-rose-950/30 rounded-lg p-3">
+              <div className="text-sm text-rose-200/60 mb-1">八字配对</div>
+              <div className="text-rose-100">{record.baziMatch.score}分</div>
+            </div>
+          </div>
+          {record.aiInterpretation && (
+            <div>
+              <h4 className="text-sm font-bold text-rose-200 mb-2">AI解读</h4>
+              <div className="bg-rose-950/40 rounded-lg p-4 text-rose-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+                {record.aiInterpretation}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 占卜记录
+    return (
+      <div className="space-y-4">
+        {record.question && (
+          <div>
+            <h4 className="text-sm font-bold text-purple-200 mb-2">问题</h4>
+            <p className="text-purple-100/90">{record.question}</p>
+          </div>
+        )}
+        {record.aiInterpretation && (
+          <div>
+            <h4 className="text-sm font-bold text-purple-200 mb-2">AI解读</h4>
+            <div className="bg-purple-950/40 rounded-lg p-4 text-purple-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+              {record.aiInterpretation}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -139,7 +231,7 @@ export default function HistoryPage() {
             <h1 className="text-4xl font-bold text-white">历史记录</h1>
             <History className="w-10 h-10 text-purple-300 ml-3" />
           </div>
-          <p className="text-purple-200/80">查看您的占卜和解梦记录</p>
+          <p className="text-purple-200/80">查看您的所有占卜记录</p>
         </div>
 
         {/* 内容区域 */}
@@ -181,21 +273,22 @@ export default function HistoryPage() {
             <div className="space-y-4">
               {records.map((record) => {
                 const typeInfo = getTypeInfo(record.type);
-                const isExpanded = expandedRecord === record.id;
+                const recordKey = `${record.type}-${record.id}`;
+                const isExpanded = expandedRecord === recordKey;
                 
                 return (
                   <Card 
-                    key={`${record.type}-${record.id}`} 
+                    key={recordKey} 
                     className="bg-white/10 backdrop-blur-md border-purple-300/30 overflow-hidden"
                   >
-                    <CardHeader className="cursor-pointer" onClick={() => setExpandedRecord(isExpanded ? null : record.id)}>
+                    <CardHeader className="cursor-pointer" onClick={() => setExpandedRecord(isExpanded ? null : recordKey)}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`p-2 rounded-lg ${typeInfo.bgColor}`}>
                             <span className={typeInfo.color}>{typeInfo.icon}</span>
                           </div>
                           <div>
-                            <CardTitle className="text-lg text-white">{record.title}</CardTitle>
+                            <h3 className="text-lg text-white font-medium">{record.title}</h3>
                             <div className="flex items-center gap-3 mt-1">
                               <span className={`text-xs px-2 py-0.5 rounded ${typeInfo.bgColor} ${typeInfo.color}`}>
                                 {typeInfo.label}
@@ -229,41 +322,7 @@ export default function HistoryPage() {
                     
                     {isExpanded && (
                       <CardContent className="border-t border-purple-300/20 pt-4">
-                        {record.type === 'dream' ? (
-                          <div className="space-y-4">
-                            <div>
-                              <h4 className="text-sm font-bold text-purple-200 mb-2">梦境内容</h4>
-                              <p className="text-purple-100/90 leading-relaxed">{record.content}</p>
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-bold text-purple-200 mb-2">解读结果</h4>
-                              <div className="bg-purple-950/40 rounded-lg p-4 text-purple-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
-                                {record.interpretation}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="bg-rose-950/30 rounded-lg p-3">
-                                <div className="text-sm text-rose-200/60 mb-1">生肖配对</div>
-                                <div className="text-rose-100">{record.shengxiaoMatch.relation} - {record.shengxiaoMatch.score}分</div>
-                              </div>
-                              <div className="bg-rose-950/30 rounded-lg p-3">
-                                <div className="text-sm text-rose-200/60 mb-1">八字配对</div>
-                                <div className="text-rose-100">{record.baziMatch.score}分</div>
-                              </div>
-                            </div>
-                            {record.aiInterpretation && (
-                              <div>
-                                <h4 className="text-sm font-bold text-rose-200 mb-2">AI解读</h4>
-                                <div className="bg-rose-950/40 rounded-lg p-4 text-rose-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
-                                  {record.aiInterpretation}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {renderExpandedContent(record)}
                       </CardContent>
                     )}
                   </Card>

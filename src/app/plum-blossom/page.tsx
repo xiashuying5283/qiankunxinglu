@@ -156,6 +156,20 @@ export default function PlumBlossomPage() {
       },
     });
     setExpandedLines(new Set());
+    
+    // 保存占卜记录
+    saveDivinationRecord({
+      upperTrigram,
+      lowerTrigram,
+      hexagram,
+      changingLine,
+      method: `时间起卦：${year}年${month}月${day}日${hour}时`,
+      numbers: {
+        upper: upperNum === 0 ? 8 : upperNum,
+        lower: lowerNum === 0 ? 8 : lowerNum,
+        change: changingLine,
+      },
+    });
   };
 
   // 数字起卦（三个数字）
@@ -195,6 +209,20 @@ export default function PlumBlossomPage() {
       },
     });
     setExpandedLines(new Set());
+    
+    // 保存占卜记录
+    saveDivinationRecord({
+      upperTrigram,
+      lowerTrigram,
+      hexagram,
+      changingLine,
+      method: `数字起卦：${num1}、${num2}、${num3}`,
+      numbers: {
+        upper: upperNum === 0 ? 8 : upperNum,
+        lower: lowerNum === 0 ? 8 : lowerNum,
+        change: changingLine,
+      },
+    });
   };
 
   // 随机起卦
@@ -222,6 +250,51 @@ export default function PlumBlossomPage() {
       },
     });
     setExpandedLines(new Set());
+    
+    // 保存占卜记录
+    saveDivinationRecord({
+      upperTrigram,
+      lowerTrigram,
+      hexagram,
+      changingLine,
+      method: '随机起卦',
+      numbers: {
+        upper: upperNum,
+        lower: lowerNum,
+        change: changingLine,
+      },
+    });
+  };
+
+  // 保存占卜记录
+  const saveDivinationRecord = async (divinationResult: {
+    upperTrigram: TrigramData;
+    lowerTrigram: TrigramData;
+    hexagram: HexagramData;
+    changingLine: number;
+    method: string;
+    numbers?: { upper: number; lower: number; change: number };
+  }) => {
+    try {
+      await fetch('/api/divination/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'plum_blossom',
+          question: null,
+          result: {
+            hexagramName: divinationResult.hexagram.name,
+            hexagramNumber: divinationResult.hexagram.number,
+            changingLine: divinationResult.changingLine,
+            method: divinationResult.method,
+            numbers: divinationResult.numbers,
+          },
+          aiInterpretation: divinationResult.hexagram.judgement,
+        }),
+      });
+    } catch (error) {
+      console.error('保存占卜记录失败:', error);
+    }
   };
 
   // 切换爻辞展开状态

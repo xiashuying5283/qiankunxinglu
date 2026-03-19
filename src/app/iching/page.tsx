@@ -158,6 +158,32 @@ export default function IChingPage() {
     return found || hexagrams[0];
   };
 
+  // 保存占卜记录
+  const saveDivinationRecord = async (divinationResult: DivinationResult, interpretation: string) => {
+    try {
+      await fetch('/api/divination/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'iching',
+          question: question || null,
+          result: {
+            originalHexagramName: divinationResult.originalHexagram.name,
+            originalHexagramNumber: divinationResult.originalHexagram.number,
+            originalHexagramSymbol: divinationResult.originalHexagram.symbol,
+            changedHexagramName: divinationResult.changedHexagram?.name || null,
+            changedHexagramNumber: divinationResult.changedHexagram?.number || null,
+            changingLines: divinationResult.changingLines,
+            coinThrows: divinationResult.coinThrows,
+          },
+          aiInterpretation: interpretation,
+        }),
+      });
+    } catch (error) {
+      console.error('保存占卜记录失败:', error);
+    }
+  };
+
   // 流式AI解读
   const streamInterpretation = async (divinationResult: DivinationResult) => {
     setIsInterpreting(true);
@@ -215,6 +241,9 @@ export default function IChingPage() {
           }
         }
       }
+      
+      // 保存占卜记录
+      await saveDivinationRecord(divinationResult, fullText);
     } catch (error) {
       console.error('Interpretation error:', error);
       setAiInterpretation('AI解读生成失败，请稍后重试');
