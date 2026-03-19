@@ -89,8 +89,8 @@ interface HuangLi {
   xingSu: string;
   erShiBaXiu: string;
   naYin: string;
-  suiPo: string;
-  yuePo: string;
+  jiShen: string[];
+  xiongSha: string[];
 }
 
 // 根据日期生成伪随机数（用于运势部分，保持一致性）
@@ -118,15 +118,26 @@ const generateHuangLi = (date: Date): HuangLi => {
   const yi = lunar.getDayYi();
   const ji = lunar.getDayJi();
   
-  // 吉时凶时
-  const jiShi = lunar.getDayJiShi().map(s => s.getMinHm().substring(0, 2) + ':' + s.getMaxHm().substring(0, 2) + ' ' + s.getNameInGanZhi() + '时');
-  const xiongShi = lunar.getDayXiongShi().map(s => s.getMinHm().substring(0, 2) + ':' + s.getMaxHm().substring(0, 2) + ' ' + s.getNameInGanZhi() + '时');
+  // 吉时凶时（根据黄道黑道判断）
+  const times = lunar.getTimes();
+  const jiShi: string[] = [];
+  const xiongShi: string[] = [];
+  times.forEach(t => {
+    const timeStr = t.getMinHm() + '-' + t.getMaxHm();
+    const ganZhi = t.getGanZhi() + '时';
+    const tianShenType = t.getTianShenType(); // 黄道或黑道
+    if (tianShenType === '黄道') {
+      jiShi.push(timeStr + ' ' + ganZhi);
+    } else {
+      xiongShi.push(timeStr + ' ' + ganZhi);
+    }
+  });
   
   // 值神（青龙、明堂等十二值神）
   const zhiShen = lunar.getZhiXing();
   
   // 冲煞
-  const chong = lunar.getDayChong() + '(' + lunar.getDayChongGanZhi() + ')';
+  const chong = '冲' + lunar.getDayChongShengXiao() + lunar.getDayChongDesc();
   const sha = lunar.getDaySha();
   
   // 彭祖百忌
@@ -134,14 +145,14 @@ const generateHuangLi = (date: Date): HuangLi => {
   const pengZuZhi = lunar.getPengZuZhi();
   
   // 胎神
-  const taiShen = lunar.getDayTaiShen();
+  const taiShen = lunar.getDayPositionTai();
   
   // 方位神煞
-  const fuShen = lunar.getFuShen();
-  const caiShen = lunar.getCaiShen();
-  const xiShen = lunar.getXiShen();
-  const yangGui = lunar.getYangGui();
-  const taiYang = lunar.getTaiYang();
+  const fuShen = lunar.getDayPositionFuDesc();
+  const caiShen = lunar.getDayPositionCaiDesc();
+  const xiShen = lunar.getDayPositionXiDesc();
+  const yangGui = lunar.getDayPositionYangGuiDesc();
+  const taiYang = yangGui; // 用阳贵代替
   
   // 节气
   const jieQi = lunar.getPrevJieQi()?.getName() || '';
@@ -158,9 +169,9 @@ const generateHuangLi = (date: Date): HuangLi => {
   // 纳音
   const naYin = lunar.getYearNaYin() + ' ' + lunar.getMonthNaYin() + ' ' + lunar.getDayNaYin();
   
-  // 岁破、月破
-  const suiPo = lunar.getYearPo();
-  const yuePo = lunar.getMonthPo();
+  // 吉神凶煞
+  const jiShen = lunar.getDayJiShen();
+  const xiongSha = lunar.getDayXiongSha();
   
   return {
     dateStr: `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`,
@@ -191,8 +202,8 @@ const generateHuangLi = (date: Date): HuangLi => {
     xingSu,
     erShiBaXiu,
     naYin,
-    suiPo,
-    yuePo,
+    jiShen,
+    xiongSha,
   };
 };
 

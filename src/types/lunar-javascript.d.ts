@@ -8,10 +8,15 @@ declare module 'lunar-javascript' {
     getLunar(): Lunar;
   }
 
-  export interface JiShi {
+  export class LunarTime {
+    getGan(): string;
+    getZhi(): string;
+    getGanZhi(): string;
     getMinHm(): string;
     getMaxHm(): string;
-    getNameInGanZhi(): string;
+    getTianShenType(): string;
+    getYi(): string[];
+    getJi(): string[];
   }
 
   export class Lunar {
@@ -30,25 +35,24 @@ declare module 'lunar-javascript' {
     getDayNaYin(): string;
     getZhiXing(): string;
     getDayChong(): string;
-    getDayChongGanZhi(): string;
+    getDayChongShengXiao(): string;
+    getDayChongDesc(): string;
     getDaySha(): string;
     getDayYi(): string[];
     getDayJi(): string[];
-    getDayJiShi(): JiShi[];
-    getDayXiongShi(): JiShi[];
+    getTimes(): LunarTime[];
     getPengZuGan(): string;
     getPengZuZhi(): string;
-    getDayTaiShen(): string;
-    getFuShen(): string;
-    getCaiShen(): string;
-    getXiShen(): string;
-    getYangGui(): string;
-    getTaiYang(): string;
+    getDayPositionTai(): string;
+    getDayPositionFuDesc(): string;
+    getDayPositionCaiDesc(): string;
+    getDayPositionXiDesc(): string;
+    getDayPositionYangGuiDesc(): string;
     getPrevJieQi(): { getName(): string } | null;
     getXiu(): string;
     getXiuSong(): string;
-    getYearPo(): string;
-    getMonthPo(): string;
+    getDayJiShen(): string[];
+    getDayXiongSha(): string[];
   }
 
   export const LunarUtil: {
