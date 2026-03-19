@@ -53,6 +53,13 @@ interface OAuthStatus {
   github: boolean;
 }
 
+interface LastOAuthAccount {
+  provider: 'google' | 'github';
+  name: string;
+  email?: string;
+  avatar?: string;
+}
+
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,6 +67,8 @@ interface LoginDialogProps {
   description?: string;
   onLoginSuccess?: () => void;
 }
+
+const LAST_OAUTH_ACCOUNT_KEY = 'last_oauth_account';
 
 export function LoginDialog({
   open,
@@ -78,6 +87,9 @@ export function LoginDialog({
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGuestLoading, setIsGuestLoading] = useState(false);
+  
+  // 上次 OAuth 登录的账号信息
+  const [lastOAuthAccount, setLastOAuthAccount] = useState<LastOAuthAccount | null>(null);
 
   // 验证码状态
   const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -102,6 +114,15 @@ export function LoginDialog({
 
     if (open) {
       fetchOAuthStatus();
+      // 读取上次 OAuth 登录的账号信息
+      try {
+        const stored = localStorage.getItem(LAST_OAUTH_ACCOUNT_KEY);
+        if (stored) {
+          setLastOAuthAccount(JSON.parse(stored));
+        }
+      } catch (e) {
+        // ignore
+      }
     }
   }, [open]);
 
@@ -279,26 +300,44 @@ export function LoginDialog({
               </div>
             </div>
             
-            <p className="text-center text-lg font-medium mb-6">验证通过</p>
+            <p className="text-center text-lg font-medium mb-2">验证通过</p>
             
             {/* OAuth 登录确认 */}
             {pendingAction === 'oauth' && pendingOAuthProvider && (
               <div className="space-y-4">
-                <div className="p-4 rounded-lg bg-muted/50 border">
-                  <div className="flex items-center gap-3">
-                    {pendingOAuthProvider === 'google' ? (
-                      <GoogleIcon className="w-10 h-10" />
-                    ) : (
-                      <GitHubIcon className="w-10 h-10" />
-                    )}
-                    <div>
-                      <p className="font-medium">使用 {getOAuthProviderName(pendingOAuthProvider)} 登录</p>
-                      <p className="text-sm text-muted-foreground">
-                        将跳转到 {getOAuthProviderName(pendingOAuthProvider)} 进行授权
-                      </p>
+                {/* 显示上次登录的账号 */}
+                {lastOAuthAccount && lastOAuthAccount.provider === pendingOAuthProvider ? (
+                  <div className="p-4 rounded-lg bg-muted/50 border mb-4">
+                    <p className="text-xs text-muted-foreground mb-2">上次登录的账号</p>
+                    <div className="flex items-center gap-3">
+                      {lastOAuthAccount.avatar ? (
+                        <img 
+                          src={lastOAuthAccount.avatar} 
+                          alt="" 
+                          className="w-10 h-10 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          {pendingOAuthProvider === 'google' ? (
+                            <GoogleIcon className="w-6 h-6" />
+                          ) : (
+                            <GitHubIcon className="w-6 h-6" />
+                          )}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{lastOAuthAccount.name}</p>
+                        {lastOAuthAccount.email && (
+                          <p className="text-sm text-muted-foreground truncate">{lastOAuthAccount.email}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <p className="text-center text-sm text-muted-foreground mb-4">
+                    即将跳转到 {getOAuthProviderName(pendingOAuthProvider)} 进行授权
+                  </p>
+                )}
                 
                 <div className="flex gap-3">
                   <Button 
@@ -313,7 +352,7 @@ export function LoginDialog({
                     onClick={() => triggerOAuthLogin(pendingOAuthProvider)}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    确认登录
+                    确认
                   </Button>
                 </div>
               </div>
