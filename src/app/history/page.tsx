@@ -67,7 +67,7 @@ export default function HistoryPage() {
       const meRes = await fetch('/api/auth/me');
       const meData = await meRes.json();
       
-      if (!meData.success || !meData.user) {
+      if (!meData.user) {
         setIsLoggedIn(false);
         setIsLoading(false);
         setShowLoginDialog(true);
