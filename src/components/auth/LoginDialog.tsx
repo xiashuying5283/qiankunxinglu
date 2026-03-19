@@ -12,7 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, User, Mail, Lock, UserCircle2 } from 'lucide-react';
+import { Loader2, User, Mail, Lock, UserCircle2, ShieldCheck } from 'lucide-react';
+import { SliderCaptcha } from '@/components/ui/slider-captcha';
 
 // Google SVG 图标
 function GoogleIcon({ className }: { className?: string }) {
@@ -78,6 +79,11 @@ export function LoginDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [isGuestLoading, setIsGuestLoading] = useState(false);
 
+  // 验证码状态
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'guest' | null>(null);
+
   // OAuth 状态
   const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ google: false, github: false });
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
@@ -99,14 +105,38 @@ export function LoginDialog({
     }
   }, [open]);
 
-  // 处理登录
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  // 处理验证码验证
+  const handleCaptchaVerify = (success: boolean) => {
+    if (success) {
+      setCaptchaVerified(true);
+      // 执行待处理的操作
+      setTimeout(() => {
+        executePendingAction();
+      }, 500);
+    }
+  };
+
+  // 执行待处理的操作
+  const executePendingAction = async () => {
+    if (!pendingAction) return;
+
+    if (pendingAction === 'login') {
+      await executeLogin();
+    } else if (pendingAction === 'register') {
+      await executeRegister();
+    } else if (pendingAction === 'guest') {
+      await executeGuestLogin();
+    }
+
+    setPendingAction(null);
+    setShowCaptcha(false);
+    setCaptchaVerified(false);
+  };
+
+  // 执行登录
+  const executeLogin = async () => {
     setIsLoading(true);
-
     const result = await login(email, password);
-
     setIsLoading(false);
 
     if (result.success) {
@@ -118,14 +148,10 @@ export function LoginDialog({
     }
   };
 
-  // 处理注册
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  // 执行注册
+  const executeRegister = async () => {
     setIsLoading(true);
-
     const result = await register(email, password, name);
-
     setIsLoading(false);
 
     if (result.success) {
@@ -137,13 +163,10 @@ export function LoginDialog({
     }
   };
 
-  // 处理游客登录
-  const handleGuestLogin = async () => {
-    setError('');
+  // 执行游客登录
+  const executeGuestLogin = async () => {
     setIsGuestLoading(true);
-
     const result = await loginAsGuest();
-
     setIsGuestLoading(false);
 
     if (result.success) {
@@ -155,10 +178,63 @@ export function LoginDialog({
     }
   };
 
-  // 处理第三方登录
+  // 处理登录（显示验证码）
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!captchaVerified) {
+      setPendingAction('login');
+      setShowCaptcha(true);
+      return;
+    }
+
+    await executeLogin();
+  };
+
+  // 处理注册（显示验证码）
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!captchaVerified) {
+      setPendingAction('register');
+      setShowCaptcha(true);
+      return;
+    }
+
+    await executeRegister();
+  };
+
+  // 处理游客登录（显示验证码）
+  const handleGuestLogin = async () => {
+    setError('');
+    
+    if (!captchaVerified) {
+      setPendingAction('guest');
+      setShowCaptcha(true);
+      return;
+    }
+
+    await executeGuestLogin();
+  };
+
+  // 处理第三方登录（需要验证码）
   const handleOAuthLogin = (provider: 'google' | 'github') => {
+    if (!captchaVerified) {
+      setPendingAction(null); // OAuth 不需要等待
+      setShowCaptcha(true);
+      // 存储 provider 以便验证后使用
+      sessionStorage.setItem('oauth_provider', provider);
+      return;
+    }
+
+    triggerOAuthLogin(provider);
+  };
+
+  // 触发 OAuth 登录
+  const triggerOAuthLogin = (provider: 'google' | 'github') => {
     setIsOAuthLoading(true);
-    // 跳转到 OAuth 授权页面
     window.location.href = `/api/auth/oauth/${provider}`;
   };
 
@@ -168,7 +244,21 @@ export function LoginDialog({
     setPassword('');
     setName('');
     setError('');
+    setShowCaptcha(false);
+    setCaptchaVerified(false);
+    setPendingAction(null);
   };
+
+  // 验证码验证成功后的 OAuth 登录
+  useEffect(() => {
+    if (captchaVerified && showCaptcha && !pendingAction) {
+      const provider = sessionStorage.getItem('oauth_provider') as 'google' | 'github' | null;
+      if (provider) {
+        sessionStorage.removeItem('oauth_provider');
+        triggerOAuthLogin(provider);
+      }
+    }
+  }, [captchaVerified, showCaptcha, pendingAction]);
 
   // 是否显示第三方登录
   const showOAuth = oauthStatus.google || oauthStatus.github;
@@ -181,196 +271,225 @@ export function LoginDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'register'); setError(''); }}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">登录</TabsTrigger>
-            <TabsTrigger value="register">注册</TabsTrigger>
-          </TabsList>
+        {/* 验证码区域 */}
+        {showCaptcha && !captchaVerified && (
+          <div className="py-4">
+            <div className="flex items-center gap-2 mb-4">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              <span className="font-medium">请完成安全验证</span>
+            </div>
+            <SliderCaptcha 
+              onVerify={handleCaptchaVerify}
+              onRefresh={() => setCaptchaVerified(false)}
+            />
+            <Button 
+              variant="ghost" 
+              className="w-full mt-4"
+              onClick={() => {
+                setShowCaptcha(false);
+                setPendingAction(null);
+              }}
+            >
+              返回
+            </Button>
+          </div>
+        )}
 
-          {/* 登录表单 */}
-          <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="邮箱"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="password"
-                    placeholder="密码"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                    minLength={6}
-                  />
-                </div>
-              </div>
-
-              {/* 忘记密码链接 */}
-              <div className="flex justify-end">
-                <a
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  忘记密码？
-                </a>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500">{error}</p>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    登录中...
-                  </>
-                ) : (
-                  '登录'
-                )}
-              </Button>
-            </form>
-          </TabsContent>
-
-          {/* 注册表单 */}
-          <TabsContent value="register">
-            <form onSubmit={handleRegister} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="昵称（可选）"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="邮箱"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="password"
-                    placeholder="密码（至少6位）"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                    minLength={6}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500">{error}</p>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    注册中...
-                  </>
-                ) : (
-                  '注册'
-                )}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
-
-        {/* 第三方登录按钮 - 放在账号密码登录之后 */}
-        {showOAuth && (
+        {/* 主登录表单 */}
+        {!showCaptcha && (
           <>
-            <div className="relative">
+            <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'register'); setError(''); }}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">登录</TabsTrigger>
+                <TabsTrigger value="register">注册</TabsTrigger>
+              </TabsList>
+
+              {/* 登录表单 */}
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="邮箱"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="password"
+                        placeholder="密码"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 忘记密码链接 */}
+                  <div className="flex justify-end">
+                    <a
+                      href="/forgot-password"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      忘记密码？
+                    </a>
+                  </div>
+
+                  {error && (
+                    <p className="text-sm text-red-500">{error}</p>
+                  )}
+
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        登录中...
+                      </>
+                    ) : (
+                      '登录'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              {/* 注册表单 */}
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="昵称（可选）"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="邮箱"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="password"
+                        placeholder="密码（至少6位）"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <p className="text-sm text-red-500">{error}</p>
+                  )}
+
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        注册中...
+                      </>
+                    ) : (
+                      '注册'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+
+            {/* 第三方登录按钮 */}
+            {showOAuth && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">或者使用第三方登录</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {oauthStatus.google && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleOAuthLogin('google')}
+                      disabled={isOAuthLoading}
+                    >
+                      <GoogleIcon className="w-5 h-5 mr-2" />
+                      使用 Google 登录
+                    </Button>
+                  )}
+                  {oauthStatus.github && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleOAuthLogin('github')}
+                      disabled={isOAuthLoading}
+                    >
+                      <GitHubIcon className="w-5 h-5 mr-2" />
+                      使用 GitHub 登录
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* 游客登录 */}
+            <div className="relative mt-4">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">或者使用第三方登录</span>
+                <span className="bg-background px-2 text-muted-foreground">或者</span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              {oauthStatus.google && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleOAuthLogin('google')}
-                  disabled={isOAuthLoading}
-                >
-                  <GoogleIcon className="w-5 h-5 mr-2" />
-                  使用 Google 登录
-                </Button>
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleGuestLogin}
+              disabled={isGuestLoading}
+            >
+              {isGuestLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  登录中...
+                </>
+              ) : (
+                <>
+                  <UserCircle2 className="mr-2 h-4 w-4" />
+                  游客登录
+                </>
               )}
-              {oauthStatus.github && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleOAuthLogin('github')}
-                  disabled={isOAuthLoading}
-                >
-                  <GitHubIcon className="w-5 h-5 mr-2" />
-                  使用 GitHub 登录
-                </Button>
-              )}
-            </div>
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              游客登录可查看结果，但历史记录仅保存在本地
+            </p>
           </>
         )}
-
-        {/* 游客登录 */}
-        <div className="relative mt-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">或者</span>
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          className="w-full mt-4"
-          onClick={handleGuestLogin}
-          disabled={isGuestLoading}
-        >
-          {isGuestLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              登录中...
-            </>
-          ) : (
-            <>
-              <UserCircle2 className="mr-2 h-4 w-4" />
-              游客登录
-            </>
-          )}
-        </Button>
-
-        <p className="text-xs text-muted-foreground text-center mt-2">
-          游客登录可查看结果，但历史记录仅保存在本地
-        </p>
       </DialogContent>
     </Dialog>
   );
