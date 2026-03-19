@@ -36,16 +36,14 @@ export function UserMenu() {
             onClick={() => setShowLoginDialog(true)}
             className="text-white/70 hover:text-white hover:bg-white/10"
           >
-            <LogIn className="h-4 w-4 mr-1" />
             登录
           </Button>
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => setShowLoginDialog(true)}
-            className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
           >
-            <UserPlus className="h-4 w-4 mr-1" />
             注册
           </Button>
         </div>
