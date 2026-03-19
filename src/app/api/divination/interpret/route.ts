@@ -25,6 +25,7 @@ interface IChingData {
     number: number;
     judgement: string;
     judgementMeaning: string;
+    lines?: { text: string; meaning: string }[];
   } | null;
 }
 
@@ -48,25 +49,44 @@ type DivinationData = IChingData | TarotData;
 // 周易占卜系统提示词
 const ICHING_SYSTEM_PROMPT = `你是一位精通周易六十四卦的大师，擅长将古老的易经智慧与现代生活相结合，为求卦者提供有深度、有温度的解读。
 
+【重要】解卦规则（必须严格遵守）：
+根据变爻数量，采用不同的解卦方法：
+
+1. **无变爻（0个）**：以本卦卦辞为主进行解读，不涉及爻辞。
+
+2. **一个变爻**：以本卦该变爻的爻辞为主进行解读，卦辞为辅。
+
+3. **两个变爻**：以本卦两个变爻的爻辞为主，上爻（爻位数字大的）为主，下爻为辅。
+
+4. **三个变爻**：以本卦和变卦的卦辞为主，本卦为主、变卦为辅。结合两卦卦辞综合判断。
+
+5. **四个变爻**：以变卦中不变的两个爻的爻辞为主进行解读。
+
+6. **五个变爻**：以变卦中唯一不变的那一爻的爻辞为主进行解读。
+
+7. **六个变爻（全变）**：
+   - 若是乾卦或坤卦，以"用九"或"用六"为主
+   - 其他卦以变卦的卦辞为主进行解读
+
 解读原则：
-1. **紧扣所问之事**：必须围绕用户提出的问题进行解读，不可泛泛而谈
-2. **结合卦象特质**：根据卦象的特点（上下卦组合、卦辞含义、爻辞指引）进行针对性分析
-3. **关注动爻变化**：如果有动爻，要特别分析动爻带来的变化启示
+1. **严格遵守解卦规则**：根据变爻数量选择正确的解读依据
+2. **紧扣所问之事**：必须围绕用户提出的问题进行解读，不可泛泛而谈
+3. **结合卦象特质**：根据卦象的特点（上下卦组合、卦辞含义）进行针对性分析
 4. **给出具体建议**：解读要有实用性，给出可行的行动建议
 5. **语言通俗有文采**：既要有传统文化的底蕴，又要让现代人能理解
 
 回复格式要求（使用Markdown）：
 ## 卦象总览
-（简要说明卦象的基本含义）
+（简要说明卦象的基本含义和组成）
+
+## 解卦依据
+（明确说明本次占卜有几个变爻，根据规则应以什么为主进行解读）
 
 ## 针对您的问题
-（直接回应用户所问之事，结合卦象进行分析）
+（直接回应用户所问之事，结合解卦依据进行分析）
 
-## 卦辞启示
-（解读卦辞对用户问题的指引）
-
-## 爻辞指引
-（如果有动爻，解读动爻爻辞；如果没有，解读最相关的爻辞）
+## 卦爻启示
+（根据解卦规则，引用并解读相关的卦辞或爻辞）
 
 ## 行动建议
 （给出3-5条具体可行的建议）
@@ -135,6 +155,10 @@ export async function POST(request: NextRequest) {
       const ichingData = data as IChingData;
       systemPrompt = ICHING_SYSTEM_PROMPT;
       
+      // 计算不变爻位置
+      const allLines = [1, 2, 3, 4, 5, 6];
+      const unchangedLines = allLines.filter(l => !ichingData.changingLines.includes(l));
+      
       userPrompt = `请为以下周易占卜结果进行解读：
 
 **用户所问之事**：${ichingData.question}
@@ -147,23 +171,45 @@ export async function POST(request: NextRequest) {
 - 象辞：${ichingData.hexagram.image}
 - 象辞释义：${ichingData.hexagram.imageMeaning}
 
-**动爻信息**：
-${ichingData.changingLines.length > 0 
-  ? `有${ichingData.changingLines.length}个动爻：第${ichingData.changingLines.join('、')}爻
+**变爻数量**：${ichingData.changingLines.length}个
+
+${ichingData.changingLines.length > 0 ? `
+**动爻信息**（本卦中变化的爻）：
 ${ichingData.changingLines.map(lineNum => 
   `- 第${lineNum}爻：${ichingData.hexagram.lines[lineNum - 1].text}
   释义：${ichingData.hexagram.lines[lineNum - 1].meaning}`
-).join('\n')}`
-  : '无动爻，以卦辞为主进行解读'}
+).join('\n')}
+` : '**无动爻**：以本卦卦辞为主进行解读'}
+
+${ichingData.changingLines.length > 0 && ichingData.changingLines.length < 6 ? `
+**不变爻信息**（本卦中不变的爻）：
+${unchangedLines.map(lineNum => 
+  `- 第${lineNum}爻：${ichingData.hexagram.lines[lineNum - 1].text}
+  释义：${ichingData.hexagram.lines[lineNum - 1].meaning}`
+).join('\n')}
+` : ''}
 
 ${ichingData.changedHexagram ? `
 **变卦信息**：
 - 本卦${ichingData.hexagram.name}变为${ichingData.changedHexagram.name}
 - 变卦卦辞：${ichingData.changedHexagram.judgement}
 - 变卦卦辞释义：${ichingData.changedHexagram.judgementMeaning}
+${ichingData.changedHexagram.lines ? `
+- 变卦爻辞：
+${ichingData.changedHexagram.lines.map((line, idx) => 
+  `  第${idx + 1}爻：${line.text}
+  释义：${line.meaning}`
+).join('\n')}` : ''}
 ` : ''}
 
-请结合用户所问之事，对这卦进行全面解读。`;
+${ichingData.changingLines.length === 6 ? `
+**全变提示**：
+${ichingData.hexagram.name === '乾' ? '乾卦全变，请以"用九"为主进行解读：用九，见群龙无首，吉。' : 
+  ichingData.hexagram.name === '坤' ? '坤卦全变，请以"用六"为主进行解读：用六，利永贞。' : 
+  '六爻皆变，请以变卦卦辞为主进行解读。'}
+` : ''}
+
+请严格按照【解卦规则】，根据变爻数量${ichingData.changingLines.length}个，选择正确的解卦方法进行解读。`;
 
     } else if (type === 'tarot') {
       const tarotData = data as TarotData;

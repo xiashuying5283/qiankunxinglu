@@ -202,7 +202,8 @@ export default function IChingPage() {
             name: divinationResult.changedHexagram.name,
             number: divinationResult.changedHexagram.number,
             judgement: divinationResult.changedHexagram.judgement,
-            judgementMeaning: divinationResult.changedHexagram.judgementMeaning
+            judgementMeaning: divinationResult.changedHexagram.judgementMeaning,
+            lines: divinationResult.changedHexagram.lines
           } : null
         })
       });
