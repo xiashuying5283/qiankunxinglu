@@ -190,7 +190,8 @@ export default function DreamInterpretPage() {
               const data = JSON.parse(line.slice(6));
               if (data.content) {
                 fullContent += data.content;
-                setAiResult(fullContent);
+                // 不直接展示原始内容，让加载动画持续显示
+                // setAiResult(fullContent);
               }
               if (data.done) {
                 fullContent = data.fullContent || fullContent;
@@ -209,9 +210,13 @@ export default function DreamInterpretPage() {
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           setParsedResult(parsed);
+        } else {
+          // 如果不是JSON格式，设置原始内容
+          setAiResult(fullContent);
         }
       } catch {
-        // 如果不是JSON格式，保持原样
+        // JSON解析失败，设置原始内容
+        setAiResult(fullContent);
       }
 
       // 刷新历史记录
@@ -515,19 +520,26 @@ export default function DreamInterpretPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col items-center justify-center py-12">
-                    <div className="relative">
-                      <Moon className="w-16 h-16 text-indigo-400 animate-pulse" />
-                      <Sparkles className="w-6 h-6 text-purple-400 absolute -top-1 -right-1 animate-spin" />
+                    <div className="relative mb-6">
+                      <Moon className="w-20 h-20 text-indigo-400 animate-pulse" />
+                      <Sparkles className="w-8 h-8 text-purple-400 absolute -top-2 -right-2 animate-spin" />
                     </div>
-                    <p className="text-xl text-indigo-200 mt-6 animate-pulse">正在解析梦境...</p>
-                    <p className="text-sm text-indigo-300/60 mt-2">请稍候，大师正在为您解梦</p>
+                    <div className="space-y-2 text-center">
+                      <p className="text-xl text-indigo-200 animate-pulse">大师正在思考中...</p>
+                      <div className="flex items-center justify-center gap-1 mt-4">
+                        <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      </div>
+                      <p className="text-sm text-indigo-300/60 mt-4">正在分析梦境符号与寓意</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
           )}
 
-          {/* AI解析结果 */}
+          {/* AI解析结果 - JSON格式化展示 */}
           {parsedResult && !isLoading && (
             <div ref={resultRef}>
               <Card className="bg-white/10 backdrop-blur-md border-indigo-300/30 mb-6">
@@ -621,6 +633,30 @@ export default function DreamInterpretPage() {
                   )}
 
                   <div className="bg-indigo-950/50 rounded-lg p-4 text-center">
+                    <p className="text-xs text-indigo-200/80">
+                      梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* AI解析结果 - 原始内容（JSON解析失败时的备选展示） */}
+          {aiResult && !parsedResult && !isLoading && (
+            <div ref={resultRef}>
+              <Card className="bg-white/10 backdrop-blur-md border-indigo-300/30 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-indigo-100 text-center flex items-center justify-center">
+                    <Moon className="w-6 h-6 mr-2" />
+                    梦境解析
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-indigo-950/60 rounded-lg p-6">
+                    <p className="text-indigo-100 leading-relaxed whitespace-pre-wrap">{aiResult}</p>
+                  </div>
+                  <div className="bg-indigo-950/50 rounded-lg p-4 text-center mt-6">
                     <p className="text-xs text-indigo-200/80">
                       梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
                     </p>
