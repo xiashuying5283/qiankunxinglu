@@ -28,6 +28,13 @@ export async function GET(request: NextRequest) {
     const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
     const redirectUri = `${baseUrl}/api/auth/oauth/google/callback`;
     
+    console.log('[Google OAuth] Initiating login:', {
+      baseUrl,
+      redirectUri,
+      clientId: process.env.GOOGLE_CLIENT_ID?.substring(0, 10) + '...',
+      force
+    });
+    
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID || '');
     authUrl.searchParams.set('redirect_uri', redirectUri);
@@ -48,11 +55,22 @@ export async function GET(request: NextRequest) {
     
     response.cookies.set('oauth_state', state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // 始终使用 secure，因为生产环境是 HTTPS
       sameSite: 'lax',
       maxAge: 60 * 10, // 10分钟有效
       path: '/',
     });
+    
+    // 存储 redirectUri 以确保回调时使用相同的值
+    response.cookies.set('oauth_redirect_uri', redirectUri, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 10,
+      path: '/',
+    });
+    
+    console.log('[Google OAuth] State cookie set:', state);
 
     return response;
   } catch (error) {

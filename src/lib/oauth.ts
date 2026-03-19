@@ -93,9 +93,17 @@ export function generateAuthorizationUrl(provider: OAuthProvider, state: string)
 // 通过授权码获取访问令牌
 export async function getAccessToken(
   provider: OAuthProvider,
-  code: string
+  code: string,
+  customRedirectUri?: string
 ): Promise<string | null> {
   const config = getOAuthConfig(provider);
+  const redirectUri = customRedirectUri || config.redirectUri;
+
+  console.log('[OAuth] Getting access token:', {
+    provider,
+    redirectUri,
+    hasCode: !!code
+  });
 
   const response = await fetch(config.tokenUrl, {
     method: 'POST',
@@ -107,17 +115,22 @@ export async function getAccessToken(
       client_id: config.clientId,
       client_secret: config.clientSecret,
       code,
-      redirect_uri: config.redirectUri,
+      redirect_uri: redirectUri,
       grant_type: 'authorization_code',
     }),
   });
 
   if (!response.ok) {
-    console.error('Failed to get access token:', await response.text());
+    const errorText = await response.text();
+    console.error('[OAuth] Failed to get access token:', {
+      status: response.status,
+      error: errorText
+    });
     return null;
   }
 
   const data = await response.json();
+  console.log('[OAuth] Access token obtained successfully');
   return data.access_token || data.access_token;
 }
 

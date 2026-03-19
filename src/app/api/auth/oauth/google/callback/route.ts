@@ -15,7 +15,14 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state');
     const error = searchParams.get('error');
 
-    console.log('[Google OAuth] Callback received:', { code: !!code, state, error });
+    // 详细日志
+    console.log('[Google OAuth] Callback received:', {
+      url: request.url,
+      code: code ? `${code.substring(0, 10)}...` : null,
+      state,
+      error,
+      allParams: Object.fromEntries(searchParams.entries())
+    });
 
     // 用户取消授权
     if (error === 'access_denied') {
@@ -32,8 +39,9 @@ export async function GET(request: NextRequest) {
     // 验证 state
     const cookieStore = await cookies();
     const savedState = cookieStore.get('oauth_state')?.value;
+    const savedRedirectUri = cookieStore.get('oauth_redirect_uri')?.value;
 
-    console.log('[Google OAuth] State validation:', { savedState, receivedState: state });
+    console.log('[Google OAuth] State validation:', { savedState, receivedState: state, savedRedirectUri });
 
     if (!savedState || savedState !== state) {
       console.log('[Google OAuth] State mismatch');
@@ -42,10 +50,11 @@ export async function GET(request: NextRequest) {
 
     // 清除 state cookie
     cookieStore.delete('oauth_state');
+    cookieStore.delete('oauth_redirect_uri');
 
     // 获取访问令牌
     console.log('[Google OAuth] Getting access token...');
-    const accessToken = await getAccessToken('google', code);
+    const accessToken = await getAccessToken('google', code, savedRedirectUri);
     if (!accessToken) {
       console.log('[Google OAuth] Failed to get access token');
       return NextResponse.redirect(new URL('/?error=token_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
@@ -155,7 +164,11 @@ export async function GET(request: NextRequest) {
     // 重定向到首页并显示成功
     return NextResponse.redirect(new URL('/?login=success', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
   } catch (error) {
-    console.error('Google OAuth callback error:', error);
-    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
+    console.error('[Google OAuth] Callback error:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+    return NextResponse.redirect(new URL(`/?error=oauth_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, baseUrl));
   }
 }

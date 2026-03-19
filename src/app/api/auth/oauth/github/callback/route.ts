@@ -32,8 +32,9 @@ export async function GET(request: NextRequest) {
     // 验证 state
     const cookieStore = await cookies();
     const savedState = cookieStore.get('oauth_state')?.value;
+    const savedRedirectUri = cookieStore.get('oauth_redirect_uri')?.value;
 
-    console.log('[GitHub OAuth] State validation:', { savedState, receivedState: state });
+    console.log('[GitHub OAuth] State validation:', { savedState, receivedState: state, savedRedirectUri });
 
     if (!savedState || savedState !== state) {
       console.log('[GitHub OAuth] State mismatch');
@@ -42,10 +43,11 @@ export async function GET(request: NextRequest) {
 
     // 清除 state cookie
     cookieStore.delete('oauth_state');
+    cookieStore.delete('oauth_redirect_uri');
 
     // 获取访问令牌
     console.log('[GitHub OAuth] Getting access token...');
-    const accessToken = await getAccessToken('github', code);
+    const accessToken = await getAccessToken('github', code, savedRedirectUri);
     if (!accessToken) {
       console.log('[GitHub OAuth] Failed to get access token');
       return NextResponse.redirect(new URL('/?error=token_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
@@ -157,7 +159,11 @@ export async function GET(request: NextRequest) {
     // 重定向到首页并显示成功
     return NextResponse.redirect(new URL('/?login=success', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
   } catch (error) {
-    console.error('[GitHub OAuth] Callback error:', error);
-    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
+    console.error('[GitHub OAuth] Callback error:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+    return NextResponse.redirect(new URL(`/?error=oauth_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, baseUrl));
   }
 }

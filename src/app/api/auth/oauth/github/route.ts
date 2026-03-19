@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { generateAuthorizationUrl, generateOAuthState, isOAuthConfigured } from '@/lib/oauth';
+import { generateOAuthState, isOAuthConfigured } from '@/lib/oauth';
 
 /**
  * 发起 GitHub OAuth 登录
@@ -29,6 +28,13 @@ export async function GET(request: NextRequest) {
     const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
     const redirectUri = `${baseUrl}/api/auth/oauth/github/callback`;
     
+    console.log('[GitHub OAuth] Initiating login:', {
+      baseUrl,
+      redirectUri,
+      clientId: process.env.GITHUB_CLIENT_ID?.substring(0, 10) + '...',
+      force
+    });
+    
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id', process.env.GITHUB_CLIENT_ID || '');
     authUrl.searchParams.set('redirect_uri', redirectUri);
@@ -45,15 +51,26 @@ export async function GET(request: NextRequest) {
     
     response.cookies.set('oauth_state', state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // 始终使用 secure，因为生产环境是 HTTPS
       sameSite: 'lax',
       maxAge: 60 * 10, // 10分钟有效
       path: '/',
     });
+    
+    // 存储 redirectUri 以确保回调时使用相同的值
+    response.cookies.set('oauth_redirect_uri', redirectUri, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 10,
+      path: '/',
+    });
+    
+    console.log('[GitHub OAuth] State cookie set:', state);
 
     return response;
   } catch (error) {
-    console.error('GitHub OAuth error:', error);
+    console.error('[GitHub OAuth] Error:', error);
     return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
   }
 }
