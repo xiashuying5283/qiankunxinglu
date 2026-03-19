@@ -102,52 +102,90 @@ export async function getAccessToken(
   console.log('[OAuth] Getting access token:', {
     provider,
     redirectUri,
+    tokenUrl: config.tokenUrl,
     hasCode: !!code
   });
 
-  const response = await fetch(config.tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    },
-    body: new URLSearchParams({
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
-      code,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-    }),
-  });
+  try {
+    // 添加超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('[OAuth] Failed to get access token:', {
-      status: response.status,
-      error: errorText
+    const response = await fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+      body: new URLSearchParams({
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        code,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[OAuth] Failed to get access token:', {
+        status: response.status,
+        error: errorText
+      });
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('[OAuth] Access token obtained successfully');
+    return data.access_token || data.access_token;
+  } catch (error) {
+    // 详细错误日志
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error('[OAuth] Request timeout for', provider);
+      } else {
+        console.error('[OAuth] Fetch error for', provider, ':', {
+          message: error.message,
+          name: error.name,
+          cause: error.cause,
+        });
+      }
+    } else {
+      console.error('[OAuth] Unknown error:', error);
+    }
     return null;
   }
-
-  const data = await response.json();
-  console.log('[OAuth] Access token obtained successfully');
-  return data.access_token || data.access_token;
 }
 
 // 获取 Google 用户信息
 async function getGoogleUserInfo(accessToken: string): Promise<OAuthUserInfo | null> {
   try {
+    console.log('[OAuth] Fetching Google user info...');
+    
+    // 添加超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      signal: controller.signal,
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
+      console.error('[OAuth] Google user info request failed:', response.status);
       return null;
     }
 
     const data = await response.json();
+    console.log('[OAuth] Google user info obtained:', { id: data.id, email: data.email });
+    
     return {
       id: data.id,
       email: data.email || null,
@@ -156,7 +194,14 @@ async function getGoogleUserInfo(accessToken: string): Promise<OAuthUserInfo | n
       provider: 'google',
     };
   } catch (error) {
-    console.error('Failed to get Google user info:', error);
+    if (error instanceof Error) {
+      console.error('[OAuth] Failed to get Google user info:', {
+        message: error.message,
+        name: error.name,
+      });
+    } else {
+      console.error('[OAuth] Failed to get Google user info:', error);
+    }
     return null;
   }
 }
@@ -164,15 +209,23 @@ async function getGoogleUserInfo(accessToken: string): Promise<OAuthUserInfo | n
 // 获取 GitHub 用户信息
 async function getGitHubUserInfo(accessToken: string): Promise<OAuthUserInfo | null> {
   try {
+    console.log('[OAuth] Fetching GitHub user info...');
+    
+    // 添加超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     // 获取用户基本信息
     const userResponse = await fetch('https://api.github.com/user', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: 'application/vnd.github.v3+json',
       },
+      signal: controller.signal,
     });
 
     if (!userResponse.ok) {
+      console.error('[OAuth] GitHub user info request failed:', userResponse.status);
       return null;
     }
 
@@ -196,6 +249,8 @@ async function getGitHubUserInfo(accessToken: string): Promise<OAuthUserInfo | n
       }
     }
 
+    console.log('[OAuth] GitHub user info obtained:', { id: userData.id, login: userData.login });
+
     return {
       id: String(userData.id),
       email: email || null,
@@ -204,7 +259,14 @@ async function getGitHubUserInfo(accessToken: string): Promise<OAuthUserInfo | n
       provider: 'github',
     };
   } catch (error) {
-    console.error('Failed to get GitHub user info:', error);
+    if (error instanceof Error) {
+      console.error('[OAuth] Failed to get GitHub user info:', {
+        message: error.message,
+        name: error.name,
+      });
+    } else {
+      console.error('[OAuth] Failed to get GitHub user info:', error);
+    }
     return null;
   }
 }
