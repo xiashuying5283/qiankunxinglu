@@ -7,13 +7,18 @@ export const users = pgTable("users", {
 	email: varchar({ length: 255 }).unique(),
 	password: text(),
 	name: varchar({ length: 50 }),
+	avatar: text(), // 用户头像URL
 	isGuest: boolean("is_guest").default(false).notNull(),
 	sessionId: varchar("session_id", { length: 100 }).unique(),
+	// 第三方登录相关
+	provider: varchar({ length: 20 }), // oauth提供商: google, github
+	providerId: varchar("provider_id", { length: 100 }), // 第三方平台的用户ID
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
 	index("users_email_idx").using("btree", table.email.asc().nullsLast().op("text_ops")),
 	index("users_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
+	index("users_provider_idx").using("btree", table.provider.asc().nullsLast().op("text_ops")),
 ]);
 
 export const hexagrams = pgTable("hexagrams", {

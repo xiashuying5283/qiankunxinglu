@@ -15,6 +15,18 @@ import {
 import { User, LogOut, UserCircle2, Mail, History } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
+// 提供商显示名称
+const providerNames: Record<string, string> = {
+  google: 'Google',
+  github: 'GitHub',
+};
+
+// 提供商图标颜色
+const providerColors: Record<string, string> = {
+  google: 'text-blue-500',
+  github: 'text-gray-700 dark:text-gray-300',
+};
+
 export function UserMenu() {
   const { user, logout, isLoading } = useAuth();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -66,7 +78,14 @@ export function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative text-white/80 hover:text-white hover:bg-white/10">
-          {user.isGuest ? (
+          {user.avatar ? (
+            // 显示头像
+            <img
+              src={user.avatar}
+              alt={user.name || '用户'}
+              className="h-6 w-6 rounded-full mr-2 object-cover"
+            />
+          ) : user.isGuest ? (
             <UserCircle2 className="h-5 w-5 mr-2" />
           ) : (
             <User className="h-5 w-5 mr-2" />
@@ -80,15 +99,31 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.name || '用户'}</p>
+            <div className="flex items-center gap-2">
+              {user.avatar && (
+                <img
+                  src={user.avatar}
+                  alt={user.name || '用户'}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              )}
+              <div className="flex-1">
+                <p className="text-sm font-medium">{user.name || '用户'}</p>
+                {user.provider && (
+                  <p className={`text-xs ${providerColors[user.provider] || 'text-muted-foreground'}`}>
+                    {providerNames[user.provider] || user.provider} 账号
+                  </p>
+                )}
+              </div>
+            </div>
             {user.email && (
-              <p className="text-xs text-muted-foreground flex items-center">
+              <p className="text-xs text-muted-foreground flex items-center mt-1">
                 <Mail className="h-3 w-3 mr-1" />
                 {user.email}
               </p>
             )}
             {user.isGuest && (
-              <span className="text-xs text-amber-500">游客模式</span>
+              <span className="text-xs text-amber-500 mt-1">游客模式</span>
             )}
           </div>
         </DropdownMenuLabel>
