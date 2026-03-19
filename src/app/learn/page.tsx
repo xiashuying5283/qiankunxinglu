@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Compass, BookOpen, Scroll, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { ArrowLeft, Compass, BookOpen, Scroll, ChevronDown, ChevronUp, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 
 // 类型定义
@@ -345,6 +345,16 @@ export default function LearnPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* 占卜此卦按钮 */}
+                      <div className="text-center">
+                        <Link href="/iching">
+                          <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            占卜此卦
+                          </Button>
+                        </Link>
+                      </div>
+                      
                       {/* 卦辞 */}
                       <div className="bg-green-950/60 rounded-lg p-6">
                         <h3 className="text-lg font-bold text-green-100 mb-3">卦辞</h3>
@@ -447,6 +457,76 @@ export default function LearnPage() {
               )}
             </TabsContent>
           </Tabs>
+
+          {/* 实践入口区域 */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <Card className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 backdrop-blur-md border-green-400/30">
+              <CardHeader className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Sparkles className="w-6 h-6 text-yellow-300 mr-2" />
+                  <CardTitle className="text-2xl text-green-100">学以致用，实践出真知</CardTitle>
+                  <Sparkles className="w-6 h-6 text-yellow-300 ml-2" />
+                </div>
+                <CardDescription className="text-green-200/80">
+                  理论结合实践，用周易智慧指导人生
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* 周易占卜入口 */}
+                  <Link href="/iching" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-green-300/20 hover:border-green-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">☯️</div>
+                        <h3 className="text-lg font-bold text-green-100 mb-2">周易占卜</h3>
+                        <p className="text-sm text-green-200/60 mb-3">
+                          传统揲蓍法起卦，AI 智能解卦
+                        </p>
+                        <div className="flex items-center justify-center text-green-300">
+                          <span className="text-sm">开始占卜</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* 塔罗占卜入口 */}
+                  <Link href="/tarot" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-green-300/20 hover:border-green-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">🎴</div>
+                        <h3 className="text-lg font-bold text-green-100 mb-2">塔罗占卜</h3>
+                        <p className="text-sm text-green-200/60 mb-3">
+                          西方神秘智慧，探索内心世界
+                        </p>
+                        <div className="flex items-center justify-center text-green-300">
+                          <span className="text-sm">开始占卜</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* 每日运势入口 */}
+                  <Link href="/daily-fortune" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-green-300/20 hover:border-green-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">🌟</div>
+                        <h3 className="text-lg font-bold text-green-100 mb-2">每日运势</h3>
+                        <p className="text-sm text-green-200/60 mb-3">
+                          今日宜忌，开运指南
+                        </p>
+                        <div className="flex items-center justify-center text-green-300">
+                          <span className="text-sm">查看运势</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Moon, BookOpen, Sparkles } from 'lucide-react';
+import { ArrowLeft, Moon, BookOpen, Sparkles, ArrowRight } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { majorArcana, minorArcana, wandsCards, cupsCards, swordsCards, pentaclesCards, suitNames, allTarotCards } from '@/lib/divination-data';
 
@@ -222,6 +222,16 @@ export default function LearnTarotPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* 占卜入口 */}
+                      <div className="text-center">
+                        <Link href="/tarot">
+                          <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            开始塔罗占卜
+                          </Button>
+                        </Link>
+                      </div>
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-purple-900/40 rounded-lg p-6">
                           <h3 className="text-lg font-bold text-purple-100 mb-3">正位含义</h3>
@@ -598,6 +608,76 @@ export default function LearnTarotPage() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* 实践入口区域 */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <Card className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-md border-purple-400/30">
+              <CardHeader className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Sparkles className="w-6 h-6 text-yellow-300 mr-2" />
+                  <CardTitle className="text-2xl text-purple-100">实践出真知</CardTitle>
+                  <Sparkles className="w-6 h-6 text-yellow-300 ml-2" />
+                </div>
+                <CardDescription className="text-purple-200/80">
+                  用塔罗牌探索你的内心世界，获取生活的指引
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* 塔罗占卜入口 */}
+                  <Link href="/tarot" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-purple-300/20 hover:border-purple-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">🎴</div>
+                        <h3 className="text-lg font-bold text-purple-100 mb-2">塔罗占卜</h3>
+                        <p className="text-sm text-purple-200/60 mb-3">
+                          单张、三张、凯尔特十字
+                        </p>
+                        <div className="flex items-center justify-center text-purple-300">
+                          <span className="text-sm">开始占卜</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* 周易占卜入口 */}
+                  <Link href="/iching" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-purple-300/20 hover:border-purple-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">☯️</div>
+                        <h3 className="text-lg font-bold text-purple-100 mb-2">周易占卜</h3>
+                        <p className="text-sm text-purple-200/60 mb-3">
+                          传统揲蓍法，AI 解卦
+                        </p>
+                        <div className="flex items-center justify-center text-purple-300">
+                          <span className="text-sm">开始占卜</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* 每日运势入口 */}
+                  <Link href="/daily-fortune" className="block">
+                    <div className="bg-white/10 hover:bg-white/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer border border-purple-300/20 hover:border-purple-400/40">
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">🌟</div>
+                        <h3 className="text-lg font-bold text-purple-100 mb-2">每日运势</h3>
+                        <p className="text-sm text-purple-200/60 mb-3">
+                          今日宜忌，开运指南
+                        </p>
+                        <div className="flex items-center justify-center text-purple-300">
+                          <span className="text-sm">查看运势</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

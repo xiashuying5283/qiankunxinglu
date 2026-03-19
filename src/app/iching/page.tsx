@@ -9,6 +9,12 @@ import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
+import { 
+  QuestionCategorySelector, 
+  QuestionCategory, 
+  getQuestionPlaceholder,
+  getQuestionHint
+} from '@/components/QuestionCategorySelector';
 
 // 类型定义
 interface LineText {
@@ -60,6 +66,7 @@ interface DivinationResult {
 export default function IChingPage() {
   const { isLoggedIn } = useAuth();
   const [question, setQuestion] = useState('');
+  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(null);
   const [isDivining, setIsDivining] = useState(false);
   const [result, setResult] = useState<DivinationResult | null>(null);
   const [currentThrow, setCurrentThrow] = useState<number>(0);
@@ -190,13 +197,29 @@ export default function IChingPage() {
     setIsInterpreting(true);
     setAiInterpretation('');
 
+    // 构建完整问题（包含类型）
+    const categoryLabels: Record<QuestionCategory, string> = {
+      career: '事业发展',
+      love: '感情姻缘',
+      study: '学业考试',
+      wealth: '财运走向',
+      other: '其他困惑'
+    };
+    const categoryText = questionCategory ? `【${categoryLabels[questionCategory]}】` : '';
+    const fullQuestion = question 
+      ? `${categoryText}${question}` 
+      : questionCategory 
+        ? `${categoryText}请为我解读这卦的含义` 
+        : '请为我解读这卦的含义';
+
     try {
       const res = await fetch('/api/divination/interpret', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'iching',
-          question: question || '请为我解读这卦的含义',
+          question: fullQuestion,
+          questionCategory: questionCategory,
           hexagram: divinationResult.originalHexagram,
           changingLines: divinationResult.changingLines,
           changedHexagram: divinationResult.changedHexagram ? {
@@ -378,6 +401,7 @@ export default function IChingPage() {
   // 重置占卜
   const reset = () => {
     setQuestion('');
+    setQuestionCategory(null);
     setResult(null);
     setCurrentThrow(0);
     setExpandedLines(new Set());
@@ -458,13 +482,22 @@ export default function IChingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-8">
+                {/* 问题类型选择 */}
+                <QuestionCategorySelector
+                  value={questionCategory}
+                  onChange={setQuestionCategory}
+                  theme="amber"
+                />
+
                 {/* 问题输入 */}
-                <div className="w-full max-w-lg mb-6">
-                  <label className="block text-sm text-amber-200 mb-2 text-center">您想问什么事？（可选）</label>
+                <div className="w-full max-w-lg mb-4">
+                  <label className="block text-sm text-amber-200 mb-2 text-center">
+                    具体问题（可选，{getQuestionHint(questionCategory)}）
+                  </label>
                   <textarea
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="例如：我的事业运势如何？这段感情会有结果吗？"
+                    placeholder={getQuestionPlaceholder(questionCategory)}
                     className="w-full h-24 bg-white/10 border border-amber-300/30 rounded-lg p-4 text-amber-100 placeholder:text-amber-200/40 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/50"
                     disabled={isDivining}
                   />

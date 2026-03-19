@@ -9,6 +9,7 @@ import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
+import { QuestionCategorySelector, QuestionCategory } from '@/components/QuestionCategorySelector';
 
 // 类型定义
 interface TarotCard {
@@ -65,6 +66,7 @@ const spreadNames: Record<SpreadType, string> = {
 export default function TarotPage() {
   const { isLoggedIn } = useAuth();
   const [question, setQuestion] = useState('');
+  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(null);
   const [spreadType, setSpreadType] = useState<SpreadType>('three');
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
@@ -160,6 +162,7 @@ export default function TarotPage() {
         body: JSON.stringify({
           type: 'tarot',
           question: question || '请为我解读这次塔罗占卜',
+          questionCategory,
           spreadType,
           cards: cards.map((dc, index) => ({
             name: dc.card.name,
@@ -323,6 +326,7 @@ export default function TarotPage() {
   // 重置
   const reset = () => {
     setQuestion('');
+    setQuestionCategory(null);
     setDrawnCards([]);
     setShowCards([]);
     setAllRevealed(false);
@@ -422,6 +426,14 @@ export default function TarotPage() {
                     placeholder="例如：我的感情发展如何？这次机会我应该把握吗？"
                     className="w-full h-24 bg-white/10 border border-purple-300/30 rounded-lg p-4 text-purple-100 placeholder:text-purple-200/40 resize-none focus:outline-none focus:ring-2 focus:ring-purple-400/50"
                     disabled={isDrawing}
+                  />
+                </div>
+
+                {/* 问题类型选择 */}
+                <div className="w-full max-w-lg mb-6">
+                  <QuestionCategorySelector
+                    value={questionCategory}
+                    onChange={setQuestionCategory}
                   />
                 </div>
 
