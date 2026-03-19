@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Calendar, Clock, Compass, Sparkles, Bookmark } from 'lucide-react';
+import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Calendar, Clock, Compass, Sparkles, Bookmark, Moon } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { Disclaimer } from '@/components/Disclaimer';
+import { Solar, Lunar, LunarUtil } from 'lunar-javascript';
 
 // 十二生肖数据
 const zodiacs = [
@@ -24,46 +25,6 @@ const zodiacs = [
   { name: '猪', emoji: '🐷', earthlyBranch: '亥' },
 ];
 
-// 天干地支
-const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
-// 宜忌事项库
-const yiItems = [
-  '祈福', '祭祀', '求嗣', '开光', '出行', '解除', '纳采', '冠笄',
-  '嫁娶', '纳婿', '安床', '移徙', '入宅', '安香', '拆卸', '动土',
-  '挂匾', '开市', '立券', '纳财', '沐浴', '理发', '安门', '修造',
-  '盖屋', '合脊', '起基', '定磉', '安碓硙', '放水', '掘井', '破土',
-  '安葬', '启钻', '除服', '成服', '开生坟', '合寿木', '入殓', '移柩',
-];
-
-const jiItems = [
-  '嫁娶', '安葬', '出行', '动土', '开市', '入宅', '移徙', '祭祀',
-  '祈福', '开光', '纳采', '安床', '掘井', '破土', '诉讼', '作灶',
-];
-
-// 值神
-const zhiShen = ['青龙', '明堂', '天刑', '朱雀', '金匮', '天德', '白虎', '玉堂', '天牢', '玄武', '司命', '勾陈'];
-
-// 吉时
-const jiShiList = ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时'];
-
-// 胎神方位
-const taiShenFangWei = [
-  '占门碓外东南', '占碓磨外东南', '占炉外东南', '占门炉外西北', '占门鸡栖外西北',
-  '占门床房内南', '占碓磨房内北', '占门厕外正南', '占门碓外东南', '占房床内西北',
-];
-
-// 彭祖百忌
-const pengZuBaiJi = [
-  '甲不开仓财物耗散', '乙不栽植千株不长', '丙不修灶必见灾殃', '丁不剃头头必生疮',
-  '戊不受田田主不祥', '己不破券二比并亡', '庚不经络织机虚张', '辛不合酱主人不尝',
-  '壬不泱水更难提防', '癸不词讼理弱敌强', '子不问卜自惹祸殃', '丑不冠带主不还乡',
-  '寅不祭祀神鬼不尝', '卯不穿井水泉不香', '辰不哭泣必主重丧', '巳不远行财物伏藏',
-  '午不苫盖屋主更张', '未不服药毒气入肠', '申不安床鬼祟入房', '酉不宴客醉坐颠狂',
-  '戌不吃犬作怪上床', '亥不嫁娶不利新郎',
-];
-
 // 运势文案库
 const fortunes = {
   overall: ['大吉大利', '运势上佳', '平稳顺利', '小有波折', '需谨慎行事', '宜静不宜动'],
@@ -79,9 +40,6 @@ const luckyElements = {
   numbers: ['1', '3', '5', '6', '8', '9', '2', '4', '7'],
   directions: ['东方', '南方', '西方', '北方', '东南', '西南', '东北', '西北'],
 };
-
-// 五行
-const wuXing = ['金', '木', '水', '火', '土'];
 
 interface DailyFortune {
   zodiac: typeof zodiacs[0];
@@ -101,88 +59,145 @@ interface DailyFortune {
   advice: string;
 }
 
+// 精确的老黄历数据
 interface HuangLi {
   dateStr: string;
+  lunarDateStr: string;
   ganZhiYear: string;
   ganZhiMonth: string;
   ganZhiDay: string;
-  wuXing: string;
+  wuXingYear: string;
+  wuXingMonth: string;
+  wuXingDay: string;
   zhiShen: string;
-  chongSha: string;
+  chong: string;
+  sha: string;
   yi: string[];
   ji: string[];
   jiShi: string[];
   xiongShi: string[];
   taiShen: string;
-  pengZu: string;
+  pengZuGan: string;
+  pengZuZhi: string;
   fuShen: string;
   caiShen: string;
+  xiShen: string;
+  yangGui: string;
+  taiYang: string;
+  jieQi: string;
+  xingZuo: string;
+  xingSu: string;
+  erShiBaXiu: string;
+  naYin: string;
+  suiPo: string;
+  yuePo: string;
 }
 
-// 根据日期生成伪随机数
+// 根据日期生成伪随机数（用于运势部分，保持一致性）
 const getSeededRandom = (seed: number) => {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 };
 
-// 生成老黄历数据
+// 使用 lunar-javascript 生成精确老黄历
 const generateHuangLi = (date: Date): HuangLi => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
+  const solar = Solar.fromDate(date);
+  const lunar = solar.getLunar();
   
-  // 简化的干支计算（实际应用中应该使用精确的历法算法）
-  const yearIndex = (year - 4) % 60;
-  const ganYearIndex = yearIndex % 10;
-  const zhiYearIndex = yearIndex % 12;
+  // 干支
+  const ganZhiYear = lunar.getYearInGanZhi();
+  const ganZhiMonth = lunar.getMonthInGanZhi();
+  const ganZhiDay = lunar.getDayInGanZhi();
   
-  const monthIndex = (year * 12 + month + 13) % 60;
-  const dayIndex = Math.floor((date.getTime() / 86400000) + 1) % 60;
+  // 五行
+  const wuXingYear = LunarUtil.WU_XING_GAN[lunar.getYearGan()] + LunarUtil.WU_XING_ZHI[lunar.getYearZhi()];
+  const wuXingMonth = LunarUtil.WU_XING_GAN[lunar.getMonthGan()] + LunarUtil.WU_XING_ZHI[lunar.getMonthZhi()];
+  const wuXingDay = LunarUtil.WU_XING_GAN[lunar.getDayGan()] + LunarUtil.WU_XING_ZHI[lunar.getDayZhi()];
   
-  const seed = year * 10000 + month * 100 + day;
+  // 宜忌（从协纪辨方书提取的真数据）
+  const yi = lunar.getDayYi();
+  const ji = lunar.getDayJi();
   
-  // 生成宜忌
-  const yiCount = Math.floor(getSeededRandom(seed * 1) * 6) + 4;
-  const jiCount = Math.floor(getSeededRandom(seed * 2) * 4) + 2;
+  // 吉时凶时
+  const jiShi = lunar.getDayJiShi().map(s => s.getMinHm().substring(0, 2) + ':' + s.getMaxHm().substring(0, 2) + ' ' + s.getNameInGanZhi() + '时');
+  const xiongShi = lunar.getDayXiongShi().map(s => s.getMinHm().substring(0, 2) + ':' + s.getMaxHm().substring(0, 2) + ' ' + s.getNameInGanZhi() + '时');
   
-  const shuffledYi = [...yiItems].sort(() => getSeededRandom(seed * 3) - 0.5);
-  const shuffledJi = [...jiItems].sort(() => getSeededRandom(seed * 4) - 0.5);
+  // 值神（青龙、明堂等十二值神）
+  const zhiShen = lunar.getZhiXing();
   
-  const yi = shuffledYi.slice(0, yiCount);
-  const ji = shuffledJi.slice(0, jiCount);
+  // 冲煞
+  const chong = lunar.getDayChong() + '(' + lunar.getDayChongGanZhi() + ')';
+  const sha = lunar.getDaySha();
   
-  // 生成吉时
-  const jiShiCount = Math.floor(getSeededRandom(seed * 5) * 3) + 3;
-  const shuffledJiShi = [...jiShiList].sort(() => getSeededRandom(seed * 6) - 0.5);
-  const jiShi = shuffledJiShi.slice(0, jiShiCount);
-  const xiongShi = jiShiList.filter(s => !jiShi.includes(s)).slice(0, 3);
+  // 彭祖百忌
+  const pengZuGan = lunar.getPengZuGan();
+  const pengZuZhi = lunar.getPengZuZhi();
   
-  // 日冲生肖
-  const dayZhiIndex = dayIndex % 12;
-  const chongZhiIndex = (dayZhiIndex + 6) % 12;
-  const chongZodiac = zodiacs.find(z => z.earthlyBranch === diZhi[chongZhiIndex]);
+  // 胎神
+  const taiShen = lunar.getDayTaiShen();
+  
+  // 方位神煞
+  const fuShen = lunar.getFuShen();
+  const caiShen = lunar.getCaiShen();
+  const xiShen = lunar.getXiShen();
+  const yangGui = lunar.getYangGui();
+  const taiYang = lunar.getTaiYang();
+  
+  // 节气
+  const jieQi = lunar.getPrevJieQi()?.getName() || '';
+  
+  // 星座
+  const xingZuo = solar.getXingZuo();
+  
+  // 星宿
+  const xingSu = lunar.getXiu();
+  
+  // 二十八宿
+  const erShiBaXiu = lunar.getXiuSong();
+  
+  // 纳音
+  const naYin = lunar.getYearNaYin() + ' ' + lunar.getMonthNaYin() + ' ' + lunar.getDayNaYin();
+  
+  // 岁破、月破
+  const suiPo = lunar.getYearPo();
+  const yuePo = lunar.getMonthPo();
   
   return {
-    dateStr: `${year}年${month}月${day}日`,
-    ganZhiYear: `${tianGan[ganYearIndex]}${diZhi[zhiYearIndex]}年`,
-    ganZhiMonth: `${tianGan[monthIndex % 10]}${diZhi[monthIndex % 12]}月`,
-    ganZhiDay: `${tianGan[dayIndex % 10]}${diZhi[dayIndex % 12]}日`,
-    wuXing: wuXing[Math.floor(getSeededRandom(seed * 7) * 5)],
-    zhiShen: zhiShen[Math.floor(getSeededRandom(seed * 8) * 12)],
-    chongSha: `冲${chongZodiac?.name || '鼠'}(${diZhi[chongZhiIndex]})煞${getSeededRandom(seed * 9) > 0.5 ? '东' : '西'}`,
-    yi,
-    ji,
-    jiShi,
-    xiongShi,
-    taiShen: taiShenFangWei[Math.floor(getSeededRandom(seed * 10) * taiShenFangWei.length)],
-    pengZu: `${pengZuBaiJi[dayIndex % 10]} ${pengZuBaiJi[10 + (dayIndex % 12)]}`,
-    fuShen: luckyElements.directions[Math.floor(getSeededRandom(seed * 11) * 8)],
-    caiShen: luckyElements.directions[Math.floor(getSeededRandom(seed * 12) * 8)],
+    dateStr: `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`,
+    lunarDateStr: lunar.toString(),
+    ganZhiYear: ganZhiYear + '年',
+    ganZhiMonth: ganZhiMonth + '月',
+    ganZhiDay: ganZhiDay + '日',
+    wuXingYear,
+    wuXingMonth,
+    wuXingDay,
+    zhiShen,
+    chong,
+    sha,
+    yi: yi.slice(0, 12), // 限制显示数量
+    ji: ji.slice(0, 8),
+    jiShi: jiShi.slice(0, 4),
+    xiongShi: xiongShi.slice(0, 3),
+    taiShen,
+    pengZuGan,
+    pengZuZhi,
+    fuShen,
+    caiShen,
+    xiShen,
+    yangGui,
+    taiYang,
+    jieQi,
+    xingZuo,
+    xingSu,
+    erShiBaXiu,
+    naYin,
+    suiPo,
+    yuePo,
   };
 };
 
 // 生成运势
-const generateFortune = (zodiac: typeof zodiacs[0], date: Date): DailyFortune => {
+const generateFortune = (zodiac: typeof zodiacs[0], date: Date, huangLi: HuangLi): DailyFortune => {
   const dateSeed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   const zodiacIndex = zodiacs.findIndex(z => z.name === zodiac.name);
   const seed = dateSeed + zodiacIndex;
@@ -190,7 +205,15 @@ const generateFortune = (zodiac: typeof zodiacs[0], date: Date): DailyFortune =>
   const pickRandom = (arr: string[]) => arr[Math.floor(getSeededRandom(seed * arr.length) * arr.length)];
   const pickScore = (base: number) => Math.floor(getSeededRandom(seed * base) * 5) + 1;
   
-  const overallScore = pickScore(1);
+  // 根据值神调整运势基础分
+  const zhiShenBonus: Record<string, number> = {
+    '青龙': 1, '明堂': 1, '金匮': 1, '天德': 1, '玉堂': 1, '司命': 1,
+    '天刑': -1, '朱雀': -1, '白虎': -1, '天牢': -1, '玄武': -1, '勾陈': -1,
+  };
+  const bonus = zhiShenBonus[huangLi.zhiShen] || 0;
+  
+  const overallScore = Math.min(5, Math.max(1, pickScore(1) + bonus));
+  
   const adviceList = [
     '今日宜积极进取，把握机会。',
     '适合开展新计划，好运相伴。',
@@ -207,11 +230,11 @@ const generateFortune = (zodiac: typeof zodiacs[0], date: Date): DailyFortune =>
     overall: pickRandom(fortunes.overall),
     overallScore,
     career: pickRandom(fortunes.career),
-    careerScore: pickScore(2),
+    careerScore: Math.min(5, Math.max(1, pickScore(2) + bonus)),
     love: pickRandom(fortunes.love),
-    loveScore: pickScore(3),
+    loveScore: Math.min(5, Math.max(1, pickScore(3) + bonus)),
     wealth: pickRandom(fortunes.wealth),
-    wealthScore: pickScore(4),
+    wealthScore: Math.min(5, Math.max(1, pickScore(4) + bonus)),
     health: pickRandom(fortunes.health),
     healthScore: pickScore(5),
     luckyColor: pickRandom(luckyElements.colors),
@@ -240,8 +263,9 @@ export default function DailyFortunePage() {
         setRememberZodiac(true);
         setShowZodiacSelector(false);
         const today = new Date();
-        setFortune(generateFortune(savedZodiac, today));
-        setHuangLi(generateHuangLi(today));
+        const hl = generateHuangLi(today);
+        setHuangLi(hl);
+        setFortune(generateFortune(savedZodiac, today, hl));
       }
     }
   }, []);
@@ -259,9 +283,10 @@ export default function DailyFortunePage() {
     setSelectedZodiac(zodiac);
     setShowZodiacSelector(false);
     const today = new Date();
-    setFortune(generateFortune(zodiac, today));
-    setHuangLi(generateHuangLi(today));
-    setRememberZodiac(true); // 默认记住
+    const hl = generateHuangLi(today);
+    setHuangLi(hl);
+    setFortune(generateFortune(zodiac, today, hl));
+    setRememberZodiac(true);
   };
 
   const handleReset = () => {
@@ -303,7 +328,7 @@ export default function DailyFortunePage() {
             <h1 className="text-4xl font-bold text-sky-100">每日运势</h1>
             <Sun className="w-10 h-10 text-yellow-400 ml-3" />
           </div>
-          <p className="text-sky-200/80">老黄历 · 十二生肖运势 · 今日宜忌</p>
+          <p className="text-sky-200/80">精确老黄历 · 十二生肖运势 · 今日宜忌</p>
         </div>
 
         <div className="max-w-5xl mx-auto">
@@ -337,20 +362,29 @@ export default function DailyFortunePage() {
           {selectedZodiac && fortune && huangLi && !showZodiacSelector && (
             <div className="space-y-6">
               {/* 老黄历头部 */}
-              <Card className="bg-gradient-to-r from-red-900/60 to-orange-900/60 backdrop-blur-md border-red-400/40">
+              <Card className="bg-gradient-to-r from-red-900/70 to-orange-900/70 backdrop-blur-md border-red-400/50">
                 <CardContent className="py-6">
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Calendar className="w-6 h-6 text-yellow-400" />
                     <h2 className="text-2xl font-bold text-white">老黄历</h2>
                   </div>
                   
-                  {/* 干支纪年 */}
+                  {/* 公历农历 */}
                   <div className="text-center mb-4">
                     <p className="text-yellow-100 text-lg">{huangLi.dateStr}</p>
-                    <div className="flex items-center justify-center gap-4 mt-2">
-                      <span className="bg-red-800/60 px-3 py-1 rounded text-yellow-100">{huangLi.ganZhiYear}</span>
-                      <span className="bg-red-800/60 px-3 py-1 rounded text-yellow-100">{huangLi.ganZhiMonth}</span>
-                      <span className="bg-red-800/60 px-3 py-1 rounded text-yellow-100">{huangLi.ganZhiDay}</span>
+                    <p className="text-yellow-200/80 mt-1 flex items-center justify-center gap-2">
+                      <Moon className="w-4 h-4" />
+                      {huangLi.lunarDateStr}
+                      {huangLi.jieQi && <span className="text-green-300">· {huangLi.jieQi}</span>}
+                    </p>
+                  </div>
+                  
+                  {/* 干支纪年 */}
+                  <div className="text-center mb-4">
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <span className="bg-red-800/60 px-3 py-1.5 rounded text-yellow-100 font-medium">{huangLi.ganZhiYear}</span>
+                      <span className="bg-red-800/60 px-3 py-1.5 rounded text-yellow-100 font-medium">{huangLi.ganZhiMonth}</span>
+                      <span className="bg-red-800/60 px-3 py-1.5 rounded text-yellow-100 font-medium">{huangLi.ganZhiDay}</span>
                     </div>
                   </div>
                   
@@ -361,16 +395,16 @@ export default function DailyFortunePage() {
                       <p className="font-bold text-white">{huangLi.zhiShen}</p>
                     </div>
                     <div className="bg-black/20 rounded-lg p-3">
-                      <p className="text-xs text-yellow-200/80 mb-1">五行</p>
-                      <p className="font-bold text-white">{huangLi.wuXing}</p>
+                      <p className="text-xs text-yellow-200/80 mb-1">日冲</p>
+                      <p className="font-bold text-white">{huangLi.chong}</p>
                     </div>
                     <div className="bg-black/20 rounded-lg p-3">
-                      <p className="text-xs text-yellow-200/80 mb-1">冲煞</p>
-                      <p className="font-bold text-white">{huangLi.chongSha}</p>
+                      <p className="text-xs text-yellow-200/80 mb-1">日煞</p>
+                      <p className="font-bold text-white">{huangLi.sha}</p>
                     </div>
                     <div className="bg-black/20 rounded-lg p-3">
-                      <p className="text-xs text-yellow-200/80 mb-1">胎神</p>
-                      <p className="font-bold text-white text-sm">{huangLi.taiShen}</p>
+                      <p className="text-xs text-yellow-200/80 mb-1">星宿</p>
+                      <p className="font-bold text-white">{huangLi.xingSu}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -379,7 +413,7 @@ export default function DailyFortunePage() {
               {/* 今日宜忌 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 宜 */}
-                <Card className="bg-green-800/40 backdrop-blur-md border-green-400/40">
+                <Card className="bg-green-800/50 backdrop-blur-md border-green-400/50">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-green-100 flex items-center gap-2">
                       <span className="text-2xl">✓</span> 今日宜
@@ -387,17 +421,17 @@ export default function DailyFortunePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {huangLi.yi.map((item, i) => (
-                        <span key={i} className="bg-green-700/40 px-3 py-1 rounded-full text-green-100 text-sm">
+                      {huangLi.yi.length > 0 ? huangLi.yi.map((item, i) => (
+                        <span key={i} className="bg-green-700/50 px-3 py-1 rounded-full text-green-100 text-sm">
                           {item}
                         </span>
-                      ))}
+                      )) : <span className="text-green-200/60 text-sm">今日诸事不宜</span>}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* 忌 */}
-                <Card className="bg-red-800/40 backdrop-blur-md border-red-400/40">
+                <Card className="bg-red-800/50 backdrop-blur-md border-red-400/50">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-red-100 flex items-center gap-2">
                       <span className="text-2xl">✗</span> 今日忌
@@ -405,11 +439,11 @@ export default function DailyFortunePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {huangLi.ji.map((item, i) => (
-                        <span key={i} className="bg-red-700/40 px-3 py-1 rounded-full text-red-100 text-sm">
+                      {huangLi.ji.length > 0 ? huangLi.ji.map((item, i) => (
+                        <span key={i} className="bg-red-700/50 px-3 py-1 rounded-full text-red-100 text-sm">
                           {item}
                         </span>
-                      ))}
+                      )) : <span className="text-red-200/60 text-sm">今日百无禁忌</span>}
                     </div>
                   </CardContent>
                 </Card>
@@ -426,27 +460,60 @@ export default function DailyFortunePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-green-300 text-sm mb-2 flex items-center gap-1">
-                        <span>🕐</span> 吉时
+                        <span>🕐</span> 吉时（宜办重要之事）
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {huangLi.jiShi.map((item, i) => (
-                          <span key={i} className="bg-green-700/40 px-3 py-1 rounded text-green-100 text-sm">
+                        {huangLi.jiShi.length > 0 ? huangLi.jiShi.map((item, i) => (
+                          <span key={i} className="bg-green-700/50 px-3 py-1 rounded text-green-100 text-sm">
                             {item}
                           </span>
-                        ))}
+                        )) : <span className="text-green-200/60 text-sm">今日无吉时</span>}
                       </div>
                     </div>
                     <div>
                       <p className="text-red-300 text-sm mb-2 flex items-center gap-1">
-                        <span>⏰</span> 凶时
+                        <span>⏰</span> 凶时（宜静不宜动）
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {huangLi.xiongShi.map((item, i) => (
-                          <span key={i} className="bg-red-700/40 px-3 py-1 rounded text-red-100 text-sm">
+                        {huangLi.xiongShi.length > 0 ? huangLi.xiongShi.map((item, i) => (
+                          <span key={i} className="bg-red-700/50 px-3 py-1 rounded text-red-100 text-sm">
                             {item}
                           </span>
-                        ))}
+                        )) : <span className="text-red-200/60 text-sm">今日无凶时</span>}
                       </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 方位吉凶 */}
+              <Card className="bg-sky-800/40 backdrop-blur-md border-sky-400/40">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg text-white flex items-center gap-2">
+                    <Compass className="w-5 h-5" /> 方位神煞
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+                    <div className="bg-yellow-900/40 rounded-lg p-3">
+                      <p className="text-xs text-yellow-200/80 mb-1">财神</p>
+                      <p className="font-bold text-yellow-100">{huangLi.caiShen}</p>
+                    </div>
+                    <div className="bg-purple-900/40 rounded-lg p-3">
+                      <p className="text-xs text-purple-200/80 mb-1">福神</p>
+                      <p className="font-bold text-purple-100">{huangLi.fuShen}</p>
+                    </div>
+                    <div className="bg-pink-900/40 rounded-lg p-3">
+                      <p className="text-xs text-pink-200/80 mb-1">喜神</p>
+                      <p className="font-bold text-pink-100">{huangLi.xiShen}</p>
+                    </div>
+                    <div className="bg-blue-900/40 rounded-lg p-3">
+                      <p className="text-xs text-blue-200/80 mb-1">阳贵</p>
+                      <p className="font-bold text-blue-100">{huangLi.yangGui}</p>
+                    </div>
+                    <div className="bg-orange-900/40 rounded-lg p-3">
+                      <p className="text-xs text-orange-200/80 mb-1">太阴</p>
+                      <p className="font-bold text-orange-100">{huangLi.taiYang}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -569,26 +636,38 @@ export default function DailyFortunePage() {
                       <div className="font-bold text-white">{fortune.luckyDirection}</div>
                     </div>
                     <div className="bg-sky-950/60 rounded-lg p-4">
-                      <div className="text-2xl mb-1">💰</div>
-                      <div className="text-xs text-sky-200/80 mb-1">财神方位</div>
-                      <div className="font-bold text-white">{huangLi.caiShen}</div>
+                      <div className="text-2xl mb-1">⭐</div>
+                      <div className="text-xs text-sky-200/80 mb-1">星座</div>
+                      <div className="font-bold text-white">{huangLi.xingZuo}</div>
                     </div>
                     <div className="bg-sky-950/60 rounded-lg p-4">
-                      <div className="text-2xl mb-1">🙏</div>
-                      <div className="text-xs text-sky-200/80 mb-1">福神方位</div>
-                      <div className="font-bold text-white">{huangLi.fuShen}</div>
+                      <div className="text-2xl mb-1">🌟</div>
+                      <div className="text-xs text-sky-200/80 mb-1">纳音</div>
+                      <div className="font-bold text-white text-sm">{huangLi.naYin.split(' ')[2]}</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* 彭祖百忌 */}
-              <Card className="bg-amber-900/40 backdrop-blur-md border-amber-400/40">
+              <Card className="bg-amber-900/50 backdrop-blur-md border-amber-400/50">
                 <CardContent className="py-4">
                   <h4 className="font-bold text-amber-100 mb-2 flex items-center gap-2">
                     <span>📜</span> 彭祖百忌
                   </h4>
-                  <p className="text-amber-100/90 text-sm leading-relaxed">{huangLi.pengZu}</p>
+                  <p className="text-amber-100/90 text-sm leading-relaxed">
+                    {huangLi.pengZuGan}。{huangLi.pengZuZhi}。
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 二十八宿 */}
+              <Card className="bg-indigo-900/50 backdrop-blur-md border-indigo-400/50">
+                <CardContent className="py-4">
+                  <h4 className="font-bold text-indigo-100 mb-2 flex items-center gap-2">
+                    <span>🌟</span> 二十八宿
+                  </h4>
+                  <p className="text-indigo-100/90 text-sm leading-relaxed">{huangLi.erShiBaXiu}</p>
                 </CardContent>
               </Card>
 
