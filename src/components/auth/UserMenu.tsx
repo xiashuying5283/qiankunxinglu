@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, UserCircle2, Mail, LogIn, UserPlus } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, History } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
 export function UserMenu() {
@@ -91,6 +92,13 @@ export function UserMenu() {
             )}
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/history" className="flex items-center w-full">
+            <History className="mr-2 h-4 w-4" />
+            历史记录
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
