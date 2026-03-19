@@ -8,6 +8,7 @@ import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loade
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Disclaimer } from '@/components/Disclaimer';
 
 // 类型定义
 interface LineText {
@@ -613,6 +614,9 @@ export default function IChingPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* 免责声明 */}
+              <Disclaimer variant="full" />
 
               {/* 重新占卜按钮 */}
               <div className="text-center">

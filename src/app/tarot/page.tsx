@@ -8,6 +8,7 @@ import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw } from 'lucide
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Disclaimer } from '@/components/Disclaimer';
 
 // 类型定义
 interface TarotCard {
@@ -693,6 +694,9 @@ export default function TarotPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* 免责声明 */}
+              {allRevealed && <Disclaimer variant="full" />}
 
               {/* 重新占卜按钮 */}
               {allRevealed && (

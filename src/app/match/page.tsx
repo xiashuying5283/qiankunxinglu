@@ -9,6 +9,7 @@ import { ArrowLeft, Heart, Sparkles, History, Trash2, Calendar, Clock, User, Che
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Disclaimer } from '@/components/Disclaimer';
 
 // 生成唯一会话ID
 function generateSessionId(): string {
@@ -759,6 +760,9 @@ export default function MatchPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* 免责声明 */}
+              <Disclaimer variant="full" />
 
               {/* 操作按钮 */}
               <div className="flex gap-4 justify-center">
