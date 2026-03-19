@@ -27,6 +27,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// 开发环境模拟用户
+const DEV_USER: User = {
+  id: 'dev-user-001',
+  email: 'dev@test.com',
+  name: '开发者',
+  avatar: undefined,
+  isGuest: false,
+  provider: 'dev',
+};
+
+// 是否为开发环境
+const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
+
 // 获取或创建游客 sessionId
 function getGuestSessionId(): string {
   if (typeof window === 'undefined') return '';
@@ -66,6 +79,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 初始化时获取用户信息
   useEffect(() => {
+    // 开发环境自动登录
+    if (isDev) {
+      console.log('[DEV] 开发环境自动登录');
+      setUser(DEV_USER);
+      setIsLoading(false);
+      return;
+    }
+    
     refreshUser().finally(() => setIsLoading(false));
   }, [refreshUser]);
 
@@ -144,6 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 登出
   const logout = useCallback(async () => {
+    // 开发环境不允许登出
+    if (isDev) {
+      console.log('[DEV] 开发环境不允许登出');
+      return;
+    }
+    
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
