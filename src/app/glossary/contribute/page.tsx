@@ -287,7 +287,7 @@ function ContributePageContent() {
               <CardContent className="space-y-4">
                 {/* 词条名称 */}
                 <div>
-                  <Label htmlFor="term">词条名称 *</Label>
+                  <Label htmlFor="term">词条名称 <span className="text-red-500">*</span></Label>
                   <Input
                     id="term"
                     value={term}
@@ -298,7 +298,7 @@ function ContributePageContent() {
                 
                 {/* 分类 */}
                 <div>
-                  <Label htmlFor="category">分类 *</Label>
+                  <Label htmlFor="category">分类 <span className="text-red-500">*</span></Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger>
                       <SelectValue />
@@ -313,7 +313,7 @@ function ContributePageContent() {
                 
                 {/* 简短描述 */}
                 <div>
-                  <Label htmlFor="shortDesc">简短描述 *</Label>
+                  <Label htmlFor="shortDesc">简短描述 <span className="text-red-500">*</span></Label>
                   <Input
                     id="shortDesc"
                     value={shortDesc}
@@ -324,7 +324,7 @@ function ContributePageContent() {
                 
                 {/* 详细描述 */}
                 <div>
-                  <Label htmlFor="fullDesc">详细描述 *</Label>
+                  <Label htmlFor="fullDesc">详细描述 <span className="text-red-500">*</span></Label>
                   <Textarea
                     id="fullDesc"
                     value={fullDesc}
@@ -420,7 +420,7 @@ function ContributePageContent() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
-                  参考文献 *
+                  参考文献 <span className="text-red-500">*</span>
                 </CardTitle>
                 <CardDescription>
                   引用权威文献，提升词条可信度
@@ -443,7 +443,7 @@ function ContributePageContent() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-xs">书名 *</Label>
+                        <Label className="text-xs">书名 <span className="text-red-500">*</span></Label>
                         <Input
                           value={ref.title}
                           onChange={(e) => updateReference(index, 'title', e.target.value)}
