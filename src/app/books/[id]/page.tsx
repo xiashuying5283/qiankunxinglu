@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BookOpen, ChevronRight, ChevronLeft, List, Hash } from 'lucide-react';
+import { BookOpen, ChevronRight, ChevronLeft, List, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,39 +34,45 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 function renderChapterTree(
   chapters: Chapter[], 
   bookId: number,
-  level: number = 0
+  level: number = 0,
+  startIndex: number = 1
 ): React.ReactNode {
-  return chapters.map((chapter) => (
-    <div key={chapter.id} className={`${level > 0 ? 'ml-4' : ''}`}>
-      {chapter.is_leaf ? (
-        // 叶子节点：可点击阅读
-        <Link href={`/books/${bookId}/${chapter.id}`}>
-          <div className="flex items-center py-2 px-3 hover:bg-amber-100 rounded-lg transition-colors group cursor-pointer">
-            <Hash className="w-4 h-4 text-amber-400 mr-2" />
-            <span className="text-amber-800 group-hover:text-amber-600 transition-colors">
-              {chapter.title}
-            </span>
-          </div>
-        </Link>
-      ) : (
-        // 非叶子节点：标题
-        <div>
-          <div className="flex items-center py-3 px-3">
-            <List className="w-4 h-4 text-amber-600 mr-2" />
-            <span className="text-amber-700 font-medium">{chapter.title}</span>
-            <Badge variant="outline" className="ml-2 text-amber-600 border-amber-300">
-              {chapter.children?.length || 0}
-            </Badge>
-          </div>
-          {chapter.children && chapter.children.length > 0 && (
-            <div className="border-l border-amber-200 ml-5">
-              {renderChapterTree(chapter.children, bookId, level + 1)}
+  return chapters.map((chapter, index) => {
+    const currentIndex = startIndex + index;
+    return (
+      <div key={chapter.id} className={`${level > 0 ? 'ml-4' : ''}`}>
+        {chapter.is_leaf ? (
+          // 叶子节点：可点击阅读
+          <Link href={`/books/${bookId}/${chapter.id}`}>
+            <div className="flex items-center py-2 px-3 hover:bg-amber-100 rounded-lg transition-colors group cursor-pointer">
+              <span className="w-6 h-6 flex items-center justify-center text-xs text-amber-500 bg-amber-100 rounded-full mr-3 font-medium">
+                {currentIndex}
+              </span>
+              <span className="text-amber-800 group-hover:text-amber-600 transition-colors">
+                {chapter.title}
+              </span>
             </div>
-          )}
-        </div>
-      )}
-    </div>
-  ));
+          </Link>
+        ) : (
+          // 非叶子节点：标题
+          <div>
+            <div className="flex items-center py-3 px-3">
+              <List className="w-4 h-4 text-amber-600 mr-2" />
+              <span className="text-amber-700 font-medium">{chapter.title}</span>
+              <Badge variant="outline" className="ml-2 text-amber-600 border-amber-300">
+                {chapter.children?.length || 0}
+              </Badge>
+            </div>
+            {chapter.children && chapter.children.length > 0 && (
+              <div className="border-l border-amber-200 ml-5">
+                {renderChapterTree(chapter.children, bookId, level + 1, 1)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  });
 }
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
