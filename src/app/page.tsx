@@ -90,8 +90,6 @@ export default function Home() {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* 顶部光晕 */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-radial from-amber-900/20 via-transparent to-transparent rounded-full blur-3xl" />
-        {/* 星点装饰 */}
-        <div className="absolute inset-0 bg-[url('/stars.png')] opacity-30" />
       </div>
 
       {/* 主内容 */}
