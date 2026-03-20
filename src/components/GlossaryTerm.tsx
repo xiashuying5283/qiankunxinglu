@@ -27,6 +27,15 @@ interface GlossaryData {
   origin?: string;
   examples?: string[];
   relatedTerms?: string[];
+  references?: Reference[];
+}
+
+interface Reference {
+  title: string;
+  author?: string;
+  publisher?: string;
+  year?: string;
+  url?: string;
 }
 
 // 科普词条缓存
@@ -176,6 +185,61 @@ export function GlossaryTerm({ term, children, category }: GlossaryTermProps) {
                   </div>
                 </div>
               )}
+
+              {/* 参考文献 */}
+              {(data.references && data.references.length > 0) ? (
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    参考文献
+                  </div>
+                  <ol className="list-decimal list-inside text-sm space-y-1.5 text-muted-foreground">
+                    {data.references.map((ref, index) => (
+                      <li key={index} className="leading-relaxed">
+                        <span className="font-medium text-foreground">{ref.title}</span>
+                        {ref.author && <span className="ml-1">— {ref.author}</span>}
+                        {ref.publisher && (
+                          <span className="text-xs ml-1 opacity-70">({ref.publisher}{ref.year ? `, ${ref.year}` : ''})</span>
+                        )}
+                        {ref.url && (
+                          <a
+                            href={ref.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-1 text-primary hover:underline inline-flex items-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <div className="bg-muted/20 rounded-lg p-3 border border-dashed">
+                  <div className="text-sm text-muted-foreground">
+                    暂无参考文献，您可以
+                    <Link
+                      href={`/glossary/contribute?term=${encodeURIComponent(term)}`}
+                      className="text-primary hover:underline ml-1"
+                    >
+                      添加参考文献
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* 贡献入口 */}
+              <div className="pt-3 border-t">
+                <Link
+                  href={`/glossary/contribute?term=${encodeURIComponent(term)}`}
+                  className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  完善此词条
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </Link>
+              </div>
 
               {/* 学习入口 */}
               <div className="pt-4 border-t">

@@ -28,6 +28,7 @@ async function fetchGlossaryData() {
     origin: item.origin,
     examples: item.examples,
     relatedTerms: item.related_terms,
+    references: item.references || [],
   }));
 }
 
@@ -68,6 +69,7 @@ export async function GET(request: Request) {
         origin: data.origin,
         examples: data.examples,
         relatedTerms: data.related_terms,
+        references: data.references || [],
       });
     }
     

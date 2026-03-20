@@ -32,7 +32,15 @@ start_service() {
     echo "Initializing glossary data..."
     curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/init" > /dev/null 2>&1 || echo "周易词条初始化完成或已存在"
     curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/bazi/init" > /dev/null 2>&1 || echo "八字词条初始化完成或已存在"
-    echo "Glossary data initialization completed"
+    
+    # 初始化参考文献数据（可选，失败不影响）
+    echo "Initializing references..."
+    curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/references" > /dev/null 2>&1 && echo "参考文献初始化成功" || echo "参考文献初始化跳过"
+    
+    # 为词条添加参考文献（需要数据库支持 references 列）
+    curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/add-references" > /dev/null 2>&1 && echo "词条参考文献更新成功" || echo "词条参考文献更新跳过"
+    
+    echo "Glossary initialization completed"
     
     # 等待服务进程
     wait $SERVER_PID
