@@ -114,22 +114,64 @@ function parseContent(html: string): { original: string[]; notes: string[]; comm
   const notes: string[] = [];
   const commentaries: string[] = [];
 
-  // 提取 [疏] 开头的疏文
-  const shuRegex = /\[疏\]([\s\S]*?)(?=\[疏\]|$)/g;
+  // 1. 提取所有段落内容
+  const paragraphRegex = /<p>([\s\S]*?)<\/p>/g;
+  const paragraphs: string[] = [];
   let match;
-  while ((match = shuRegex.exec(html)) !== null) {
-    const text = cleanText(match[1]);
-    if (text.length > 20) {
-      commentaries.push(text.substring(0, 2000)); // 限制长度
-    }
+  while ((match = paragraphRegex.exec(html)) !== null) {
+    paragraphs.push(match[1]);
   }
 
-  // 提取 < > 中的注文  
-  const zhuRegex = /〈([^〉]+)〉/g;
-  while ((match = zhuRegex.exec(html)) !== null) {
-    const text = cleanText(match[1]);
-    if (text.length > 5) {
-      notes.push(text);
+  // 2. 处理每个段落
+  for (const para of paragraphs) {
+    // 跳过导航链接段落
+    if (para.includes('<a href') && (para.includes('周易') || para.includes('中华文库'))) {
+      continue;
+    }
+    
+    // 检查是否是疏（以[疏]开头）
+    if (para.includes('[疏]')) {
+      // 提取疏的内容
+      const shuMatch = para.match(/\[疏\]([\s\S]*)$/);
+      if (shuMatch) {
+        const text = cleanText(shuMatch[1]);
+        if (text.length > 20) {
+          commentaries.push(text.substring(0, 2000));
+        }
+      }
+      continue;
+    }
+    
+    // 检查是否包含注（<small>标签）
+    if (para.includes('<small')) {
+      // 提取<small>标签内的内容作为注
+      const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/g;
+      let smallMatch;
+      while ((smallMatch = smallRegex.exec(para)) !== null) {
+        const noteText = cleanText(smallMatch[1]);
+        if (noteText.length > 5) {
+          notes.push(noteText);
+        }
+      }
+      
+      // 提取<small>标签之前的内容作为原文
+      const beforeSmall = para.split('<small')[0];
+      const originalText = cleanText(beforeSmall);
+      if (originalText.length > 2) {
+        // 原文通常包含爻辞，如"初九：潜龙勿用。"等
+        original.push(originalText);
+      }
+      continue;
+    }
+    
+    // 普通段落可能是原文（经文）
+    // 原文特征：包含卦辞、爻辞等，如"干下干上"、"元、亨、利、贞"、"九二：见龙在田"等
+    const text = cleanText(para);
+    if (text.length > 2 && !text.startsWith('[')) {
+      // 排除导航性文字
+      if (!text.includes('上一页') && !text.includes('下一页') && !text.includes('目录')) {
+        original.push(text);
+      }
     }
   }
 
