@@ -104,6 +104,14 @@ export default function Home() {
       badge: '新',
     },
     {
+      title: '古籍阅读',
+      description: '周易六十四卦原文、卦辞、爻辞',
+      icon: <BookOpen className="w-6 h-6" />,
+      href: '/read',
+      color: 'from-amber-500 to-yellow-500',
+      badge: '新',
+    },
+    {
       title: '周易学习',
       description: '六十四卦详解，新手入门教程',
       icon: <Compass className="w-6 h-6" />,
