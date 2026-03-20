@@ -37,10 +37,10 @@ export default function Home() {
       highlight: false,
     },
     {
-      title: '每日运势',
-      description: '今日卦运宜忌速查',
-      icon: <Zap className="w-5 h-5" />,
-      href: '/daily-fortune',
+      title: '塔罗牌意',
+      description: '78张牌完整解读',
+      icon: <Moon className="w-5 h-5" />,
+      href: '/learn-tarot',
       highlight: false,
     },
   ];
@@ -48,13 +48,14 @@ export default function Home() {
   // 占卜工具
   const tools = [
     { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
-    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
     { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
     { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
     { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },
     { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
     { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
-    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream' },
+    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
+    { title: '周公解梦', description: '梦境解析', icon: <Sparkles className="w-5 h-5" />, href: '/dream' },
+    { title: '每日运势', description: '今日宜忌', icon: <Zap className="w-5 h-5" />, href: '/daily-fortune' },
   ];
 
   return (
@@ -180,16 +181,18 @@ export default function Home() {
               <Link href={item.href} key={index} className="group">
                 <Card className={`h-full transition-all cursor-pointer ${
                   item.highlight 
-                    ? 'bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/30 hover:border-amber-400/50' 
+                    ? 'bg-[#1a1a1a] border-2 border-amber-500/60 hover:border-amber-400 shadow-lg shadow-amber-500/10' 
                     : 'bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30'
                 }`}>
                   <CardContent className="py-5 px-4">
                     <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3 ${
-                      item.highlight ? 'bg-amber-500/20' : 'bg-amber-500/10 group-hover:bg-amber-500/20'
+                      item.highlight ? 'bg-amber-500/30' : 'bg-amber-500/10 group-hover:bg-amber-500/20'
                     } transition-colors`}>
-                      <div className="text-amber-400">{item.icon}</div>
+                      <div className={item.highlight ? 'text-amber-300' : 'text-amber-400'}>{item.icon}</div>
                     </div>
-                    <h3 className="text-white font-medium mb-1 group-hover:text-amber-200 transition-colors">
+                    <h3 className={`font-medium mb-1 transition-colors ${
+                      item.highlight ? 'text-amber-100' : 'text-white group-hover:text-amber-200'
+                    }`}>
                       {item.title}
                     </h3>
                     <p className="text-gray-500 text-xs">{item.description}</p>
@@ -218,11 +221,11 @@ export default function Home() {
 
           {/* 工具卡片 */}
           <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3">
               {tools.map((tool, index) => (
                 <Link href={tool.href} key={index}>
                   <Card className="group bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
-                    <CardContent className="py-4 px-3 text-center">
+                    <CardContent className="py-4 px-2 text-center">
                       <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-500/10 mb-2 group-hover:bg-amber-500/20 transition-colors">
                         <div className="text-amber-400">{tool.icon}</div>
                       </div>
