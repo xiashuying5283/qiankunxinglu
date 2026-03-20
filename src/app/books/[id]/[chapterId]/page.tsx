@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { 
   BookOpen, ChevronRight, ChevronLeft, 
-  List, Home, Bookmark
+  Home
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,85 +42,55 @@ const CONTENT_TYPE_CONFIG: Record<string, { label: string; color: string; bgColo
   'translation': { label: '译文', color: 'text-green-700', bgColor: 'bg-green-100' },
 };
 
-// 渲染内容
-function renderContent(contents: ContentItem[], groupedContents: Record<string, ContentItem[]>) {
+// 渲染内容 - 配套展示经文+注+疏
+function renderContent(contents: ContentItem[]) {
   return (
-    <div className="space-y-6">
-      {/* 原文 */}
-      {groupedContents.original.map((item, idx) => (
-        <div key={item.id || idx} className="space-y-2">
-          <Badge className={`${CONTENT_TYPE_CONFIG.original.bgColor} ${CONTENT_TYPE_CONFIG.original.color} border-0`}>
-            {item.source || '原文'}
-          </Badge>
-          <div className="text-xl leading-loose text-amber-900 font-serif">
-            {item.content.split('\n').map((line, i) => (
-              <p key={i} className="mb-2">{line}</p>
-            ))}
-          </div>
-        </div>
-      ))}
-      
-      {/* 译文 */}
-      {groupedContents.translation.length > 0 && (
-        <div className="border-t border-amber-200 pt-6">
-          {groupedContents.translation.map((item, idx) => (
-            <div key={item.id || idx} className="space-y-2">
-              <Badge className={`${CONTENT_TYPE_CONFIG.translation.bgColor} ${CONTENT_TYPE_CONFIG.translation.color} border-0`}>
-                {item.source || '译文'}
+    <div className="space-y-8">
+      {contents.map((item, idx) => (
+        <div key={item.id || idx} className="border-b border-amber-200 pb-6 last:border-b-0">
+          {/* 经文 */}
+          {item.content && (
+            <div className="mb-4">
+              <Badge className={`${CONTENT_TYPE_CONFIG.original.bgColor} ${CONTENT_TYPE_CONFIG.original.color} border-0 mb-2`}>
+                经文
               </Badge>
-              <div className="text-lg leading-loose text-amber-800/80">
+              <div className="text-xl leading-loose text-amber-900 font-serif">
                 {item.content.split('\n').map((line, i) => (
                   <p key={i} className="mb-2">{line}</p>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      )}
-      
-      {/* 注释 */}
-      {groupedContents.note.length > 0 && (
-        <div className="border-t border-amber-200 pt-6">
-          <h3 className="text-lg font-medium text-amber-800 mb-4 flex items-center gap-2">
-            <Bookmark className="w-4 h-4 text-blue-600" />
-            注释
-          </h3>
-          {groupedContents.note.map((item, idx) => (
-            <div key={item.id || idx} className="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
-              {item.source && (
-                <p className="text-sm text-blue-600 mb-2">{item.source}</p>
-              )}
+          )}
+          
+          {/* 注（配套） */}
+          {item.note && (
+            <div className="mb-4 pl-4 border-l-2 border-blue-300">
+              <Badge className={`${CONTENT_TYPE_CONFIG.note.bgColor} ${CONTENT_TYPE_CONFIG.note.color} border-0 mb-2`}>
+                注
+              </Badge>
               <div className="text-amber-800/80 leading-relaxed">
-                {item.content.split('\n').map((line, i) => (
+                {item.note.split('\n').map((line, i) => (
                   <p key={i} className="mb-1">{line}</p>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      )}
-      
-      {/* 疏解 */}
-      {groupedContents.commentary.length > 0 && (
-        <div className="border-t border-amber-200 pt-6">
-          <h3 className="text-lg font-medium text-amber-800 mb-4 flex items-center gap-2">
-            <Bookmark className="w-4 h-4 text-purple-600" />
-            疏解
-          </h3>
-          {groupedContents.commentary.map((item, idx) => (
-            <div key={item.id || idx} className="mb-4 p-4 rounded-lg bg-purple-50 border border-purple-200">
-              {item.source && (
-                <p className="text-sm text-purple-600 mb-2">{item.source}</p>
-              )}
-              <div className="text-amber-800/80 leading-relaxed">
-                {item.content.split('\n').map((line, i) => (
+          )}
+          
+          {/* 疏（配套） */}
+          {item.commentary && (
+            <div className="pl-4 border-l-2 border-purple-300">
+              <Badge className={`${CONTENT_TYPE_CONFIG.commentary.bgColor} ${CONTENT_TYPE_CONFIG.commentary.color} border-0 mb-2`}>
+                疏
+              </Badge>
+              <div className="text-amber-800/80 leading-relaxed text-sm">
+                {item.commentary.split('\n').map((line, i) => (
                   <p key={i} className="mb-1">{line}</p>
                 ))}
               </div>
             </div>
-          ))}
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -193,7 +163,7 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
                 <p className="text-sm mt-2">请稍后再来</p>
               </div>
             ) : (
-              renderContent(contents, groupedContents)
+              renderContent(contents)
             )}
           </CardContent>
         </Card>

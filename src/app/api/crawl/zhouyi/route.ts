@@ -108,11 +108,16 @@ function cleanText(text: string): string {
   return text.trim();
 }
 
-// 解析HTML内容
-function parseContent(html: string): { original: string[]; notes: string[]; commentaries: string[] } {
-  const original: string[] = [];
-  const notes: string[] = [];
-  const commentaries: string[] = [];
+// 内容单元：经文 + 注 + 疏 配套
+interface ContentUnit {
+  original: string;      // 经文
+  note?: string;         // 注（可选）
+  commentary?: string;   // 疏（可选）
+}
+
+// 解析HTML内容 - 按段落组织，经文+注+疏配套
+function parseContent(html: string): ContentUnit[] {
+  const units: ContentUnit[] = [];
 
   // 1. 提取所有段落内容
   const paragraphRegex = /<p>([\s\S]*?)<\/p>/g;
@@ -122,7 +127,10 @@ function parseContent(html: string): { original: string[]; notes: string[]; comm
     paragraphs.push(match[1]);
   }
 
-  // 2. 处理每个段落
+  // 2. 遍历段落，识别经文段落和疏段落
+  // 关键：[疏]紧跟在经文之后，需要配对
+  let lastUnit: ContentUnit | null = null;
+
   for (const para of paragraphs) {
     // 跳过导航链接段落
     if (para.includes('<a href') && (para.includes('周易') || para.includes('中华文库'))) {
@@ -131,51 +139,65 @@ function parseContent(html: string): { original: string[]; notes: string[]; comm
     
     // 检查是否是疏（以[疏]开头）
     if (para.includes('[疏]')) {
-      // 提取疏的内容
       const shuMatch = para.match(/\[疏\]([\s\S]*)$/);
       if (shuMatch) {
         const text = cleanText(shuMatch[1]);
         if (text.length > 20) {
-          commentaries.push(text.substring(0, 2000));
+          // 疏应该与最近的经文单元配对
+          if (lastUnit) {
+            lastUnit.commentary = text.substring(0, 2000);
+          } else {
+            // 疏没有对应的经文，单独创建
+            units.push({ original: '', commentary: text.substring(0, 2000) });
+          }
+          // 注意：配对后不重置 lastUnit，因为可能有多个[疏]对应同一段经文
         }
       }
       continue;
     }
     
-    // 检查是否包含注（<small>标签）
+    // 解析经文段落
+    let original = '';
+    let note = '';
+    
     if (para.includes('<small')) {
-      // 提取<small>标签内的内容作为注
-      const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/g;
-      let smallMatch;
-      while ((smallMatch = smallRegex.exec(para)) !== null) {
-        const noteText = cleanText(smallMatch[1]);
-        if (noteText.length > 5) {
-          notes.push(noteText);
-        }
-      }
-      
-      // 提取<small>标签之前的内容作为原文
+      // 包含注的段落
       const beforeSmall = para.split('<small')[0];
-      const originalText = cleanText(beforeSmall);
-      if (originalText.length > 2) {
-        // 原文通常包含爻辞，如"初九：潜龙勿用。"等
-        original.push(originalText);
+      original = cleanText(beforeSmall);
+      
+      // 提取注
+      const smallMatch = para.match(/<small[^>]*>([\s\S]*?)<\/small>/);
+      if (smallMatch) {
+        note = cleanText(smallMatch[1]);
       }
-      continue;
+    } else {
+      // 纯经文段落
+      const text = cleanText(para);
+      if (text.length > 2 && !text.includes('上一页') && !text.includes('下一页') && !text.includes('目录')) {
+        original = text;
+      }
     }
     
-    // 普通段落可能是原文（经文）
-    // 原文特征：包含卦辞、爻辞等，如"干下干上"、"元、亨、利、贞"、"九二：见龙在田"等
-    const text = cleanText(para);
-    if (text.length > 2 && !text.startsWith('[')) {
-      // 排除导航性文字
-      if (!text.includes('上一页') && !text.includes('下一页') && !text.includes('目录')) {
-        original.push(text);
+    // 如果解析到了新的经文
+    if (original) {
+      // 先保存上一个单元（如果有）
+      if (lastUnit) {
+        units.push(lastUnit);
+      }
+      // 创建新单元
+      lastUnit = { original };
+      if (note) {
+        lastUnit.note = note;
       }
     }
   }
+  
+  // 保存最后一个单元
+  if (lastUnit) {
+    units.push(lastUnit);
+  }
 
-  return { original, notes, commentaries };
+  return units;
 }
 
 // GET /api/crawl/zhouyi - 爬取周易正义
@@ -212,7 +234,7 @@ export async function GET() {
         const response = await fetch(chapterInfo.url);
         const html = await response.text();
         
-        const { original, notes, commentaries } = parseContent(html);
+        const contentUnits = parseContent(html);
         
         // 从URL中提取章节标识
         const slug = chapterInfo.url.split('/').pop() || `chapter-${chapterInfo.order}`;
@@ -249,25 +271,30 @@ export async function GET() {
           // 删除旧内容
           await client.from('book_contents').delete().eq('chapter_id', chapterId);
           
-          // 插入新内容
+          // 插入新内容 - 每个内容单元存为一条记录，包含配套的经文+注+疏
           const contents = [];
           let order = 1;
           
-          for (const text of original) {
-            contents.push({ chapter_id: chapterId, content_type: 'original', content: text, content_order: order++ });
-          }
-          for (const text of notes) {
-            contents.push({ chapter_id: chapterId, content_type: 'note', content: text, source: '王弼注', content_order: order++ });
-          }
-          for (const text of commentaries) {
-            contents.push({ chapter_id: chapterId, content_type: 'commentary', content: text, source: '孔颖达疏', content_order: order++ });
+          for (const unit of contentUnits) {
+            // 跳过空单元
+            if (!unit.original && !unit.commentary) continue;
+            
+            contents.push({
+              chapter_id: chapterId,
+              content_type: unit.original ? 'original' : 'commentary',
+              content: unit.original || '',
+              note: unit.note || null,
+              commentary: unit.commentary || null,
+              source: '周易正义',
+              content_order: order++,
+            });
           }
           
           if (contents.length > 0) {
             await client.from('book_contents').insert(contents);
           }
           
-          logs.push(`  ✓ 原文${original.length} 注${notes.length} 疏${commentaries.length}`);
+          logs.push(`  ✓ 内容单元${contents.length}个`);
           successCount++;
         }
         

@@ -38,6 +38,8 @@ export interface ContentItem {
   content: string;
   source: string | null;
   content_order: number | null;
+  note: string | null;        // 注（配套）
+  commentary: string | null;  // 疏（配套）
   created_at: string;
   updated_at: string;
 }
