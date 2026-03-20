@@ -40,10 +40,6 @@ start_service() {
     # 为词条添加参考文献（需要数据库支持 references 列）
     curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/add-references" > /dev/null 2>&1 && echo "词条参考文献更新成功" || echo "词条参考文献更新跳过"
     
-    # 初始化书籍数据
-    echo "Initializing books data..."
-    curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/books/init" > /dev/null 2>&1 && echo "书籍数据初始化成功" || echo "书籍数据初始化跳过"
-    
     echo "Glossary initialization completed"
     
     # 等待服务进程
