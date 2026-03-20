@@ -40,9 +40,14 @@ start_service() {
     # 为词条添加参考文献
     curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/glossary/add-references" > /dev/null 2>&1 && echo "词条参考文献更新成功" || echo "词条参考文献更新跳过"
     
-    # 初始化书籍数据
+    # 初始化书籍数据（必须成功）
     echo "Initializing books data..."
-    curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/books/init" > /dev/null 2>&1 && echo "书籍数据初始化成功" || echo "书籍数据初始化跳过"
+    BOOKS_INIT_RESULT=$(curl -s -X POST "http://localhost:${DEPLOY_RUN_PORT}/api/books/init" 2>&1)
+    echo "Books init result: ${BOOKS_INIT_RESULT}"
+    
+    # 验证书籍数据
+    BOOKS_COUNT=$(curl -s "http://localhost:${DEPLOY_RUN_PORT}/api/books" 2>&1 | grep -o '"id"' | wc -l)
+    echo "Books count in database: ${BOOKS_COUNT}"
     
     echo "Initialization completed"
     
