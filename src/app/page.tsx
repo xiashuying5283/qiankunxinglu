@@ -2,302 +2,374 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
-  Wand2, Sun, Calendar, Zap, ArrowRight,
-  Users, Shield
-} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
+import { 
+  BookOpen, Moon, Compass, PenTool, Star, Wand2, 
+  Calendar, Heart, Sparkles, ArrowRight, ChevronRight,
+  BookMarked, FileText, Layers, Zap
+} from 'lucide-react';
 
 export default function Home() {
-  // 高频核心功能 - 首屏C位
-  const coreFeatures = [
+  // 易经学习功能
+  const ichingLearning = [
     {
-      title: '每日运势',
-      subtitle: '今日运势速查',
-      description: '掌握每日幸运指引，了解事业、感情、财运走向',
-      icon: <Sun className="w-7 h-7" />,
-      href: '/daily-fortune',
-      color: 'from-sky-500 to-blue-500',
-      badge: '推荐',
-    },
-    {
-      title: '周易占卜',
-      subtitle: '周易起卦',
-      description: '解当下困惑，探知天机指引',
-      icon: <BookOpen className="w-7 h-7" />,
-      href: '/iching',
-      color: 'from-amber-500 to-orange-500',
-      badge: '经典',
-    },
-    {
-      title: '塔罗占卜',
-      subtitle: '塔罗抽牌',
-      description: '探前路方向，揭示命运的奥秘',
-      icon: <Moon className="w-7 h-7" />,
-      href: '/tarot',
-      color: 'from-purple-500 to-indigo-500',
-      badge: '热门',
-    },
-    {
-      title: '周公解梦',
-      subtitle: '梦境解读',
-      description: '解读梦中玄机，揭示潜意识密码',
-      icon: <Moon className="w-7 h-7" />,
-      href: '/dream',
-      color: 'from-indigo-500 to-violet-500',
-      badge: null,
-    },
-  ];
-
-  // 其他占卜功能
-  const otherFeatures = [
-    {
-      title: '测字算卦',
-      description: '一字断事，解心中疑虑',
-      icon: <PenTool className="w-6 h-6" />,
-      href: '/char-divination',
-      color: 'from-cyan-500 to-blue-500',
-    },
-    {
-      title: '梅花易数',
-      description: '以数明理，揭示天机',
-      icon: <Star className="w-6 h-6" />,
-      href: '/plum-blossom',
-      color: 'from-pink-500 to-rose-500',
-    },
-    {
-      title: '观音灵签',
-      description: '虔诚抽签，指点迷津',
-      icon: <Wand2 className="w-6 h-6" />,
-      href: '/fortune-stick',
-      color: 'from-yellow-500 to-amber-500',
-    },
-    {
-      title: '生辰八字',
-      description: '推算命盘与五行',
-      icon: <Calendar className="w-6 h-6" />,
-      href: '/bazi',
-      color: 'from-amber-500 to-orange-500',
-    },
-    {
-      title: '姻缘匹配',
-      description: '测算你们的缘分指数',
-      icon: <Heart className="w-6 h-6" />,
-      href: '/match',
-      color: 'from-rose-500 to-red-500',
-    },
-  ];
-
-  // 学习板块
-  const learningFeatures = [
-    {
-      title: '科普词典',
-      description: '周易八字术语详解，系统学习传统文化',
-      icon: <BookOpen className="w-6 h-6" />,
-      href: '/glossary',
-      color: 'from-blue-500 to-cyan-500',
-      badge: '新',
+      title: '六十四卦详解',
+      description: '卦辞、爻辞、象传图解',
+      icon: <Layers className="w-5 h-5" />,
+      href: '/learn',
     },
     {
       title: '古籍阅读',
-      description: '周易正义等经典典籍，原文注疏对照',
-      icon: <BookOpen className="w-6 h-6" />,
+      description: '周易正义注疏对照',
+      icon: <BookMarked className="w-5 h-5" />,
       href: '/books',
-      color: 'from-amber-500 to-yellow-500',
-      badge: '新',
     },
     {
-      title: '周易学习',
-      description: '六十四卦详解，新手入门教程',
-      icon: <Compass className="w-6 h-6" />,
-      href: '/learn',
-      color: 'from-green-500 to-emerald-500',
-      badge: '新',
+      title: '科普词典',
+      description: '术语百科快速查询',
+      icon: <FileText className="w-5 h-5" />,
+      href: '/glossary',
     },
     {
-      title: '塔罗学习',
-      description: '78张牌详解，牌阵使用指南',
-      icon: <Moon className="w-6 h-6" />,
-      href: '/learn-tarot',
-      color: 'from-violet-500 to-purple-500',
-      badge: '新',
+      title: '每日运势',
+      description: '今日卦运宜忌速查',
+      icon: <Zap className="w-5 h-5" />,
+      href: '/daily-fortune',
     },
   ];
 
+  // 易经工具功能
+  const ichingTools = [
+    { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
+    { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
+    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
+    { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },
+    { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
+    { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
+  ];
+
+  // 塔罗学习功能
+  const tarotLearning = [
+    {
+      title: '牌意详解',
+      description: '78张牌完整解读',
+      icon: <Layers className="w-5 h-5" />,
+      href: '/learn-tarot',
+    },
+    {
+      title: '牌阵教程',
+      description: '经典牌阵使用指南',
+      icon: <Compass className="w-5 h-5" />,
+      href: '/learn-tarot',
+    },
+    {
+      title: '每日一牌',
+      description: '今日牌灵指引',
+      icon: <Sparkles className="w-5 h-5" />,
+      href: '/tarot',
+    },
+  ];
+
+  // 塔罗工具功能
+  const tarotTools = [
+    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
+    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* OAuth 登录成功处理 */}
       <Suspense fallback={null}>
         <OAuthHandler />
       </Suspense>
 
-      {/* 星空背景效果 */}
+      {/* 背景装饰 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="stars"></div>
+        {/* 顶部光晕 */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-radial from-amber-900/20 via-transparent to-transparent rounded-full blur-3xl" />
+        {/* 星点装饰 */}
+        <div className="absolute inset-0 bg-[url('/stars.png')] opacity-30" />
       </div>
 
       {/* 主内容 */}
       <div className="relative z-10">
         {/* 顶部导航栏 */}
-        <div className="container mx-auto px-4 py-4 flex items-center justify-end">
-          <UserMenu />
-        </div>
-        
+        <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+              </div>
+              <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+                乾坤星路
+              </span>
+            </Link>
+
+            {/* 导航链接 */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link href="/" className="text-amber-200 hover:text-amber-100 transition-colors">
+                首页
+              </Link>
+              <Link href="/learn" className="text-gray-400 hover:text-amber-200 transition-colors">
+                易经学院
+              </Link>
+              <Link href="/learn-tarot" className="text-gray-400 hover:text-amber-200 transition-colors">
+                塔罗秘境
+              </Link>
+              <Link href="/daily-fortune" className="text-gray-400 hover:text-amber-200 transition-colors">
+                每日一占
+              </Link>
+            </nav>
+
+            {/* 用户菜单 */}
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/iching" 
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all text-sm"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>开启探索</span>
+              </Link>
+              <UserMenu />
+            </div>
+          </div>
+        </header>
+
         {/* Hero 区域 */}
-        <div className="container mx-auto px-4 pt-8 pb-12 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <img 
-              src="/logo.png" 
-              alt="占卜问卦" 
-              className="w-14 h-14 mr-3 rounded-full shadow-lg shadow-purple-500/30"
-            />
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent">
-              占卜问卦
+        <section className="container mx-auto px-4 pt-16 pb-20 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold text-amber-100 mb-4">
+              东方智慧 · 探寻命运法则
             </h1>
-          </div>
-          <p className="text-lg md:text-xl text-purple-200 mb-3">探索古老智慧，指引人生方向</p>
-          <p className="text-sm text-gray-400 max-w-xl mx-auto mb-6">
-            融合周易六十四卦、塔罗牌、测字、梅花易数等传统智慧
-          </p>
-          
-          {/* 新手引导 - 快速入口 */}
-          <Link href="/daily-fortune">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-sky-500/20 to-blue-500/20 
-              border border-sky-400/30 rounded-full px-6 py-3 cursor-pointer
-              hover:from-sky-500/30 hover:to-blue-500/30 transition-all group">
-              <Zap className="w-5 h-5 text-sky-300" />
-              <span className="text-sky-100">新手首选：30秒速测今日运势</span>
-              <ArrowRight className="w-4 h-4 text-sky-300 group-hover:translate-x-1 transition-transform" />
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500/50" />
+              <p className="text-lg text-gray-400">探索宇宙万物的演变逻辑</p>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-500/50" />
             </div>
-          </Link>
-        </div>
+            <p className="text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
+              从周易六十四卦到塔罗七十八牌，系统化学习传统智慧。<br />
+              不止于占卜预测，更在于洞察规律、顺势而为。
+            </p>
 
-        {/* 高频核心功能 - 大卡片 */}
-        <div className="container mx-auto px-4 mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {coreFeatures.map((feature, index) => (
-              <Link href={feature.href} key={index}>
-                <Card className="group h-full bg-white/10 backdrop-blur-md border-white/20 
-                  hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl 
-                  cursor-pointer overflow-hidden">
-                  {feature.badge && (
-                    <div className={`absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full
-                      ${feature.badge === '推荐' ? 'bg-sky-500/80 text-white' : 
-                        feature.badge === '热门' ? 'bg-rose-500/80 text-white' : 
-                        'bg-amber-500/80 text-white'}`}>
-                      {feature.badge}
-                    </div>
-                  )}
-                  <CardHeader className="pb-2">
-                    <div className={`inline-flex w-fit p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-3`}>
-                      <div className="text-white">{feature.icon}</div>
-                    </div>
-                    <CardTitle className="text-lg text-white group-hover:text-amber-300 transition-colors">
-                      {feature.title}
-                    </CardTitle>
-                    <CardDescription className="text-purple-200 text-sm">
-                      {feature.subtitle}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-gray-400 text-xs mb-3">{feature.description}</p>
-                    <Button 
-                      size="sm"
-                      className={`w-full bg-gradient-to-r ${feature.color} hover:opacity-90 text-white`}
-                    >
-                      立即体验
-                    </Button>
-                  </CardContent>
-                </Card>
+            {/* 双入口 */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/learn" className="group w-full sm:w-auto">
+                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 hover:border-amber-400/50 hover:from-amber-500/30 hover:to-amber-600/20 transition-all">
+                  <div className="text-3xl">☰</div>
+                  <div className="text-left">
+                    <div className="text-amber-100 font-medium">易经入门</div>
+                    <div className="text-amber-200/60 text-sm">零基础学习</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-amber-400 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
               </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* 其他占卜功能 */}
-        <div className="container mx-auto px-4 mb-12 max-w-6xl">
-          <h2 className="text-lg font-medium text-gray-300 mb-4 flex items-center">
-            <Sparkles className="w-5 h-5 mr-2 text-amber-400" />
-            更多占卜
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {otherFeatures.map((feature, index) => (
-              <Link href={feature.href} key={index}>
-                <Card className="group bg-white/5 backdrop-blur-md border-white/10 
-                  hover:bg-white/15 transition-all cursor-pointer">
-                  <CardContent className="py-4 px-4">
-                    <div className={`inline-flex w-fit p-2 rounded-lg bg-gradient-to-br ${feature.color} mb-2`}>
-                      <div className="text-white w-5 h-5">{feature.icon}</div>
-                    </div>
-                    <h3 className="text-sm font-medium text-white group-hover:text-amber-300 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">{feature.description}</p>
-                  </CardContent>
-                </Card>
+              <Link href="/learn-tarot" className="group w-full sm:w-auto">
+                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/30 hover:border-indigo-400/50 hover:from-indigo-500/30 hover:to-purple-600/20 transition-all">
+                  <div className="text-3xl">☆</div>
+                  <div className="text-left">
+                    <div className="text-indigo-100 font-medium">塔罗牌意</div>
+                    <div className="text-indigo-200/60 text-sm">78张牌解读</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-indigo-400 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
               </Link>
-            ))}
+            </div>
           </div>
-        </div>
 
-        {/* 学习板块 */}
-        <div className="container mx-auto px-4 mb-12 max-w-6xl">
-          <h2 className="text-lg font-medium text-gray-300 mb-4 flex items-center">
-            <BookOpen className="w-5 h-5 mr-2 text-emerald-400" />
-            知识学习
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {learningFeatures.map((feature, index) => (
-              <Link href={feature.href} key={index} className="block">
-                <Card className="group h-full bg-white/5 backdrop-blur-md border-white/10 
-                  hover:bg-white/15 transition-all cursor-pointer relative">
-                  {feature.badge && (
-                    <div className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full bg-blue-500/80 text-white">
-                      {feature.badge}
-                    </div>
-                  )}
-                  <CardContent className="py-4 px-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`flex-shrink-0 p-2 rounded-lg bg-gradient-to-br ${feature.color}`}>
-                        <div className="text-white w-5 h-5">{feature.icon}</div>
+          {/* 卦象装饰 */}
+          <div className="mt-16 flex items-center justify-center">
+            <div className="relative">
+              <div className="text-6xl text-amber-500/20 font-serif">谦</div>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs text-amber-500/40 tracking-widest">
+                地山谦
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 双主线板块 */}
+        <section className="container mx-auto px-4 pb-20">
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {/* 易经学院 */}
+            <div className="bg-gradient-to-br from-amber-500/5 to-transparent rounded-2xl border border-amber-500/20 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-amber-500 text-xs px-2 py-0.5 rounded border border-amber-500/30">
+                  核心板块
+                </div>
+                <div className="text-amber-100 text-2xl">☰</div>
+              </div>
+              <h2 className="text-2xl font-bold text-amber-100 mb-2">易经学院</h2>
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                系统研习周易智慧，从卦象到古籍注疏，循序渐进掌握易学精髓。
+              </p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {ichingLearning.map((item, index) => (
+                  <Link href={item.href} key={index} className="group">
+                    <div className="p-4 rounded-xl bg-[#1a1a1a]/50 border border-amber-500/10 hover:border-amber-500/30 transition-all h-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="text-amber-400">{item.icon}</div>
+                        <span className="text-white font-medium text-sm group-hover:text-amber-200 transition-colors">
+                          {item.title}
+                        </span>
                       </div>
-                      <h3 className="font-medium text-white group-hover:text-emerald-300 transition-colors">
-                        {feature.title}
-                      </h3>
+                      <p className="text-gray-500 text-xs">{item.description}</p>
                     </div>
-                    <p className="text-xs text-gray-500 ml-11">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* 塔罗秘境 */}
+            <div className="bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl border border-indigo-500/20 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-indigo-400 text-xs px-2 py-0.5 rounded border border-indigo-500/30">
+                  延伸探索
+                </div>
+                <div className="text-indigo-300 text-2xl">☆</div>
+              </div>
+              <h2 className="text-2xl font-bold text-indigo-100 mb-2">塔罗秘境</h2>
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                探索西方神秘符号，从潜意识到原型意象，对话内心直觉。
+              </p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {tarotLearning.map((item, index) => (
+                  <Link href={item.href} key={index} className="group">
+                    <div className="p-4 rounded-xl bg-[#1a1a1a]/50 border border-indigo-500/10 hover:border-indigo-500/30 transition-all h-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="text-indigo-400">{item.icon}</div>
+                        <span className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors">
+                          {item.title}
+                        </span>
+                      </div>
+                      <p className="text-gray-500 text-xs">{item.description}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 数字化起卦系统 */}
+        <section className="container mx-auto px-4 pb-20">
+          <div className="max-w-6xl mx-auto text-center mb-10">
+            <h2 className="text-2xl font-bold text-white mb-2">数字化起卦系统</h2>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-amber-500/50" />
+              <p className="text-gray-400 text-sm">
+                结合传统演卦方法，提供多种起卦工具
+              </p>
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-amber-500/50" />
+            </div>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              不止给出结论，更引导你研读爻辞，领悟背后哲学。
+            </p>
+          </div>
+
+          {/* 工具卡片 */}
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {ichingTools.map((tool, index) => (
+                <Link href={tool.href} key={index}>
+                  <Card className="group bg-[#1a1a1a]/50 border-amber-500/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
+                    <CardContent className="py-5 px-4 text-center">
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 mb-3 group-hover:bg-amber-500/20 transition-colors">
+                        <div className="text-amber-400">{tool.icon}</div>
+                      </div>
+                      <h3 className="text-white text-sm font-medium mb-1 group-hover:text-amber-200 transition-colors">
+                        {tool.title}
+                      </h3>
+                      <p className="text-gray-500 text-xs">{tool.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-6 text-center">
+              <Link href="/iching">
+                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 transition-colors">
+                  <span>立即体验排盘</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* 信任背书 */}
-        <div className="container mx-auto px-4 mb-8">
-          <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-emerald-400" />
-              <span>隐私保护</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
-              <span>基于传统典籍整理</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-400" />
-              <span>民俗文化科普</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* 免责声明 - 页脚 */}
-        <Disclaimer variant="footer" />
+        {/* 页脚 */}
+        <footer className="border-t border-amber-500/10 bg-[#0a0a0a]">
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-4 gap-8 mb-8">
+                {/* Logo区 */}
+                <div className="md:col-span-1">
+                  <Link href="/" className="flex items-center gap-2 mb-4">
+                    <div className="relative w-8 h-8">
+                      <div className="absolute inset-0 rounded-full border-2 border-amber-500/50" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-amber-500" />
+                    </div>
+                    <span className="text-lg font-bold text-amber-100">乾坤星路</span>
+                  </Link>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    融合传统智慧与现代科技，打造专业的术数学习平台。
+                  </p>
+                  <p className="text-amber-500/60 text-xs mt-2">
+                    民俗文化科普 · 仅供学习参考
+                  </p>
+                </div>
+
+                {/* 学习中心 */}
+                <div>
+                  <h4 className="text-amber-200 font-medium mb-4">学习中心</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link href="/learn" className="text-gray-400 hover:text-amber-200 transition-colors">易经入门</Link></li>
+                    <li><Link href="/books" className="text-gray-400 hover:text-amber-200 transition-colors">六十四卦详解</Link></li>
+                    <li><Link href="/glossary" className="text-gray-400 hover:text-amber-200 transition-colors">古籍阅读</Link></li>
+                    <li><Link href="/learn-tarot" className="text-gray-400 hover:text-amber-200 transition-colors">塔罗牌意</Link></li>
+                  </ul>
+                </div>
+
+                {/* 在线工具 */}
+                <div>
+                  <h4 className="text-amber-200 font-medium mb-4">在线工具</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link href="/iching" className="text-gray-400 hover:text-amber-200 transition-colors">周易起卦</Link></li>
+                    <li><Link href="/tarot" className="text-gray-400 hover:text-amber-200 transition-colors">塔罗占卜</Link></li>
+                    <li><Link href="/daily-fortune" className="text-gray-400 hover:text-amber-200 transition-colors">每日运势</Link></li>
+                    <li><Link href="/bazi" className="text-gray-400 hover:text-amber-200 transition-colors">生辰八字</Link></li>
+                  </ul>
+                </div>
+
+                {/* 关于 */}
+                <div>
+                  <h4 className="text-amber-200 font-medium mb-4">关于</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link href="/privacy" className="text-gray-400 hover:text-amber-200 transition-colors">服务条款</Link></li>
+                    <li><Link href="/privacy" className="text-gray-400 hover:text-amber-200 transition-colors">隐私协议</Link></li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 版权 */}
+              <div className="border-t border-amber-500/10 pt-6 text-center">
+                <p className="text-gray-500 text-sm">
+                  © 2024 乾坤星路 · 传承东方智慧
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 免责声明 */}
+          <Disclaimer variant="footer" />
+        </footer>
       </div>
     </div>
   );

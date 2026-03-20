@@ -209,3 +209,16 @@ body {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.7; }
 }
+
+/* 金色渐变文字 */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #f4c542 0%, #d4af37 50%, #f4c542 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 径向渐变背景 */
+.bg-gradient-radial {
+  background: radial-gradient(circle at center, var(--tw-gradient-stops));
+}

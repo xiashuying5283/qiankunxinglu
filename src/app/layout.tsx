@@ -6,11 +6,11 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: '占卜问卦 - 传统民俗文化科普平台',
-    template: '%s | 占卜问卦',
+    default: '乾坤星路 - 东方智慧学习平台',
+    template: '%s | 乾坤星路',
   },
   description:
-    '探索周易六十四卦、塔罗牌、测字、梅花易数等传统智慧。本站为民俗文化科普与娱乐参考，提供每日运势、生辰八字、姻缘匹配等文化体验服务。',
+    '探索周易六十四卦、塔罗牌等传统智慧。从卦象到注疏，系统化学习东方神秘文化。不止于占卜预测，更在于洞察规律、顺势而为。',
   keywords: [
     '周易占卜',
     '六十四卦详解',
@@ -27,26 +27,27 @@ export const metadata: Metadata = {
     '每日运势',
     '传统民俗文化',
     '易经学习',
+    '乾坤星路',
   ],
-  authors: [{ name: '占卜问卦' }],
+  authors: [{ name: '乾坤星路' }],
   generator: 'Coze Code',
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
   },
   openGraph: {
-    title: '占卜问卦 - 传统民俗文化科普平台',
+    title: '乾坤星路 - 东方智慧学习平台',
     description:
-      '探索周易六十四卦、塔罗牌、测字、梅花易数等传统智慧。民俗文化科普与娱乐参考，仅供学习交流。',
+      '探索周易六十四卦、塔罗牌等传统智慧。从卦象到注疏，系统化学习东方神秘文化。',
     type: 'website',
     locale: 'zh_CN',
     images: ['/logo.png'],
-    siteName: '占卜问卦',
+    siteName: '乾坤星路',
   },
   twitter: {
     card: 'summary',
-    title: '占卜问卦 - 传统民俗文化科普平台',
-    description: '探索周易六十四卦、塔罗牌等传统智慧，民俗文化科普与娱乐参考。',
+    title: '乾坤星路 - 东方智慧学习平台',
+    description: '探索周易六十四卦、塔罗牌等传统智慧，系统化学习东方神秘文化。',
   },
   robots: {
     index: true,

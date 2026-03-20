@@ -16,13 +16,13 @@ interface DisclaimerProps {
 export function Disclaimer({ variant = 'full' }: DisclaimerProps) {
   if (variant === 'footer') {
     return (
-      <div className="text-center text-gray-400 text-xs py-4 px-4 border-t border-white/10">
+      <div className="text-center text-gray-500 text-xs py-4 px-4 border-t border-amber-500/10">
         <p className="mb-2">
           本网站所有内容均为传统民俗文化科普与娱乐参考，不构成任何人生决策依据
         </p>
         <p>
           不涉及封建迷信宣传与相关承诺 · 
-          <Link href="/privacy" className="text-purple-300 hover:text-purple-200 ml-1">
+          <Link href="/privacy" className="text-amber-400 hover:text-amber-300 ml-1">
             隐私政策
           </Link>
         </p>
