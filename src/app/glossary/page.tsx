@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, BookOpen, Search, Loader2, ChevronRight,
-  Sparkles, Atom, Compass
+  Sparkles, Atom, Compass, Plus, PenLine
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import {
@@ -27,6 +27,12 @@ interface GlossaryData {
   origin?: string;
   examples?: string[];
   relatedTerms?: string[];
+  references?: Array<{
+    title: string;
+    author?: string;
+    publisher?: string;
+    year?: string;
+  }>;
 }
 
 const CATEGORY_INFO = {
@@ -138,12 +144,20 @@ export default function GlossaryPage() {
         </div>
 
         {/* 标题 */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <BookOpen className="w-12 h-12 text-purple-400 mr-3" />
             <h1 className="text-4xl font-bold text-white">术语词典</h1>
           </div>
-          <p className="text-white/60">系统学习周易、八字等传统文化术语</p>
+          <p className="text-white/60 mb-4">系统学习周易、八字等传统文化术语</p>
+          
+          {/* 贡献词条入口 */}
+          <Link href="/glossary/contribute">
+            <Button className="bg-gradient-to-r from-purple-500 to-amber-500 hover:from-purple-600 hover:to-amber-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              贡献词条
+            </Button>
+          </Link>
         </div>
 
         {/* 搜索栏 */}
@@ -308,6 +322,29 @@ export default function GlossaryPage() {
                     </div>
                   )}
 
+                  {/* 参考文献 */}
+                  {selectedTerm.references && selectedTerm.references.length > 0 && (
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        参考文献
+                      </div>
+                      <ol className="list-decimal list-inside space-y-2">
+                        {selectedTerm.references.map((ref, index) => (
+                          <li key={index} className="text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">{ref.title}</span>
+                            {ref.author && <span className="ml-1">— {ref.author}</span>}
+                            {ref.publisher && (
+                              <span className="text-xs ml-1 opacity-70">
+                                ({ref.publisher}{ref.year ? `, ${ref.year}` : ''})
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
                   {/* 学习入口 */}
                   <div className="pt-4 border-t flex items-center justify-between">
                     <Link
@@ -316,6 +353,13 @@ export default function GlossaryPage() {
                     >
                       深入学习此概念
                       <ChevronRight className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      href={`/glossary/contribute?term=${encodeURIComponent(selectedTerm.term)}&type=edit`}
+                      className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
+                    >
+                      <PenLine className="w-4 h-4" />
+                      完善此词条
                     </Link>
                   </div>
                 </div>
