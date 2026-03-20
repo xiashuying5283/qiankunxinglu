@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
 import { 
@@ -59,7 +60,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--page-bg)] text-white">
       {/* OAuth 登录成功处理 */}
       <Suspense fallback={null}>
         <OAuthHandler />
@@ -74,7 +75,7 @@ export default function Home() {
       {/* 主内容 */}
       <div className="relative z-10">
         {/* 顶部导航栏 */}
-        <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+        <header className="sticky top-0 z-50 bg-[var(--header-bg)]/80 backdrop-blur-md border-b border-amber-500/10 transition-colors">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
@@ -104,7 +105,8 @@ export default function Home() {
             </nav>
 
             {/* 用户菜单 */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
               <Link 
                 href="/iching" 
                 className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all text-sm"
