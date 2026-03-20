@@ -8,20 +8,53 @@ import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
 import { 
   BookOpen, Moon, PenTool, Star, Wand2, 
-  Calendar, Heart, Sparkles, ArrowRight, ChevronRight
+  Calendar, Heart, Sparkles, ArrowRight, ChevronRight,
+  BookMarked, FileText, Layers, Zap
 } from 'lucide-react';
 
 export default function Home() {
+  // 学习资源
+  const learningResources = [
+    {
+      title: '古籍阅读',
+      description: '周易正义等经典注疏，原文对照',
+      icon: <BookMarked className="w-5 h-5" />,
+      href: '/books',
+      highlight: true,
+    },
+    {
+      title: '六十四卦详解',
+      description: '卦辞、爻辞、象传图解',
+      icon: <Layers className="w-5 h-5" />,
+      href: '/learn',
+      highlight: false,
+    },
+    {
+      title: '科普词典',
+      description: '术语百科快速查询',
+      icon: <FileText className="w-5 h-5" />,
+      href: '/glossary',
+      highlight: false,
+    },
+    {
+      title: '每日运势',
+      description: '今日卦运宜忌速查',
+      icon: <Zap className="w-5 h-5" />,
+      href: '/daily-fortune',
+      highlight: false,
+    },
+  ];
+
   // 占卜工具
   const tools = [
-    { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching', color: 'amber' },
-    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot', color: 'indigo' },
-    { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination', color: 'amber' },
-    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom', color: 'amber' },
-    { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick', color: 'amber' },
-    { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi', color: 'amber' },
-    { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match', color: 'amber' },
-    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream', color: 'indigo' },
+    { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
+    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
+    { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
+    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
+    { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },
+    { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
+    { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
+    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream' },
   ];
 
   return (
@@ -135,6 +168,38 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 学习资源 */}
+        <section className="container mx-auto px-4 pb-16">
+          <div className="max-w-6xl mx-auto text-center mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">学习资源</h2>
+            <p className="text-gray-400 text-sm">系统研习周易智慧，从古籍到术语，循序渐进</p>
+          </div>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+            {learningResources.map((item, index) => (
+              <Link href={item.href} key={index} className="group">
+                <Card className={`h-full transition-all cursor-pointer ${
+                  item.highlight 
+                    ? 'bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/30 hover:border-amber-400/50' 
+                    : 'bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30'
+                }`}>
+                  <CardContent className="py-5 px-4">
+                    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3 ${
+                      item.highlight ? 'bg-amber-500/20' : 'bg-amber-500/10 group-hover:bg-amber-500/20'
+                    } transition-colors`}>
+                      <div className="text-amber-400">{item.icon}</div>
+                    </div>
+                    <h3 className="text-white font-medium mb-1 group-hover:text-amber-200 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-500 text-xs">{item.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* 数字化起卦系统 */}
         <section className="container mx-auto px-4 pb-20">
           <div className="max-w-6xl mx-auto text-center mb-10">
@@ -158,14 +223,8 @@ export default function Home() {
                 <Link href={tool.href} key={index}>
                   <Card className="group bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
                     <CardContent className="py-4 px-3 text-center">
-                      <div className={`inline-flex items-center justify-center w-9 h-9 rounded-lg mb-2 transition-colors ${
-                        tool.color === 'indigo' 
-                          ? 'bg-indigo-500/10 group-hover:bg-indigo-500/20' 
-                          : 'bg-amber-500/10 group-hover:bg-amber-500/20'
-                      }`}>
-                        <div className={tool.color === 'indigo' ? 'text-indigo-400' : 'text-amber-400'}>
-                          {tool.icon}
-                        </div>
+                      <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-500/10 mb-2 group-hover:bg-amber-500/20 transition-colors">
+                        <div className="text-amber-400">{tool.icon}</div>
                       </div>
                       <h3 className="text-white text-sm font-medium mb-0.5 group-hover:text-amber-200 transition-colors">
                         {tool.title}
