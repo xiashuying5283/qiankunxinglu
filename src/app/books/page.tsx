@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, ChevronRight, Sparkles, BookMarked, Scroll, Library } from 'lucide-react';
+import { BookOpen, ChevronRight, ChevronLeft, Sparkles, BookMarked, Scroll, Library, Home } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: '古籍阅读 - 传统智慧经典',
@@ -58,6 +59,16 @@ export default async function BooksPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <div className="container mx-auto px-4 py-8">
+        {/* 返回首页 */}
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              返回首页
+            </Button>
+          </Link>
+        </div>
+
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">

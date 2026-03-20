@@ -128,7 +128,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         {/* 返回按钮 */}
         <div className="mb-8">
           <Link href="/books">
-            <Button variant="ghost" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100">
+            <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
               <ChevronLeft className="w-4 h-4 mr-2" />
               返回书架
             </Button>
