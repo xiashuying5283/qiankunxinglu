@@ -96,6 +96,14 @@ export default function Home() {
   // 学习板块
   const learningFeatures = [
     {
+      title: '科普词典',
+      description: '周易八字术语详解，系统学习传统文化',
+      icon: <BookOpen className="w-6 h-6" />,
+      href: '/glossary',
+      color: 'from-blue-500 to-cyan-500',
+      badge: '新',
+    },
+    {
       title: '周易学习',
       description: '六十四卦详解，新手入门教程',
       icon: <Compass className="w-6 h-6" />,
@@ -233,11 +241,16 @@ export default function Home() {
             <GraduationCap className="w-5 h-5 mr-2 text-emerald-400" />
             知识学习
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
             {learningFeatures.map((feature, index) => (
               <Link href={feature.href} key={index}>
                 <Card className="group bg-white/5 backdrop-blur-md border-white/10 
-                  hover:bg-white/15 transition-all cursor-pointer">
+                  hover:bg-white/15 transition-all cursor-pointer relative">
+                  {feature.badge && (
+                    <div className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full bg-blue-500/80 text-white">
+                      {feature.badge}
+                    </div>
+                  )}
                   <CardContent className="py-4 px-4 flex items-center gap-4">
                     <div className={`flex-shrink-0 p-3 rounded-xl bg-gradient-to-br ${feature.color}`}>
                       <div className="text-white w-6 h-6">{feature.icon}</div>
