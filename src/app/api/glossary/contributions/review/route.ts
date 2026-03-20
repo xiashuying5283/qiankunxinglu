@@ -57,7 +57,7 @@ export async function POST(request: Request) {
             origin: contribution.origin,
             examples: contribution.examples,
             related_terms: contribution.related_terms,
-            references: contribution.references,
+            refs: contribution.refs,  // 数据库字段名为 refs
           });
         
         if (insertError) {
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             origin: contribution.origin,
             examples: contribution.examples,
             related_terms: contribution.related_terms,
-            references: contribution.references,
+            refs: contribution.refs,  // 数据库字段名为 refs
             updated_at: new Date().toISOString(),
           })
           .eq('id', contribution.original_term_id);

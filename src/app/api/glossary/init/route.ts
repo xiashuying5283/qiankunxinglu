@@ -20,7 +20,7 @@ const GLOSSARY_DATA = [
     origin: '《周易·系辞》："易有太极，是生两仪，两仪生四象，四象生八卦。"',
     examples: ['乾卦代表天、刚健', '坤卦代表地、柔顺', '坎卦代表水、险陷'],
     related_terms: ['爻', '八卦', '六十四卦'],
-    references: [
+    refs: [
       { title: '周易正义', author: '王弼 注，孔颖达 疏', publisher: '中华书局', year: '1980' },
       { title: '周易本义', author: '朱熹', publisher: '中华书局', year: '2009' },
     ],
@@ -46,7 +46,7 @@ const GLOSSARY_DATA = [
     origin: '《周易·系辞》："爻者，言乎变者也。"',
     examples: ['初九为阳爻居初位', '六二为阴爻居二位'],
     related_terms: ['卦', '阴爻', '阳爻', '爻位'],
-    references: [
+    refs: [
       { title: '周易正义', author: '王弼 注，孔颖达 疏', publisher: '中华书局', year: '1980' },
     ],
   },
@@ -67,7 +67,7 @@ const GLOSSARY_DATA = [
 • 本卦为"体"，变卦为"用"`,
     examples: ['占得乾卦为本卦，代表刚健进取的状态', '占得坤卦为本卦，代表柔顺承载的状态'],
     related_terms: ['变卦', '卦辞', '爻辞'],
-    references: [
+    refs: [
       { title: '易经入门', author: '傅佩荣', publisher: '新星出版社', year: '2011' },
     ],
   },
@@ -338,15 +338,15 @@ export async function POST() {
       // 数据已存在，尝试更新参考文献
       let updated = 0;
       for (const item of GLOSSARY_DATA) {
-        if (item.references && item.references.length > 0) {
+        if (item.refs && item.refs.length > 0) {
           try {
             const { error: updateError } = await client
               .from('glossary')
-              .update({ references: item.references })
+              .update({ refs: item.refs })
               .eq('term', item.term);
             if (!updateError) updated++;
           } catch {
-            // references 列可能不存在，跳过
+            // refs 列可能不存在，跳过
           }
         }
       }

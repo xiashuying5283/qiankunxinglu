@@ -16,7 +16,7 @@ export const glossary = pgTable("glossary", {
   origin: text(),
   examples: jsonb().default([]),
   relatedTerms: jsonb("related_terms").default([]),
-  references: jsonb().default([]),
+  refs: jsonb().default([]),  // 参考文献（避免使用 references 保留字）
   createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
@@ -52,7 +52,7 @@ export const glossaryContributions = pgTable("glossary_contributions", {
   origin: text(),
   examples: jsonb().default([]),
   relatedTerms: jsonb("related_terms").default([]),
-  references: jsonb().default([]),
+  refs: jsonb().default([]),  // 参考文献（避免使用 references 保留字）
   contributionType: varchar("contribution_type", { length: 20 }).default('add'),
   originalTermId: integer("original_term_id"),
   userId: varchar("user_id", { length: 36 }),

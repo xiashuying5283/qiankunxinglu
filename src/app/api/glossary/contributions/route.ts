@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       origin: item.origin,
       examples: item.examples,
       relatedTerms: item.related_terms,
-      references: item.references,
+      references: item.refs || [],  // 数据库字段名为 refs
       contributionType: item.contribution_type,
       originalTermId: item.original_term_id,
       userId: item.user_id,
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
         origin,
         examples,
         related_terms,
-        references,
+        refs: references,  // 数据库字段名为 refs
         contribution_type,
         original_term_id,
         user_id,

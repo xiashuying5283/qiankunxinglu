@@ -83,9 +83,9 @@ const TERM_REFERENCES: Record<string, Array<{ title: string; author?: string; pu
 
 /**
  * 为现有词条添加参考文献
- * POST /api/glossary/add-references
+ * POST /api/glossary/add-refs
  * 
- * 注意：需要先确保 glossary 表有 references 列
+ * 注意：需要先确保 glossary 表有 refs 列
  */
 export async function POST() {
   try {
@@ -96,13 +96,13 @@ export async function POST() {
       try {
         const { error } = await client
           .from('glossary')
-          .update({ references: refs })
+          .update({ refs: refs })
           .eq('term', term);
         
         if (error) {
           // 如果是列不存在错误，跳过
-          if (error.message.includes('references')) {
-            results.push(`⚠️ ${term}: references 列不存在，请先运行迁移`);
+          if (error.message.includes('refs')) {
+            results.push(`⚠️ ${term}: refs 列不存在，请先运行迁移`);
           } else {
             results.push(`❌ ${term}: ${error.message}`);
           }
@@ -118,7 +118,7 @@ export async function POST() {
       message: '参考文献添加完成',
       results,
       total: Object.keys(TERM_REFERENCES).length,
-      note: '如果看到 "references 列不存在"，请在 Supabase 控制台执行：ALTER TABLE glossary ADD COLUMN references JSONB DEFAULT \'[]\'::jsonb;'
+      note: '如果看到 "refs 列不存在"，请在 Supabase 控制台执行：ALTER TABLE glossary ADD COLUMN refs JSONB DEFAULT \'[]\'::jsonb;'
     });
   } catch (error) {
     console.error('添加参考文献失败:', error);

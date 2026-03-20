@@ -1,14 +1,15 @@
 -- 科普词典数据库初始化脚本
 -- 在 Supabase SQL Editor 中执行此脚本
 
--- 1. 为 glossary 表添加 references 列（如果不存在）
+-- 1. 为 glossary 表添加 refs 列（如果不存在）
+-- 注意：使用 refs 而非 references，因为 references 是 PostgreSQL 保留关键字
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'glossary' AND column_name = 'references'
+    WHERE table_name = 'glossary' AND column_name = 'refs'
   ) THEN
-    ALTER TABLE glossary ADD COLUMN references JSONB DEFAULT '[]'::jsonb;
+    ALTER TABLE glossary ADD COLUMN refs JSONB DEFAULT '[]'::jsonb;
   END IF;
 END $$;
 
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS glossary_contributions (
   origin TEXT,
   examples JSONB DEFAULT '[]'::jsonb,
   related_terms JSONB DEFAULT '[]'::jsonb,
-  references JSONB DEFAULT '[]'::jsonb,
+  refs JSONB DEFAULT '[]'::jsonb,
   contribution_type VARCHAR(20) DEFAULT 'add',
   original_term_id INTEGER,
   user_id VARCHAR(36),
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS glossary_contributions (
 );
 
 -- 4. 创建索引
+CREATE INDEX IF NOT EXISTS glossary_refs_idx ON glossary USING GIN (refs);
 CREATE INDEX IF NOT EXISTS glossary_references_category_idx ON glossary_references(category);
 CREATE INDEX IF NOT EXISTS glossary_contributions_status_idx ON glossary_contributions(status);
 CREATE INDEX IF NOT EXISTS glossary_contributions_term_idx ON glossary_contributions(term);
