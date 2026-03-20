@@ -119,6 +119,14 @@ export default function Home() {
       color: 'from-green-500 to-emerald-500',
       badge: '新',
     },
+    {
+      title: '塔罗学习',
+      description: '78张牌详解，牌阵使用指南',
+      icon: <Moon className="w-6 h-6" />,
+      href: '/learn-tarot',
+      color: 'from-violet-500 to-purple-500',
+      badge: '新',
+    },
   ];
 
   return (
@@ -243,7 +251,7 @@ export default function Home() {
             <BookOpen className="w-5 h-5 mr-2 text-emerald-400" />
             知识学习
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {learningFeatures.map((feature, index) => (
               <Link href={feature.href} key={index}>
                 <Card className="group bg-white/5 backdrop-blur-md border-white/10 
