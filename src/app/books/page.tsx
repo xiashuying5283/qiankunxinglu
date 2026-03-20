@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBooks } from '@/lib/books-service';
 
-// 禁用静态生成，强制动态渲染
+// 动态渲染，每次请求都查数据库
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
