@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, BookOpen, Search, Loader2, ChevronRight,
-  Sparkles, Atom, Compass, AlertCircle
+  Sparkles, Atom, Compass
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import {
@@ -63,8 +63,6 @@ export default function GlossaryPage() {
   const [allTerms, setAllTerms] = useState<GlossaryData[]>([]);
   const [filteredTerms, setFilteredTerms] = useState<GlossaryData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [initializing, setInitializing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<GlossaryData | null>(null);
@@ -82,40 +80,11 @@ export default function GlossaryPage() {
     try {
       const response = await fetch('/api/glossary');
       const data = await response.json();
-      
-      // 如果没有数据，尝试初始化
-      if (!data || data.length === 0) {
-        await initializeData();
-        return;
-      }
-      
-      setAllTerms(data);
-      setFilteredTerms(data);
+      setAllTerms(data || []);
+      setFilteredTerms(data || []);
     } catch (error) {
       console.error('获取词条失败:', error);
-      setError('加载失败，请刷新页面重试');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const initializeData = async () => {
-    setInitializing(true);
-    try {
-      // 先初始化周易词条
-      await fetch('/api/glossary/init', { method: 'POST' });
-      // 再初始化八字词条
-      await fetch('/api/glossary/bazi/init', { method: 'POST' });
-      // 重新获取
-      const response = await fetch('/api/glossary');
-      const data = await response.json();
-      setAllTerms(data);
-      setFilteredTerms(data);
-    } catch (error) {
-      console.error('初始化词条失败:', error);
-      setError('初始化失败，请联系管理员');
-    } finally {
-      setInitializing(false);
       setLoading(false);
     }
   };
@@ -222,28 +191,14 @@ export default function GlossaryPage() {
         </div>
 
         {/* 词条列表 */}
-        {loading || initializing ? (
-          <div className="flex flex-col items-center justify-center py-20">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-purple-400" />
-            <p className="mt-4 text-white/60">
-              {initializing ? '正在初始化词条数据...' : '加载中...'}
-            </p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-20 text-white/60">
-            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
-            <p>{error}</p>
-            <Button 
-              onClick={() => { setLoading(true); fetchTerms(); }}
-              className="mt-4 bg-purple-500 hover:bg-purple-600"
-            >
-              重试
-            </Button>
           </div>
         ) : filteredTerms.length === 0 ? (
           <div className="text-center py-20 text-white/60">
             <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p>未找到相关词条</p>
+            <p>暂无词条数据</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
