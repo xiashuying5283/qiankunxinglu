@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, BookOpen, Search, Loader2, ChevronRight,
-  Sparkles, Atom, Compass
+  Sparkles, Atom, Compass, AlertCircle
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import {
@@ -35,7 +35,7 @@ const CATEGORY_INFO = {
     icon: Sparkles,
     color: 'from-amber-500 to-orange-500',
     bgColor: 'bg-amber-500/10',
-    textColor: 'text-amber-600',
+    textColor: 'text-amber-400',
     borderColor: 'border-amber-500/30',
     description: '周易六十四卦、爻辞、象传等术语解释',
   },
@@ -44,16 +44,16 @@ const CATEGORY_INFO = {
     icon: Atom,
     color: 'from-purple-500 to-indigo-500',
     bgColor: 'bg-purple-500/10',
-    textColor: 'text-purple-600',
+    textColor: 'text-purple-400',
     borderColor: 'border-purple-500/30',
     description: '四柱八字、天干地支、十神等术语解释',
   },
   general: {
     name: '通用',
     icon: Compass,
-    color: 'from-gray-500 to-slate-500',
+    color: 'from-gray-400 to-slate-400',
     bgColor: 'bg-gray-500/10',
-    textColor: 'text-gray-600',
+    textColor: 'text-gray-300',
     borderColor: 'border-gray-500/30',
     description: '传统文化通用术语解释',
   },
@@ -63,6 +63,8 @@ export default function GlossaryPage() {
   const [allTerms, setAllTerms] = useState<GlossaryData[]>([]);
   const [filteredTerms, setFilteredTerms] = useState<GlossaryData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<GlossaryData | null>(null);
@@ -80,11 +82,40 @@ export default function GlossaryPage() {
     try {
       const response = await fetch('/api/glossary');
       const data = await response.json();
+      
+      // 如果没有数据，尝试初始化
+      if (!data || data.length === 0) {
+        await initializeData();
+        return;
+      }
+      
       setAllTerms(data);
       setFilteredTerms(data);
     } catch (error) {
       console.error('获取词条失败:', error);
+      setError('加载失败，请刷新页面重试');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const initializeData = async () => {
+    setInitializing(true);
+    try {
+      // 先初始化周易词条
+      await fetch('/api/glossary/init', { method: 'POST' });
+      // 再初始化八字词条
+      await fetch('/api/glossary/bazi/init', { method: 'POST' });
+      // 重新获取
+      const response = await fetch('/api/glossary');
+      const data = await response.json();
+      setAllTerms(data);
+      setFilteredTerms(data);
+    } catch (error) {
+      console.error('初始化词条失败:', error);
+      setError('初始化失败，请联系管理员');
+    } finally {
+      setInitializing(false);
       setLoading(false);
     }
   };
@@ -160,12 +191,12 @@ export default function GlossaryPage() {
         </div>
 
         {/* 分类标签 */}
-        <div className="flex justify-center gap-4 mb-8 flex-wrap">
+        <div className="flex justify-center gap-3 mb-8 flex-wrap">
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             className={selectedCategory === null 
-              ? 'bg-purple-500 hover:bg-purple-600' 
-              : 'border-white/30 text-white hover:bg-white/10'
+              ? 'bg-purple-500 hover:bg-purple-600 text-white' 
+              : 'bg-white/10 border-white/30 text-white hover:bg-white/20'
             }
             onClick={() => setSelectedCategory(null)}
           >
@@ -178,8 +209,8 @@ export default function GlossaryPage() {
                 key={cat.key}
                 variant={selectedCategory === cat.key ? 'default' : 'outline'}
                 className={selectedCategory === cat.key 
-                  ? `bg-gradient-to-r ${cat.color} hover:opacity-90` 
-                  : 'border-white/30 text-white hover:bg-white/10'
+                  ? `bg-gradient-to-r ${cat.color} hover:opacity-90 text-white` 
+                  : 'bg-white/10 border-white/30 text-white hover:bg-white/20'
                 }
                 onClick={() => setSelectedCategory(cat.key)}
               >
@@ -191,9 +222,23 @@ export default function GlossaryPage() {
         </div>
 
         {/* 词条列表 */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
+        {loading || initializing ? (
+          <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-purple-400" />
+            <p className="mt-4 text-white/60">
+              {initializing ? '正在初始化词条数据...' : '加载中...'}
+            </p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20 text-white/60">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+            <p>{error}</p>
+            <Button 
+              onClick={() => { setLoading(true); fetchTerms(); }}
+              className="mt-4 bg-purple-500 hover:bg-purple-600"
+            >
+              重试
+            </Button>
           </div>
         ) : filteredTerms.length === 0 ? (
           <div className="text-center py-20 text-white/60">
