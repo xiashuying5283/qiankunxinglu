@@ -1,29 +1,12 @@
 import { pgTable, index, unique, serial, integer, varchar, text, jsonb, timestamp, boolean } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-// 用户表（支持正式用户和游客）
-export const users = pgTable("users", {
-	id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
-	email: varchar({ length: 255 }).unique(),
-	password: text(),
-	name: varchar({ length: 50 }),
-	avatar: text(), // 用户头像URL
-	isGuest: boolean("is_guest").default(false).notNull(),
-	sessionId: varchar("session_id", { length: 100 }).unique(),
-	// 第三方登录相关
-	provider: varchar({ length: 20 }), // oauth提供商: google, github
-	providerId: varchar("provider_id", { length: 100 }), // 第三方平台的用户ID
-	// 密码重置相关
-	resetToken: varchar("reset_token", { length: 100 }),
-	resetTokenExpires: timestamp("reset_token_expires", { withTimezone: true, mode: 'string' }),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-}, (table) => [
-	index("users_email_idx").using("btree", table.email.asc().nullsLast().op("text_ops")),
-	index("users_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
-	index("users_provider_idx").using("btree", table.provider.asc().nullsLast().op("text_ops")),
-	index("users_reset_token_idx").using("btree", table.resetToken.asc().nullsLast().op("text_ops")),
-]);
+// 生成 UUID 的函数
+function gen_random_uuid() {
+  return sql`gen_random_uuid()`;
+}
+
+
 
 export const hexagrams = pgTable("hexagrams", {
 	id: serial().notNull(),
@@ -96,13 +79,13 @@ export const dreamKeywords = pgTable("dream_keywords", {
 
 export const dreamRecords = pgTable("dream_records", {
 	id: serial().notNull(),
-	userId: varchar("user_id", { length: 36 }),
 	sessionId: varchar("session_id", { length: 100 }).notNull(),
 	dreamContent: text("dream_content").notNull(),
 	keywords: jsonb().notNull(),
 	interpretation: text().notNull(),
 	advice: text().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	userId: varchar("user_id", { length: 36 }),
 }, (table) => [
 	index("dream_records_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("dream_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
@@ -111,7 +94,6 @@ export const dreamRecords = pgTable("dream_records", {
 
 export const matchRecords = pgTable("match_records", {
 	id: serial().notNull(),
-	userId: varchar("user_id", { length: 36 }),
 	sessionId: varchar("session_id", { length: 100 }).notNull(),
 	name1: varchar({ length: 50 }).notNull(),
 	birth1: varchar({ length: 20 }).notNull(),
@@ -128,29 +110,48 @@ export const matchRecords = pgTable("match_records", {
 	aiInterpretation: text(),
 	advice: text(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	userId: varchar("user_id", { length: 36 }),
 }, (table) => [
 	index("match_records_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("match_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
 	index("match_records_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
 ]);
 
-// 统一占卜记录表（周易、塔罗、观音灵签、测字、梅花易数等）
 export const divinationRecords = pgTable("divination_records", {
-	id: serial().notNull(),
+	id: serial().primaryKey().notNull(),
 	userId: varchar("user_id", { length: 36 }),
 	sessionId: varchar("session_id", { length: 100 }).notNull(),
-	// 占卜类型: iching(周易), tarot(塔罗), fortune_stick(观音灵签), char(测字), plum_blossom(梅花易数)
 	type: varchar({ length: 20 }).notNull(),
-	// 问题/输入
 	question: text(),
-	// 占卜结果（JSON格式，根据类型不同结构不同）
 	result: jsonb().notNull(),
-	// AI解读
-	aiInterpretation: text(),
+	aiInterpretation: text("ai_interpretation"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
-	index("divination_records_type_idx").using("btree", table.type.asc().nullsLast().op("text_ops")),
 	index("divination_records_created_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("divination_records_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
+	index("divination_records_type_idx").using("btree", table.type.asc().nullsLast().op("text_ops")),
 	index("divination_records_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+]);
+
+export const users = pgTable("users", {
+	id: varchar({ length: 36 }).default(gen_random_uuid()).primaryKey().notNull(),
+	email: varchar({ length: 255 }),
+	password: text(),
+	name: varchar({ length: 50 }),
+	isGuest: boolean("is_guest").default(false).notNull(),
+	sessionId: varchar("session_id", { length: 100 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	avatar: text(),
+	provider: varchar({ length: 20 }),
+	providerId: varchar("provider_id", { length: 100 }),
+	resetToken: varchar("reset_token", { length: 100 }),
+	resetTokenExpires: timestamp("reset_token_expires", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	index("users_email_idx").using("btree", table.email.asc().nullsLast().op("text_ops")),
+	index("users_provider_idx").using("btree", table.provider.asc().nullsLast().op("text_ops")),
+	index("users_reset_token_idx").using("btree", table.resetToken.asc().nullsLast().op("text_ops")),
+	index("users_session_idx").using("btree", table.sessionId.asc().nullsLast().op("text_ops")),
+	unique("users_email_unique").on(table.email),
+	unique("users_session_id_unique").on(table.sessionId),
 ]);

@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
+import { GlossaryTerm } from '@/components/GlossaryTerm';
+import { HexagramKnowledge } from '@/components/HexagramKnowledge';
 import { 
   QuestionCategorySelector, 
   QuestionCategory, 
@@ -529,7 +531,7 @@ export default function IChingPage() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* 本卦显示 - 精简版 */}
+              {/* 本卦显示 - 带科普词条 */}
               <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
                 <CardHeader className="text-center pb-2">
                   <div className="flex items-center justify-center gap-8">
@@ -537,7 +539,9 @@ export default function IChingPage() {
                     <div className="text-center">
                       <div className="text-5xl mb-2">{result.originalHexagram.symbol}</div>
                       <CardTitle className="text-2xl text-amber-100">{result.originalHexagram.name}卦</CardTitle>
-                      <CardDescription className="text-amber-200/60 text-sm">本卦 · 第{result.originalHexagram.number}卦</CardDescription>
+                      <CardDescription className="text-amber-200/60 text-sm">
+                        <GlossaryTerm term="本卦">本卦</GlossaryTerm> · 第{result.originalHexagram.number}卦
+                      </CardDescription>
                     </div>
                     
                     {/* 变卦（如果有动爻） */}
@@ -547,7 +551,9 @@ export default function IChingPage() {
                         <div className="text-center">
                           <div className="text-5xl mb-2">{result.changedHexagram.symbol}</div>
                           <CardTitle className="text-2xl text-amber-100">{result.changedHexagram.name}卦</CardTitle>
-                          <CardDescription className="text-amber-200/60 text-sm">变卦 · 第{result.changedHexagram.number}卦</CardDescription>
+                          <CardDescription className="text-amber-200/60 text-sm">
+                            <GlossaryTerm term="变卦">变卦</GlossaryTerm> · 第{result.changedHexagram.number}卦
+                          </CardDescription>
                         </div>
                       </>
                     )}
@@ -557,18 +563,22 @@ export default function IChingPage() {
                   {/* 动爻信息 */}
                   {result.changingLines.length > 0 ? (
                     <div className="text-center mb-4">
-                      <span className="text-amber-200">动爻：</span>
+                      <span className="text-amber-200">
+                        <GlossaryTerm term="动爻">动爻</GlossaryTerm>：
+                      </span>
                       <span className="text-amber-100 font-bold">
                         {result.changingLines.map(l => ['初', '二', '三', '四', '五', '上'][l-1] + '爻').join('、')}
                       </span>
                     </div>
                   ) : (
-                    <div className="text-center mb-4 text-amber-200/60">无动爻，以卦辞为主</div>
+                    <div className="text-center mb-4 text-amber-200/60">无动爻，以<GlossaryTerm term="卦辞">卦辞</GlossaryTerm>为主</div>
                   )}
                   
-                  {/* 卦辞 - 仅展示原文，不展开 */}
+                  {/* 卦辞 */}
                   <div className="bg-amber-950/60 rounded-lg p-4 text-center">
+                    <div className="text-xs text-amber-400 mb-2">卦辞</div>
                     <p className="text-amber-100 text-lg">{result.originalHexagram.judgement}</p>
+                    <p className="text-amber-200/70 text-sm mt-2">{result.originalHexagram.judgementMeaning}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -605,6 +615,35 @@ export default function IChingPage() {
                       <div ref={interpretationRef} />
                     </div>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* 卦象科普卡片 */}
+              <HexagramKnowledge 
+                hexagramNumber={result.originalHexagram.number} 
+                hexagramName={result.originalHexagram.name} 
+              />
+
+              {/* 进阶学习入口 */}
+              <Card className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border-purple-400/30">
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-purple-100 font-medium flex items-center gap-2">
+                        <GraduationCap className="w-5 h-5" />
+                        想深入学习周易？
+                      </div>
+                      <div className="text-purple-200/60 text-sm mt-1">
+                        前往学习中心，系统学习卦象知识与断卦技巧
+                      </div>
+                    </div>
+                    <Link href="/learn">
+                      <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600">
+                        开始学习
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
 
