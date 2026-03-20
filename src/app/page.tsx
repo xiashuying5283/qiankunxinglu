@@ -105,9 +105,9 @@ export default function Home() {
     },
     {
       title: '古籍阅读',
-      description: '周易六十四卦原文、卦辞、爻辞',
+      description: '周易正义等经典典籍，原文注疏对照',
       icon: <BookOpen className="w-6 h-6" />,
-      href: '/read',
+      href: '/books',
       color: 'from-amber-500 to-yellow-500',
       badge: '新',
     },

@@ -217,3 +217,58 @@ export const users = pgTable("users", {
 	unique("users_email_unique").on(table.email),
 	unique("users_session_id_unique").on(table.sessionId),
 ]);
+
+// 古籍阅读系统表
+
+// 书籍表
+export const books = pgTable("books", {
+	id: serial().notNull(),
+	title: varchar({ length: 255 }).notNull(),
+	titlePinyin: varchar("title_pinyin", { length: 255 }),
+	author: varchar({ length: 100 }),
+	dynasty: varchar({ length: 50 }),
+	category: varchar({ length: 50 }),
+	description: text(),
+	coverUrl: varchar("cover_url", { length: 500 }),
+	totalChapters: integer("total_chapters").default(0),
+	status: varchar({ length: 20 }).default('active'),
+	sortOrder: integer("sort_order").default(0),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("books_category_idx").using("btree", table.category.asc().nullsLast().op("text_ops")),
+	index("books_status_idx").using("btree", table.status.asc().nullsLast().op("text_ops")),
+]);
+
+// 章节表（支持多级目录）
+export const chapters = pgTable("chapters", {
+	id: serial().notNull(),
+	bookId: integer("book_id").notNull(),
+	parentId: integer("parent_id"),
+	title: varchar({ length: 255 }).notNull(),
+	slug: varchar({ length: 100 }),
+	chapterOrder: integer("chapter_order").default(0),
+	level: integer().default(1),
+	isLeaf: boolean("is_leaf").default(false),
+	wordCount: integer("word_count").default(0),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("chapters_book_id_idx").using("btree", table.bookId.asc().nullsLast().op("int4_ops")),
+	index("chapters_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("int4_ops")),
+]);
+
+// 内容表
+export const bookContents = pgTable("book_contents", {
+	id: serial().notNull(),
+	chapterId: integer("chapter_id").notNull(),
+	contentType: varchar("content_type", { length: 20 }).notNull(),
+	content: text().notNull(),
+	source: varchar({ length: 100 }),
+	contentOrder: integer("content_order").default(0),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("book_contents_chapter_id_idx").using("btree", table.chapterId.asc().nullsLast().op("int4_ops")),
+	index("book_contents_type_idx").using("btree", table.chapterId.asc().nullsLast().op("int4_ops"), table.contentType.asc().nullsLast().op("text_ops")),
+]);
