@@ -194,26 +194,30 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
       <div className="container mx-auto px-4 py-8">
         {/* 顶部导航 */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <Link href="/books">
-              <Button variant="ghost" size="sm" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100">
-                <Home className="w-4 h-4" />
-              </Button>
-            </Link>
-            <ChevronRight className="w-4 h-4 text-amber-400" />
-            <Link href={`/books/${bookId}`}>
-              <Button variant="ghost" size="sm" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100">
-                {book.title}
-              </Button>
-            </Link>
-          </div>
-          
+          {/* 左侧：返回按钮 */}
           <Link href={`/books/${bookId}`}>
-            <Button variant="ghost" size="sm" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100">
-              <List className="w-4 h-4 mr-2" />
-              目录
+            <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              返回目录
             </Button>
           </Link>
+          
+          {/* 右侧：书架主页 */}
+          <Link href="/books">
+            <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-800 hover:bg-amber-100">
+              <Home className="w-4 h-4 mr-2" />
+              书架
+            </Button>
+          </Link>
+        </div>
+
+        {/* 面包屑导航 */}
+        <div className="flex items-center gap-2 text-sm text-amber-600 mb-6">
+          <Link href="/books" className="hover:text-amber-800">全部书籍</Link>
+          <ChevronRight className="w-4 h-4" />
+          <Link href={`/books/${bookId}`} className="hover:text-amber-800">{book.title}</Link>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-amber-800">{chapter.title}</span>
         </div>
 
         {/* 章节标题 */}
