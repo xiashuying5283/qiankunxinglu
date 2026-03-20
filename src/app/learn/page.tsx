@@ -59,18 +59,18 @@ export default function LearnPage() {
         const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
         const initData = await initResponse.json();
         
-        if (initData.success) {
+          if (initData.success) {
           // 重新加载数据
           const retryResponse = await fetch('/api/hexagrams');
           const retryData = await retryResponse.json();
-          setHexagrams(retryData.hexagrams);
-          setTrigrams(retryData.trigrams);
+          setHexagrams(retryData.hexagrams || []);
+          setTrigrams(retryData.trigrams || []);
         } else {
           setError('数据初始化失败');
         }
       } else if (data.hexagrams) {
         setHexagrams(data.hexagrams);
-        setTrigrams(data.trigrams);
+        setTrigrams(data.trigrams || []);
       } else {
         setError(data.error || '加载数据失败');
       }
