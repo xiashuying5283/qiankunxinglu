@@ -87,6 +87,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* 自定义主题变量 */
+  --header-bg: #ffffff;
+  --page-bg: #fafafa;
+  --card-bg: #ffffff;
+  --card-border: rgba(212, 175, 55, 0.2);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-muted: #999999;
 }
 
 .dark {
@@ -121,6 +130,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  
+  /* 自定义主题变量 */
+  --header-bg: #0a0a0a;
+  --page-bg: #0a0a0a;
+  --card-bg: rgba(26, 26, 26, 0.5);
+  --card-border: rgba(212, 175, 55, 0.2);
+  --text-primary: #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
 }
 
 @layer base {

@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Star, Clock, ChevronDown, ChevronUp, BookOpen, Loader2 } from 'lucide-react';
-import { UserMenu } from '@/components/auth/UserMenu';
+import { Sparkles, Star, Clock, ChevronDown, ChevronUp, BookOpen, Loader2 } from 'lucide-react';
+import { SiteHeader } from '@/components/SiteHeader';
 
 // 类型定义
 interface LineText {
@@ -50,16 +49,13 @@ export default function PlumBlossomPage() {
   } | null>(null);
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
   
-  // 输入区域的ref，用于自动滚动
   const inputAreaRef = useRef<HTMLDivElement>(null);
   
-  // 数据状态
   const [hexagrams, setHexagrams] = useState<HexagramData[]>([]);
   const [trigrams, setTrigrams] = useState<TrigramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 加载数据
   const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -69,12 +65,10 @@ export default function PlumBlossomPage() {
       const data = await response.json();
       
       if (data.needsInit) {
-        // 需要初始化数据
         const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
         const initData = await initResponse.json();
         
         if (initData.success) {
-          // 重新加载数据
           const retryResponse = await fetch('/api/hexagrams');
           const retryData = await retryResponse.json();
           setHexagrams(retryData.hexagrams);
@@ -99,22 +93,18 @@ export default function PlumBlossomPage() {
     loadData();
   }, [loadData]);
 
-  // 选择方法并滚动到输入区域
   const handleMethodSelect = (newMethod: Method) => {
     setMethod(newMethod);
-    // 延迟滚动，确保DOM更新后再滚动
     setTimeout(() => {
       inputAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   };
 
-  // 根据数字获取八卦
   const getTrigramByNumber = (num: number): TrigramData => {
     const remainder = num % 8;
     return trigrams[remainder === 0 ? 7 : remainder - 1];
   };
 
-  // 根据上下卦找到对应的六十四卦
   const findHexagram = (upperName: string, lowerName: string): HexagramData => {
     const found = hexagrams.find(
       h => h.upperTrigram === upperName && h.lowerTrigram === lowerName
@@ -122,7 +112,6 @@ export default function PlumBlossomPage() {
     return found || hexagrams[0];
   };
 
-  // 时间起卦
   const divineByTime = () => {
     if (hexagrams.length === 0 || trigrams.length === 0) return;
     
@@ -130,13 +119,10 @@ export default function PlumBlossomPage() {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const day = now.getDate();
-    const hour = Math.floor(now.getHours() / 2) + 1; // 时辰
+    const hour = Math.floor(now.getHours() / 2) + 1;
 
-    // 上卦 = (年+月+日) % 8
     const upperNum = (year + month + day) % 8;
-    // 下卦 = (年+月+日+时) % 8
     const lowerNum = (year + month + day + hour) % 8;
-    // 动爻 = (年+月+日+时) % 6
     const changingLine = ((year + month + day + hour) % 6) || 6;
 
     const upperTrigram = getTrigramByNumber(upperNum === 0 ? 8 : upperNum);
@@ -157,7 +143,6 @@ export default function PlumBlossomPage() {
     });
     setExpandedLines(new Set());
     
-    // 保存占卜记录
     saveDivinationRecord({
       upperTrigram,
       lowerTrigram,
@@ -172,7 +157,6 @@ export default function PlumBlossomPage() {
     });
   };
 
-  // 数字起卦（三个数字）
   const divineByNumber = () => {
     if (hexagrams.length === 0 || trigrams.length === 0) return;
     
@@ -185,11 +169,8 @@ export default function PlumBlossomPage() {
       return;
     }
 
-    // 第一个数字取上卦
     const upperNum = num1 % 8;
-    // 第二个数字取下卦
     const lowerNum = num2 % 8;
-    // 第三个数字取动爻
     const changingLine = (num3 % 6) || 6;
 
     const upperTrigram = getTrigramByNumber(upperNum === 0 ? 8 : upperNum);
@@ -210,7 +191,6 @@ export default function PlumBlossomPage() {
     });
     setExpandedLines(new Set());
     
-    // 保存占卜记录
     saveDivinationRecord({
       upperTrigram,
       lowerTrigram,
@@ -225,7 +205,6 @@ export default function PlumBlossomPage() {
     });
   };
 
-  // 随机起卦
   const divineRandom = () => {
     if (hexagrams.length === 0 || trigrams.length === 0) return;
     
@@ -251,7 +230,6 @@ export default function PlumBlossomPage() {
     });
     setExpandedLines(new Set());
     
-    // 保存占卜记录
     saveDivinationRecord({
       upperTrigram,
       lowerTrigram,
@@ -266,7 +244,6 @@ export default function PlumBlossomPage() {
     });
   };
 
-  // 保存占卜记录
   const saveDivinationRecord = async (divinationResult: {
     upperTrigram: TrigramData;
     lowerTrigram: TrigramData;
@@ -297,7 +274,6 @@ export default function PlumBlossomPage() {
     }
   };
 
-  // 切换爻辞展开状态
   const toggleLine = (index: number) => {
     setExpandedLines(prev => {
       const newSet = new Set(prev);
@@ -316,31 +292,29 @@ export default function PlumBlossomPage() {
     { id: 'random', name: '随机起卦', icon: Sparkles, description: '随机生成卦象' },
   ];
 
-  // 加载中状态
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+        <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
           <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-pink-300 animate-spin mb-4" />
-            <p className="text-pink-100">正在加载卦象数据...</p>
+            <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+            <p className="text-gray-300">正在加载卦象数据...</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // 错误状态
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-pink-300/30 max-w-md">
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+        <Card className="bg-[#1a1a1a]/50 border-amber-500/20 max-w-md">
           <CardHeader>
-            <CardTitle className="text-pink-100">加载失败</CardTitle>
+            <CardTitle className="text-amber-100">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-pink-200 mb-4">{error}</p>
-            <Button onClick={loadData} className="bg-pink-500 hover:bg-pink-600 text-white">
+            <p className="text-gray-400 mb-4">{error}</p>
+            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-black">
               重试
             </Button>
           </CardContent>
@@ -350,29 +324,18 @@ export default function PlumBlossomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-900 via-rose-900 to-red-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* 顶部导航栏 */}
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/">
-            <Button variant="ghost" className="text-pink-200 hover:text-pink-100 hover:bg-white/10">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回首页
-            </Button>
-          </Link>
-          
-          {/* 用户菜单 */}
-          <UserMenu />
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <SiteHeader />
 
+      <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Star className="w-10 h-10 text-pink-300 mr-3" />
-            <h1 className="text-4xl font-bold text-pink-100">梅花易数</h1>
-            <Star className="w-10 h-10 text-pink-300 ml-3" />
+            <Star className="w-10 h-10 text-amber-500 mr-3" />
+            <h1 className="text-4xl font-bold text-amber-100">梅花易数</h1>
+            <Star className="w-10 h-10 text-amber-500 ml-3" />
           </div>
-          <p className="text-pink-200/80">以数明理，以象言事，探索数字与命运的关联</p>
+          <p className="text-gray-400">以数明理，以象言事，探索数字与命运的关联</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -383,15 +346,15 @@ export default function PlumBlossomPage() {
                 key={m.id}
                 className={`cursor-pointer transition-all ${
                   method === m.id
-                    ? 'bg-white/20 border-pink-400/50 scale-105'
-                    : 'bg-white/10 border-pink-300/30 hover:bg-white/15'
+                    ? 'bg-[#1a1a1a] border-amber-500/50'
+                    : 'bg-[#1a1a1a]/50 border-amber-500/20 hover:border-amber-500/30'
                 }`}
                 onClick={() => handleMethodSelect(m.id as Method)}
               >
                 <CardContent className="py-6 text-center">
-                  <m.icon className={`w-8 h-8 mx-auto mb-2 ${method === m.id ? 'text-pink-200' : 'text-pink-300/60'}`} />
-                  <div className="text-lg font-medium text-pink-100">{m.name}</div>
-                  <div className="text-sm text-pink-200/60 mt-1">{m.description}</div>
+                  <m.icon className={`w-8 h-8 mx-auto mb-2 ${method === m.id ? 'text-amber-400' : 'text-gray-500'}`} />
+                  <div className="text-lg font-medium text-amber-100">{m.name}</div>
+                  <div className="text-sm text-gray-500 mt-1">{m.description}</div>
                 </CardContent>
               </Card>
             ))}
@@ -400,14 +363,14 @@ export default function PlumBlossomPage() {
           {/* 输入区域 */}
           {!result && (
             <div ref={inputAreaRef}>
-              <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-pink-100">
+                <CardTitle className="text-2xl text-amber-100">
                   {method === 'time' && '时间起卦'}
                   {method === 'number' && '数字起卦'}
                   {method === 'random' && '随机起卦'}
                 </CardTitle>
-                <CardDescription className="text-pink-200/60">
+                <CardDescription className="text-gray-500">
                   {method === 'time' && '使用当前日期时间为您推算卦象'}
                   {method === 'number' && '输入三个数字：第一个取上卦，第二个取下卦，第三个取动爻'}
                   {method === 'random' && '随机生成一组数字为您推算卦象'}
@@ -416,12 +379,12 @@ export default function PlumBlossomPage() {
               <CardContent className="space-y-4">
                 {method === 'time' && (
                   <div className="text-center py-8">
-                    <p className="text-pink-200 mb-6">
+                    <p className="text-gray-400 mb-6">
                       将使用当前的年、月、日、时为您起卦
                     </p>
                     <Button
                       onClick={divineByTime}
-                      className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
+                      className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                     >
                       <Clock className="w-5 h-5 mr-2" />
                       开始起卦
@@ -433,33 +396,33 @@ export default function PlumBlossomPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm text-pink-200 mb-2 block text-center">第一个数字（上卦）</label>
+                        <label className="text-sm text-gray-400 mb-2 block text-center">第一个数字（上卦）</label>
                         <Input
                           type="number"
                           value={numberInput.num1}
                           onChange={(e) => setNumberInput({ ...numberInput, num1: e.target.value })}
                           placeholder="上卦"
-                          className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
+                          className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center text-xl h-14"
                         />
                       </div>
                       <div>
-                        <label className="text-sm text-pink-200 mb-2 block text-center">第二个数字（下卦）</label>
+                        <label className="text-sm text-gray-400 mb-2 block text-center">第二个数字（下卦）</label>
                         <Input
                           type="number"
                           value={numberInput.num2}
                           onChange={(e) => setNumberInput({ ...numberInput, num2: e.target.value })}
                           placeholder="下卦"
-                          className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
+                          className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center text-xl h-14"
                         />
                       </div>
                       <div>
-                        <label className="text-sm text-pink-200 mb-2 block text-center">第三个数字（动爻）</label>
+                        <label className="text-sm text-gray-400 mb-2 block text-center">第三个数字（动爻）</label>
                         <Input
                           type="number"
                           value={numberInput.num3}
                           onChange={(e) => setNumberInput({ ...numberInput, num3: e.target.value })}
                           placeholder="动爻"
-                          className="bg-white/10 border-pink-300/30 text-pink-100 placeholder:text-pink-200/40 text-center text-xl h-14"
+                          className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center text-xl h-14"
                         />
                       </div>
                     </div>
@@ -467,7 +430,7 @@ export default function PlumBlossomPage() {
                       <Button
                         onClick={divineByNumber}
                         disabled={!numberInput.num1 || !numberInput.num2 || !numberInput.num3}
-                        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
+                        className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                       >
                         <Star className="w-5 h-5 mr-2" />
                         开始起卦
@@ -478,12 +441,12 @@ export default function PlumBlossomPage() {
 
                 {method === 'random' && (
                   <div className="text-center py-8">
-                    <p className="text-pink-200 mb-6">
+                    <p className="text-gray-400 mb-6">
                       随机生成数字为您起卦
                     </p>
                     <Button
                       onClick={divineRandom}
-                      className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
+                      className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
                       随机起卦
@@ -500,24 +463,24 @@ export default function PlumBlossomPage() {
             <div className="space-y-6">
               {/* 数字信息 */}
               {result.numbers && (
-                <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+                <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
                   <CardContent className="py-6">
                     <div className="text-center">
-                      <div className="text-lg text-pink-200 mb-2">{result.method}</div>
+                      <div className="text-lg text-gray-400 mb-2">{result.method}</div>
                       <div className="flex justify-center gap-6">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-pink-100">{result.numbers.upper}</div>
-                          <div className="text-xs text-pink-200/60">上卦数</div>
+                          <div className="text-2xl font-bold text-amber-100">{result.numbers.upper}</div>
+                          <div className="text-xs text-gray-500">上卦数</div>
                         </div>
-                        <div className="text-2xl text-pink-300">+</div>
+                        <div className="text-2xl text-amber-500">+</div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-pink-100">{result.numbers.lower}</div>
-                          <div className="text-xs text-pink-200/60">下卦数</div>
+                          <div className="text-2xl font-bold text-amber-100">{result.numbers.lower}</div>
+                          <div className="text-xs text-gray-500">下卦数</div>
                         </div>
-                        <div className="text-2xl text-pink-300">+</div>
+                        <div className="text-2xl text-amber-500">+</div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-pink-100">{result.numbers.change}</div>
-                          <div className="text-xs text-pink-200/60">动爻数</div>
+                          <div className="text-2xl font-bold text-amber-100">{result.numbers.change}</div>
+                          <div className="text-xs text-gray-500">动爻数</div>
                         </div>
                       </div>
                     </div>
@@ -525,66 +488,61 @@ export default function PlumBlossomPage() {
                 </Card>
               )}
 
-              {/* 卦象显示 - 显示完整的六十四卦 */}
-              <Card className="bg-white/10 backdrop-blur-md border-pink-300/30">
+              {/* 卦象显示 */}
+              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl text-pink-100">所成卦象</CardTitle>
+                  <CardTitle className="text-2xl text-amber-100">所成卦象</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* 完整卦象 */}
                   <div className="text-center mb-6">
                     <div className="text-8xl mb-4">{result.hexagram.symbol}</div>
-                    <div className="text-3xl font-bold text-pink-100 mb-2">
+                    <div className="text-3xl font-bold text-amber-100 mb-2">
                       第{result.hexagram.number}卦 · {result.hexagram.name}卦
                     </div>
-                    <div className="text-pink-200/80">
+                    <div className="text-gray-400">
                       {result.upperTrigram.name}上{result.lowerTrigram.name}下
                     </div>
                   </div>
 
-                  {/* 上下卦分解 */}
                   <div className="flex justify-center items-center gap-6 mb-6">
                     <div className="text-center">
                       <div className="text-4xl mb-1">{result.upperTrigram.symbol}</div>
-                      <div className="text-sm text-pink-100">{result.upperTrigram.name}</div>
-                      <div className="text-xs text-pink-200/60">上卦·{result.upperTrigram.nature}</div>
+                      <div className="text-sm text-amber-100">{result.upperTrigram.name}</div>
+                      <div className="text-xs text-gray-500">上卦·{result.upperTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-pink-300">+</div>
+                    <div className="text-2xl text-amber-500">+</div>
                     <div className="text-center">
                       <div className="text-4xl mb-1">{result.lowerTrigram.symbol}</div>
-                      <div className="text-sm text-pink-100">{result.lowerTrigram.name}</div>
-                      <div className="text-xs text-pink-200/60">下卦·{result.lowerTrigram.nature}</div>
+                      <div className="text-sm text-amber-100">{result.lowerTrigram.name}</div>
+                      <div className="text-xs text-gray-500">下卦·{result.lowerTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-pink-300">=</div>
+                    <div className="text-2xl text-amber-500">=</div>
                     <div className="text-center">
                       <div className="text-4xl mb-1">{result.hexagram.symbol}</div>
-                      <div className="text-sm text-pink-100">{result.hexagram.name}</div>
-                      <div className="text-xs text-pink-200/60">本卦</div>
+                      <div className="text-sm text-amber-100">{result.hexagram.name}</div>
+                      <div className="text-xs text-gray-500">本卦</div>
                     </div>
                   </div>
 
-                  {/* 卦辞 */}
-                  <div className="bg-pink-950/60 rounded-lg p-6 mb-4">
-                    <h4 className="text-lg font-bold text-pink-100 mb-2">卦辞</h4>
-                    <p className="text-pink-100 text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
-                    <p className="text-pink-200/80 text-sm leading-relaxed border-t border-pink-600/30 pt-3 mt-3">
+                  <div className="bg-[#0a0a0a] rounded-lg p-6 mb-4 border border-amber-500/10">
+                    <h4 className="text-lg font-bold text-amber-400 mb-2">卦辞</h4>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
+                    <p className="text-gray-400 text-sm leading-relaxed border-t border-amber-500/10 pt-3 mt-3">
                       💡 {result.hexagram.judgementMeaning}
                     </p>
                   </div>
 
-                  {/* 象辞 */}
-                  <div className="bg-pink-950/60 rounded-lg p-6 mb-4">
-                    <h4 className="text-lg font-bold text-pink-100 mb-2">象辞</h4>
-                    <p className="text-pink-100 text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
-                    <p className="text-pink-200/80 text-sm leading-relaxed border-t border-pink-600/30 pt-3 mt-3">
+                  <div className="bg-[#0a0a0a] rounded-lg p-6 mb-4 border border-amber-500/10">
+                    <h4 className="text-lg font-bold text-amber-400 mb-2">象辞</h4>
+                    <p className="text-amber-100 text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
+                    <p className="text-gray-400 text-sm leading-relaxed border-t border-amber-500/10 pt-3 mt-3">
                       💡 {result.hexagram.imageMeaning}
                     </p>
                   </div>
 
-                  {/* 爻辞 */}
-                  <div className="bg-pink-950/60 rounded-lg p-6">
+                  <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-bold text-pink-100">爻辞（点击查看注解）</h4>
+                      <h4 className="text-lg font-bold text-amber-400">爻辞（点击查看注解）</h4>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -595,7 +553,7 @@ export default function PlumBlossomPage() {
                             setExpandedLines(new Set([0, 1, 2, 3, 4, 5]));
                           }
                         }}
-                        className="text-pink-200 hover:text-pink-100"
+                        className="text-gray-400 hover:text-amber-100"
                       >
                         {expandedLines.size === 6 ? '收起全部' : '展开全部'}
                       </Button>
@@ -606,25 +564,25 @@ export default function PlumBlossomPage() {
                           key={index}
                           className={`rounded-lg overflow-hidden transition-all ${
                             result.changingLine === index + 1
-                              ? 'bg-pink-500/20 border border-pink-400'
-                              : 'bg-pink-900/30'
+                              ? 'bg-amber-500/10 border border-amber-500/30'
+                              : 'bg-[#1a1a1a]'
                           }`}
                         >
                           <div
-                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-pink-800/20 transition-colors"
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-amber-500/5 transition-colors"
                             onClick={() => toggleLine(index)}
                           >
                             <div className="flex-1">
-                              <p className="text-pink-100 font-medium">
+                              <p className="text-amber-100 font-medium">
                                 {line.text}
                                 {result.changingLine === index + 1 && (
-                                  <span className="ml-2 text-pink-300 font-bold text-sm bg-pink-500/30 px-2 py-1 rounded">
+                                  <span className="ml-2 text-amber-400 font-bold text-sm bg-amber-500/20 px-2 py-1 rounded">
                                     动爻
                                   </span>
                                 )}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 text-pink-300">
+                            <div className="flex items-center gap-2 text-amber-500">
                               <BookOpen className="w-4 h-4" />
                               {expandedLines.has(index) ? (
                                 <ChevronUp className="w-4 h-4" />
@@ -634,9 +592,9 @@ export default function PlumBlossomPage() {
                             </div>
                           </div>
                           {expandedLines.has(index) && (
-                            <div className="px-4 pb-4 pt-0 border-t border-pink-600/20">
-                              <div className="bg-pink-900/40 rounded-lg p-4 mt-2">
-                                <p className="text-pink-200/90 leading-relaxed">
+                            <div className="px-4 pb-4 pt-0 border-t border-amber-500/10">
+                              <div className="bg-[#0a0a0a] rounded-lg p-4 mt-2">
+                                <p className="text-gray-400 leading-relaxed">
                                   📖 {line.meaning}
                                 </p>
                               </div>
@@ -650,13 +608,13 @@ export default function PlumBlossomPage() {
               </Card>
 
               {/* 解读 */}
-              <Card className="bg-gradient-to-r from-pink-900/60 to-rose-900/60 border-pink-400/30">
+              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
                 <CardHeader>
-                  <CardTitle className="text-xl text-pink-100">梅花易数解读</CardTitle>
+                  <CardTitle className="text-xl text-amber-100">梅花易数解读</CardTitle>
                 </CardHeader>
-                <CardContent className="text-pink-100 leading-relaxed">
+                <CardContent className="text-gray-300 leading-relaxed">
                   <p className="mb-4">
-                    此卦为<strong className="text-pink-100">{result.hexagram.name}卦</strong>
+                    此卦为<strong className="text-amber-100">{result.hexagram.name}卦</strong>
                     （第{result.hexagram.number}卦），由{result.upperTrigram.name}卦（{result.upperTrigram.nature}）在上、
                     {result.lowerTrigram.name}卦（{result.lowerTrigram.nature}）在下组成。
                   </p>
@@ -667,13 +625,13 @@ export default function PlumBlossomPage() {
                   <p className="mb-4">
                     第{result.changingLine}爻为动爻，象征事物发展的关键转折点。
                   </p>
-                  <div className="bg-pink-950/60 rounded-lg p-4 mb-4">
-                    <p className="text-pink-100 font-medium mb-2">⚡ 动爻提示</p>
-                    <p className="text-pink-100">{result.hexagram.lines[result.changingLine - 1].meaning}</p>
+                  <div className="bg-[#0a0a0a] rounded-lg p-4 mb-4 border border-amber-500/10">
+                    <p className="text-amber-100 font-medium mb-2">⚡ 动爻提示</p>
+                    <p className="text-gray-400">{result.hexagram.lines[result.changingLine - 1].meaning}</p>
                   </div>
-                  <div className="mt-4 p-4 bg-pink-950/60 rounded-lg">
-                    <p className="text-sm text-pink-100">
-                      <strong className="text-pink-100">温馨提示：</strong>
+                  <div className="mt-4 p-4 bg-[#0a0a0a] rounded-lg border border-amber-500/10">
+                    <p className="text-sm text-gray-400">
+                      <strong className="text-amber-100">温馨提示：</strong>
                       梅花易数以数明理，仅供参考。人生道路需要自己把握，愿此卦带给您启示。
                     </p>
                   </div>
@@ -687,7 +645,7 @@ export default function PlumBlossomPage() {
                     setResult(null);
                     setExpandedLines(new Set());
                   }}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   重新起卦

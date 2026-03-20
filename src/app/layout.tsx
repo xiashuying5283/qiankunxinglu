@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inspector } from 'react-dev-inspector';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { PreloadProvider } from '@/components/PreloadProvider';
 import './globals.css';
 
@@ -73,14 +74,16 @@ export default function RootLayout({
   const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
 
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className="dark">
       <body className={`antialiased`}>
-        <PreloadProvider>
-          <AuthProvider>
-            {isDev && <Inspector />}
-            {children}
-          </AuthProvider>
-        </PreloadProvider>
+        <ThemeProvider>
+          <PreloadProvider>
+            <AuthProvider>
+              {isDev && <Inspector />}
+              {children}
+            </AuthProvider>
+          </PreloadProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
