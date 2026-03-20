@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Compass, BookOpen, Scroll, ChevronDown, ChevronUp, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 // 类型定义
 interface LineText {
@@ -103,11 +104,11 @@ export default function LearnPage() {
   // 加载中状态
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Card className="bg-[#1a1a1a] border-amber-500/20">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="bg-card/50 border-amber-500/20">
           <CardContent className="py-12 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-            <p className="text-gray-300">正在加载卦象数据...</p>
+            <p className="text-muted-foreground">正在加载卦象数据...</p>
           </CardContent>
         </Card>
       </div>
@@ -117,13 +118,13 @@ export default function LearnPage() {
   // 错误状态
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Card className="bg-[#1a1a1a] border-amber-500/20 max-w-md">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="bg-card/50 border-amber-500/20 max-w-md">
           <CardHeader>
-            <CardTitle className="text-amber-100">加载失败</CardTitle>
+            <CardTitle className="text-amber-500">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-gray-400 mb-4">{error}</p>
+            <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-black">
               重试
             </Button>
@@ -134,20 +135,23 @@ export default function LearnPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-amber-500/10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
               <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
             </div>
-            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-amber-500 group-hover:text-amber-400 transition-colors">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -156,7 +160,7 @@ export default function LearnPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Compass className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">周易学习</h1>
+            <h1 className="text-4xl font-bold text-amber-500">周易学习</h1>
             <Compass className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-gray-400">探索周易智慧，领悟古代先贤的哲学思想</p>

@@ -10,7 +10,7 @@ import { Disclaimer } from '@/components/Disclaimer';
 import { 
   BookOpen, Moon, PenTool, Star, Wand2, 
   Calendar, Heart, Sparkles, ArrowRight, ChevronRight,
-  BookMarked, FileText, Layers, Zap
+  BookMarked, FileText, Layers, Zap, Compass
 } from 'lucide-react';
 
 export default function Home() {
@@ -49,6 +49,7 @@ export default function Home() {
   // 占卜工具
   const tools = [
     { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
+    { title: '奇门遁甲', description: '帝王之学', icon: <Compass className="w-5 h-5" />, href: '/qimen' },
     { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
     { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
     { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },

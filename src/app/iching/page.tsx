@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { GlossaryTerm } from '@/components/GlossaryTerm';
@@ -378,18 +379,21 @@ export default function IChingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-amber-500/10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
               <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
             </div>
-            <span className="text-xl font-bold text-foreground group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-amber-500 group-hover:text-amber-400 transition-colors">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -398,7 +402,7 @@ export default function IChingPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Sparkles className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">周易占卜</h1>
+            <h1 className="text-4xl font-bold text-amber-500">周易占卜</h1>
             <Sparkles className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-muted-foreground">诚心祈愿，掷币问卦，探知天机</p>
@@ -409,7 +413,7 @@ export default function IChingPage() {
           {!result ? (
             <Card className="bg-card/50 border-amber-500/20">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-foreground">投掷铜钱</CardTitle>
+                <CardTitle className="text-2xl text-amber-500">投掷铜钱</CardTitle>
                 <CardDescription className="text-muted-foreground">
                   心中默念您想问的问题，点击下方按钮开始占卜
                 </CardDescription>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Calendar, Clock, Compass, Sparkles, Bookmark, Moon } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Disclaimer } from '@/components/Disclaimer';
 import { Solar, Lunar, LunarUtil } from 'lunar-javascript';
 
@@ -294,11 +295,14 @@ export default function DailyFortunePage() {
               <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
             </div>
-            <span className="text-xl font-bold text-foreground group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-amber-500 group-hover:text-amber-400 transition-colors">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -307,7 +311,7 @@ export default function DailyFortunePage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Sun className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">每日运势</h1>
+            <h1 className="text-4xl font-bold text-amber-500">每日运势</h1>
             <Sun className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-muted-foreground">精确老黄历 · 十二生肖运势 · 今日宜忌</p>
@@ -318,7 +322,7 @@ export default function DailyFortunePage() {
           {showZodiacSelector && (
             <Card className="bg-card/50 border-amber-500/20">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-foreground">选择您的生肖</CardTitle>
+                <CardTitle className="text-2xl text-amber-500">选择您的生肖</CardTitle>
                 <CardDescription className="text-muted-foreground">
                   点击生肖查看今日详细运势与老黄历
                 </CardDescription>
@@ -332,7 +336,7 @@ export default function DailyFortunePage() {
                       className="flex flex-col items-center p-4 rounded-lg bg-background hover:bg-amber-500/10 transition-all hover:scale-105 border border-amber-500/20 hover:border-amber-500/40"
                     >
                       <span className="text-3xl mb-1">{zodiac.emoji}</span>
-                      <span className="text-sm text-gray-300 font-medium">{zodiac.name}</span>
+                      <span className="text-sm text-muted-foreground font-medium">{zodiac.name}</span>
                     </button>
                   ))}
                 </div>
@@ -348,11 +352,11 @@ export default function DailyFortunePage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Calendar className="w-6 h-6 text-amber-500" />
-                    <h2 className="text-2xl font-bold text-foreground">老黄历</h2>
+                    <h2 className="text-2xl font-bold text-amber-500">老黄历</h2>
                   </div>
                   
                   <div className="text-center mb-4">
-                    <p className="text-gray-200 text-lg">{huangLi.dateStr}</p>
+                    <p className="text-foreground text-lg">{huangLi.dateStr}</p>
                     <p className="text-muted-foreground mt-1 flex items-center justify-center gap-2">
                       <Moon className="w-4 h-4" />
                       {huangLi.lunarDateStr}
@@ -362,9 +366,9 @@ export default function DailyFortunePage() {
                   
                   <div className="text-center mb-4">
                     <div className="flex items-center justify-center gap-3 flex-wrap">
-                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{huangLi.ganZhiYear}</span>
-                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{huangLi.ganZhiMonth}</span>
-                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{huangLi.ganZhiDay}</span>
+                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-foreground font-medium">{huangLi.ganZhiYear}</span>
+                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-foreground font-medium">{huangLi.ganZhiMonth}</span>
+                      <span className="bg-red-900/40 border border-red-500/30 px-3 py-1.5 rounded text-foreground font-medium">{huangLi.ganZhiDay}</span>
                     </div>
                   </div>
                   
@@ -375,15 +379,15 @@ export default function DailyFortunePage() {
                     </div>
                     <div className="bg-background rounded-lg p-3 border border-amber-500/10">
                       <p className="text-xs text-muted-foreground mb-1">日冲</p>
-                      <p className="font-bold text-gray-200">{huangLi.chong}</p>
+                      <p className="font-bold text-foreground">{huangLi.chong}</p>
                     </div>
                     <div className="bg-background rounded-lg p-3 border border-amber-500/10">
                       <p className="text-xs text-muted-foreground mb-1">日煞</p>
-                      <p className="font-bold text-gray-200">{huangLi.sha}</p>
+                      <p className="font-bold text-foreground">{huangLi.sha}</p>
                     </div>
                     <div className="bg-background rounded-lg p-3 border border-amber-500/10">
                       <p className="text-xs text-muted-foreground mb-1">星宿</p>
-                      <p className="font-bold text-gray-200">{huangLi.xingSu}</p>
+                      <p className="font-bold text-foreground">{huangLi.xingSu}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -429,7 +433,7 @@ export default function DailyFortunePage() {
               {/* 吉时凶时 */}
               <Card className="bg-card/50 border-amber-500/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                  <CardTitle className="text-lg text-amber-500 flex items-center gap-2">
                     <Clock className="w-5 h-5" /> 吉时凶时
                   </CardTitle>
                 </CardHeader>
@@ -501,7 +505,7 @@ export default function DailyFortunePage() {
                 <CardContent className="py-6">
                   <div className="text-center mb-6">
                     <span className="text-5xl mb-2 block">{fortune.zodiac.emoji}</span>
-                    <h2 className="text-2xl font-bold text-foreground">{fortune.zodiac.name}生肖今日运势</h2>
+                    <h2 className="text-2xl font-bold text-amber-500">{fortune.zodiac.name}生肖今日运势</h2>
                     
                     <label className="flex items-center justify-center gap-2 mt-3 cursor-pointer">
                       <input
@@ -535,7 +539,7 @@ export default function DailyFortunePage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Briefcase className="w-5 h-5 text-blue-400" />
-                        <span className="font-bold text-gray-200">事业运</span>
+                        <span className="font-bold text-foreground">事业运</span>
                       </div>
                       <StarRating score={fortune.careerScore} />
                     </div>
@@ -548,7 +552,7 @@ export default function DailyFortunePage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Heart className="w-5 h-5 text-pink-400" />
-                        <span className="font-bold text-gray-200">爱情运</span>
+                        <span className="font-bold text-foreground">爱情运</span>
                       </div>
                       <StarRating score={fortune.loveScore} />
                     </div>
@@ -561,7 +565,7 @@ export default function DailyFortunePage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Coins className="w-5 h-5 text-amber-400" />
-                        <span className="font-bold text-gray-200">财运</span>
+                        <span className="font-bold text-foreground">财运</span>
                       </div>
                       <StarRating score={fortune.wealthScore} />
                     </div>
@@ -574,7 +578,7 @@ export default function DailyFortunePage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-green-400" />
-                        <span className="font-bold text-gray-200">健康运</span>
+                        <span className="font-bold text-foreground">健康运</span>
                       </div>
                       <StarRating score={fortune.healthScore} />
                     </div>
@@ -586,7 +590,7 @@ export default function DailyFortunePage() {
               {/* 幸运元素 */}
               <Card className="bg-card/50 border-amber-500/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                  <CardTitle className="text-lg text-amber-500 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-amber-500" /> 今日幸运元素
                   </CardTitle>
                 </CardHeader>
@@ -595,27 +599,27 @@ export default function DailyFortunePage() {
                     <div className="bg-background rounded-lg p-4 border border-amber-500/10">
                       <div className="text-2xl mb-1">🎨</div>
                       <div className="text-xs text-muted-foreground mb-1">幸运颜色</div>
-                      <div className="font-bold text-gray-200">{fortune.luckyColor}</div>
+                      <div className="font-bold text-foreground">{fortune.luckyColor}</div>
                     </div>
                     <div className="bg-background rounded-lg p-4 border border-amber-500/10">
                       <div className="text-2xl mb-1">🔢</div>
                       <div className="text-xs text-muted-foreground mb-1">幸运数字</div>
-                      <div className="font-bold text-gray-200">{fortune.luckyNumber}</div>
+                      <div className="font-bold text-foreground">{fortune.luckyNumber}</div>
                     </div>
                     <div className="bg-background rounded-lg p-4 border border-amber-500/10">
                       <div className="text-2xl mb-1">🧭</div>
                       <div className="text-xs text-muted-foreground mb-1">幸运方位</div>
-                      <div className="font-bold text-gray-200">{fortune.luckyDirection}</div>
+                      <div className="font-bold text-foreground">{fortune.luckyDirection}</div>
                     </div>
                     <div className="bg-background rounded-lg p-4 border border-amber-500/10">
                       <div className="text-2xl mb-1">⭐</div>
                       <div className="text-xs text-muted-foreground mb-1">星座</div>
-                      <div className="font-bold text-gray-200">{huangLi.xingZuo}</div>
+                      <div className="font-bold text-foreground">{huangLi.xingZuo}</div>
                     </div>
                     <div className="bg-background rounded-lg p-4 border border-amber-500/10">
                       <div className="text-2xl mb-1">🌟</div>
                       <div className="text-xs text-muted-foreground mb-1">纳音</div>
-                      <div className="font-bold text-gray-200 text-sm">{huangLi.naYin.split(' ')[2]}</div>
+                      <div className="font-bold text-foreground text-sm">{huangLi.naYin.split(' ')[2]}</div>
                     </div>
                   </div>
                 </CardContent>
