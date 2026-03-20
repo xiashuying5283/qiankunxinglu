@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
-  GraduationCap, Wand2, Sun, Calendar, Zap, ArrowRight,
+  Wand2, Sun, Calendar, Zap, ArrowRight,
   Users, Shield
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
@@ -117,13 +117,7 @@ export default function Home() {
       icon: <Compass className="w-6 h-6" />,
       href: '/learn',
       color: 'from-green-500 to-emerald-500',
-    },
-    {
-      title: '塔罗学习',
-      description: '78张牌详解，牌阵使用指南',
-      icon: <GraduationCap className="w-6 h-6" />,
-      href: '/learn-tarot',
-      color: 'from-violet-500 to-purple-500',
+      badge: '新',
     },
   ];
 
@@ -218,12 +212,12 @@ export default function Home() {
         </div>
 
         {/* 其他占卜功能 */}
-        <div className="container mx-auto px-4 mb-12">
+        <div className="container mx-auto px-4 mb-12 max-w-6xl">
           <h2 className="text-lg font-medium text-gray-300 mb-4 flex items-center">
             <Sparkles className="w-5 h-5 mr-2 text-amber-400" />
             更多占卜
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {otherFeatures.map((feature, index) => (
               <Link href={feature.href} key={index}>
                 <Card className="group bg-white/5 backdrop-blur-md border-white/10 
@@ -244,12 +238,12 @@ export default function Home() {
         </div>
 
         {/* 学习板块 */}
-        <div className="container mx-auto px-4 mb-12">
+        <div className="container mx-auto px-4 mb-12 max-w-6xl">
           <h2 className="text-lg font-medium text-gray-300 mb-4 flex items-center">
-            <GraduationCap className="w-5 h-5 mr-2 text-emerald-400" />
+            <BookOpen className="w-5 h-5 mr-2 text-emerald-400" />
             知识学习
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {learningFeatures.map((feature, index) => (
               <Link href={feature.href} key={index}>
                 <Card className="group bg-white/5 backdrop-blur-md border-white/10 
