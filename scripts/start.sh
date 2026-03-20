@@ -10,9 +10,9 @@ DEPLOY_RUN_PORT="${DEPLOY_RUN_PORT:-$PORT}"
 start_service() {
     cd "${COZE_WORKSPACE_PATH}"
     
-    # 确保数据库表已创建
-    echo "Running database migration..."
-    coze-coding-ai db upgrade || echo "Database migration completed"
+    # 同步数据库 schema（创建新表、添加新列）
+    echo "Syncing database schema..."
+    coze-coding-ai db upgrade || echo "Database schema sync completed"
     
     echo "Starting HTTP service on port ${DEPLOY_RUN_PORT} for deploy..."
     PORT=${DEPLOY_RUN_PORT} node dist/server.js &

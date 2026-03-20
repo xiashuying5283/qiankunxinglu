@@ -6,6 +6,68 @@ function gen_random_uuid() {
   return sql`gen_random_uuid()`;
 }
 
+// 科普词条表
+export const glossary = pgTable("glossary", {
+  id: serial().notNull(),
+  term: varchar({ length: 50 }).notNull(),
+  category: varchar({ length: 20 }).notNull(),
+  shortDesc: text("short_desc").notNull(),
+  fullDesc: text("full_desc").notNull(),
+  origin: text(),
+  examples: jsonb().default([]),
+  relatedTerms: jsonb("related_terms").default([]),
+  references: jsonb().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+  index("glossary_category_idx").using("btree", table.category.asc().nullsLast().op("text_ops")),
+  index("glossary_term_idx").using("btree", table.term.asc().nullsLast().op("text_ops")),
+  unique("glossary_term_unique").on(table.term),
+]);
+
+// 参考文献表
+export const glossaryReferences = pgTable("glossary_references", {
+  id: serial().notNull(),
+  title: varchar({ length: 255 }).notNull(),
+  author: varchar({ length: 100 }),
+  publisher: varchar({ length: 100 }),
+  year: varchar({ length: 20 }),
+  isbn: varchar({ length: 20 }),
+  url: text(),
+  description: text(),
+  category: varchar({ length: 50 }).default('general'),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+  index("glossary_references_category_idx").using("btree", table.category.asc().nullsLast().op("text_ops")),
+]);
+
+// 用户贡献表
+export const glossaryContributions = pgTable("glossary_contributions", {
+  id: serial().notNull(),
+  term: varchar({ length: 50 }).notNull(),
+  category: varchar({ length: 20 }).notNull(),
+  shortDesc: text("short_desc").notNull(),
+  fullDesc: text("full_desc").notNull(),
+  origin: text(),
+  examples: jsonb().default([]),
+  relatedTerms: jsonb("related_terms").default([]),
+  references: jsonb().default([]),
+  contributionType: varchar("contribution_type", { length: 20 }).default('add'),
+  originalTermId: integer("original_term_id"),
+  userId: varchar("user_id", { length: 36 }),
+  userName: varchar("user_name", { length: 50 }),
+  status: varchar({ length: 20 }).default('pending'),
+  reviewerId: varchar("reviewer_id", { length: 36 }),
+  reviewNote: text("review_note"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+  index("glossary_contributions_status_idx").using("btree", table.status.asc().nullsLast().op("text_ops")),
+  index("glossary_contributions_term_idx").using("btree", table.term.asc().nullsLast().op("text_ops")),
+  index("glossary_contributions_user_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+]);
 
 
 export const hexagrams = pgTable("hexagrams", {

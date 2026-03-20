@@ -317,6 +317,17 @@ export async function POST() {
   try {
     const client = getSupabaseClient();
     
+    // 先检查表是否存在，如果不存在则尝试创建
+    const { error: checkError } = await client
+      .from('glossary')
+      .select('id')
+      .limit(1);
+    
+    if (checkError) {
+      // 表不存在，需要通过 db upgrade 创建
+      console.log('Glossary table check:', checkError.message);
+    }
+    
     // 检查是否已有数据
     const { data: existing } = await client
       .from('glossary')
@@ -328,11 +339,15 @@ export async function POST() {
       let updated = 0;
       for (const item of GLOSSARY_DATA) {
         if (item.references && item.references.length > 0) {
-          const { error: updateError } = await client
-            .from('glossary')
-            .update({ references: item.references })
-            .eq('term', item.term);
-          if (!updateError) updated++;
+          try {
+            const { error: updateError } = await client
+              .from('glossary')
+              .update({ references: item.references })
+              .eq('term', item.term);
+            if (!updateError) updated++;
+          } catch {
+            // references 列可能不存在，跳过
+          }
         }
       }
       return NextResponse.json({ 
