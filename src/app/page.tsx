@@ -253,25 +253,24 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {learningFeatures.map((feature, index) => (
-              <Link href={feature.href} key={index}>
-                <Card className="group bg-white/5 backdrop-blur-md border-white/10 
+              <Link href={feature.href} key={index} className="block">
+                <Card className="group h-full bg-white/5 backdrop-blur-md border-white/10 
                   hover:bg-white/15 transition-all cursor-pointer relative">
                   {feature.badge && (
                     <div className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full bg-blue-500/80 text-white">
                       {feature.badge}
                     </div>
                   )}
-                  <CardContent className="py-4 px-4 flex items-center gap-4">
-                    <div className={`flex-shrink-0 p-3 rounded-xl bg-gradient-to-br ${feature.color}`}>
-                      <div className="text-white w-6 h-6">{feature.icon}</div>
-                    </div>
-                    <div className="flex-1">
+                  <CardContent className="py-4 px-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`flex-shrink-0 p-2 rounded-lg bg-gradient-to-br ${feature.color}`}>
+                        <div className="text-white w-5 h-5">{feature.icon}</div>
+                      </div>
                       <h3 className="font-medium text-white group-hover:text-emerald-300 transition-colors">
                         {feature.title}
                       </h3>
-                      <p className="text-sm text-gray-500">{feature.description}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-emerald-400 transition-colors" />
+                    <p className="text-xs text-gray-500 ml-11">{feature.description}</p>
                   </CardContent>
                 </Card>
               </Link>
