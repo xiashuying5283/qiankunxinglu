@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBookWithChapters, type Chapter } from '@/lib/books-service';
 
+// 禁用静态生成，强制动态渲染
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const bookId = parseInt(id);

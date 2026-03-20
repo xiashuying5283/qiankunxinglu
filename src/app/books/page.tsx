@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBooks } from '@/lib/books-service';
 
+// 禁用静态生成，强制动态渲染
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: '古籍阅读 - 传统智慧经典',
   description: '阅读周易、论语、道德经等传统文化经典，传承千年智慧',

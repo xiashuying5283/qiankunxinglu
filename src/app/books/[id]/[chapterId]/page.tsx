@@ -10,6 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getChapterContent, type ContentItem } from '@/lib/books-service';
 
+// 禁用静态生成，强制动态渲染
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string; chapterId: string }> }): Promise<Metadata> {
   const { id, chapterId } = await params;
   const bookId = parseInt(id);
