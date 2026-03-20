@@ -270,24 +270,24 @@ export default function DreamInterpretPage() {
       case '中吉': return 'text-orange-400';
       case '小吉': return 'text-yellow-400';
       case '平': return 'text-green-400';
-      case '小凶': return 'text-gray-400';
-      default: return 'text-amber-400';
+      case '小凶': return 'text-muted-foreground';
+      default: return 'text-[var(--theme-accent)]';
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Moon className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">周公解梦</h1>
-            <Moon className="w-10 h-10 text-amber-500 ml-3" />
+            <Moon className="w-10 h-10 text-[var(--theme-accent)] mr-3" />
+            <h1 className="text-4xl font-bold text-foreground">周公解梦</h1>
+            <Moon className="w-10 h-10 text-[var(--theme-accent)] ml-3" />
           </div>
-          <p className="text-gray-400">探索梦境的奥秘，解读潜意识的密码</p>
+          <p className="text-muted-foreground">探索梦境的奥秘，解读潜意识的密码</p>
         </div>
 
         {/* 模式切换和历史按钮 */}
@@ -297,8 +297,8 @@ export default function DreamInterpretPage() {
               onClick={() => setMode('ai')}
               variant={mode === 'ai' ? 'default' : 'outline'}
               className={mode === 'ai' 
-                ? 'bg-amber-500 hover:bg-amber-600 text-black' 
-                : 'bg-[#1a1a1a] border-amber-500/20 text-amber-100 hover:bg-amber-500/10'}
+                ? 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black' 
+                : 'bg-[#1a1a1a] border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10'}
             >
               <Bot className="w-4 h-4 mr-2" />
               AI智能解梦
@@ -307,8 +307,8 @@ export default function DreamInterpretPage() {
               onClick={() => setMode('keyword')}
               variant={mode === 'keyword' ? 'default' : 'outline'}
               className={mode === 'keyword' 
-                ? 'bg-amber-500 hover:bg-amber-600 text-black' 
-                : 'bg-[#1a1a1a] border-amber-500/20 text-amber-100 hover:bg-amber-500/10'}
+                ? 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black' 
+                : 'bg-[#1a1a1a] border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10'}
             >
               <BookOpen className="w-4 h-4 mr-2" />
               关键词查询
@@ -316,7 +316,7 @@ export default function DreamInterpretPage() {
             <Button
               onClick={() => setShowHistory(!showHistory)}
               variant="outline"
-              className="bg-[#1a1a1a] border-amber-500/20 text-amber-100 hover:bg-amber-500/10"
+              className="bg-[#1a1a1a] border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10"
             >
               <History className="w-4 h-4 mr-2" />
               历史记录
@@ -332,30 +332,30 @@ export default function DreamInterpretPage() {
         <div className="max-w-2xl mx-auto">
           {/* 历史记录面板 */}
           {showHistory && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+            <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
               <CardHeader>
-                <CardTitle className="text-xl text-amber-100 flex items-center">
+                <CardTitle className="text-xl text-foreground flex items-center">
                   <History className="w-5 h-5 mr-2" />
                   解梦历史
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {history.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">暂无解梦记录</p>
+                  <p className="text-muted-foreground text-center py-8">暂无解梦记录</p>
                 ) : (
                   <div className="space-y-3 max-h-80 overflow-y-auto">
                     {history.map((record) => (
                       <div
                         key={record.id}
-                        className="bg-[#0a0a0a] rounded-lg p-4 hover:bg-[#0a0a0a]/80 cursor-pointer transition-colors group border border-amber-500/10"
+                        className="bg-[#0a0a0a] rounded-lg p-4 hover:bg-[#0a0a0a]/80 cursor-pointer transition-colors group border border-[var(--theme-border)]"
                         onClick={() => viewHistoryDetail(record)}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <p className="text-amber-100 text-sm line-clamp-2">
+                            <p className="text-foreground text-sm line-clamp-2">
                               {record.dream_content}
                             </p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                               <Clock className="w-3 h-3" />
                               {new Date(record.created_at).toLocaleString('zh-CN')}
                             </div>
@@ -382,13 +382,13 @@ export default function DreamInterpretPage() {
 
           {/* AI智能解梦模式 */}
           {mode === 'ai' && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+            <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-100 flex items-center justify-center">
+                <CardTitle className="text-2xl text-foreground flex items-center justify-center">
                   <Bot className="w-6 h-6 mr-2" />
                   AI智能解梦
                 </CardTitle>
-                <CardDescription className="text-gray-500">
+                <CardDescription className="text-muted-foreground">
                   详细描述您的梦境，AI将为您进行深度解析
                 </CardDescription>
               </CardHeader>
@@ -397,14 +397,14 @@ export default function DreamInterpretPage() {
                   value={dreamContent}
                   onChange={(e) => setDreamContent(e.target.value)}
                   placeholder="请详细描述您的梦境，包括场景、人物、情节、感受等。描述越详细，解析越准确..."
-                  className="w-full h-40 bg-[#0a0a0a] border border-amber-500/20 rounded-lg p-4 text-amber-100 placeholder:text-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full h-40 bg-[#0a0a0a] border border-[var(--theme-border)] rounded-lg p-4 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   disabled={isLoading}
                 />
                 <div className="text-center">
                   <Button
                     onClick={interpretWithAI}
                     disabled={!dreamContent.trim() || isLoading || !isInitialized}
-                    className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
+                    className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
                   >
                     {isLoading ? (
                       <>
@@ -425,13 +425,13 @@ export default function DreamInterpretPage() {
 
           {/* 关键词查询模式 */}
           {mode === 'keyword' && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+            <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-100 flex items-center justify-center">
+                <CardTitle className="text-2xl text-foreground flex items-center justify-center">
                   <BookOpen className="w-6 h-6 mr-2" />
                   关键词查询
                 </CardTitle>
-                <CardDescription className="text-gray-500">
+                <CardDescription className="text-muted-foreground">
                   输入梦境中出现的事物或场景关键词
                 </CardDescription>
               </CardHeader>
@@ -442,18 +442,18 @@ export default function DreamInterpretPage() {
                     value={keyword}
                     onChange={(e) => handleKeywordInput(e.target.value)}
                     placeholder="例如：水、蛇、掉牙、飞..."
-                    className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center text-xl h-14 pr-12"
+                    className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center text-xl h-14 pr-12"
                     onKeyDown={(e) => e.key === 'Enter' && interpretKeyword(keyword)}
                   />
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
 
                   {/* 搜索建议 */}
                   {suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] rounded-lg border border-amber-500/20 overflow-hidden z-10">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] rounded-lg border border-[var(--theme-border)] overflow-hidden z-10">
                       {suggestions.map((s, i) => (
                         <div
                           key={i}
-                          className="px-4 py-3 text-amber-100 hover:bg-amber-500/10 cursor-pointer flex justify-between"
+                          className="px-4 py-3 text-foreground hover:bg-[var(--theme-accent)]/10 cursor-pointer flex justify-between"
                           onClick={() => {
                             setKeyword(s.keyword);
                             interpretKeyword(s.keyword);
@@ -461,7 +461,7 @@ export default function DreamInterpretPage() {
                           }}
                         >
                           <span>{s.keyword}</span>
-                          <span className="text-xs text-gray-500">{s.category}</span>
+                          <span className="text-xs text-muted-foreground">{s.category}</span>
                         </div>
                       ))}
                     </div>
@@ -472,7 +472,7 @@ export default function DreamInterpretPage() {
                   <Button
                     onClick={() => interpretKeyword(keyword)}
                     disabled={!keyword.trim()}
-                    className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
+                    className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     开始解梦
@@ -481,7 +481,7 @@ export default function DreamInterpretPage() {
 
                 {/* 热门关键词 */}
                 <div className="pt-4">
-                  <p className="text-sm text-gray-500 mb-3 text-center">热门关键词：</p>
+                  <p className="text-sm text-muted-foreground mb-3 text-center">热门关键词：</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {['水', '蛇', '掉牙', '飞', '结婚', '死人', '钱', '龙'].map((kw) => (
                       <Button
@@ -492,7 +492,7 @@ export default function DreamInterpretPage() {
                           setKeyword(kw);
                           interpretKeyword(kw);
                         }}
-                        className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 hover:bg-amber-500/10"
+                        className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10"
                       >
                         {kw}
                       </Button>
@@ -506,9 +506,9 @@ export default function DreamInterpretPage() {
           {/* AI解析中状态 */}
           {isLoading && !parsedResult && (
             <div ref={resultRef}>
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+              <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-amber-100 text-center flex items-center justify-center">
+                  <CardTitle className="text-2xl text-foreground text-center flex items-center justify-center">
                     <Moon className="w-6 h-6 mr-2" />
                     梦境解析
                   </CardTitle>
@@ -516,17 +516,17 @@ export default function DreamInterpretPage() {
                 <CardContent>
                   <div className="flex flex-col items-center justify-center py-12">
                     <div className="relative mb-6">
-                      <Moon className="w-20 h-20 text-amber-500 animate-pulse" />
-                      <Sparkles className="w-8 h-8 text-amber-400 absolute -top-2 -right-2 animate-spin" />
+                      <Moon className="w-20 h-20 text-[var(--theme-accent)] animate-pulse" />
+                      <Sparkles className="w-8 h-8 text-[var(--theme-accent)] absolute -top-2 -right-2 animate-spin" />
                     </div>
                     <div className="space-y-2 text-center">
-                      <p className="text-xl text-amber-100 animate-pulse">大师正在思考中...</p>
+                      <p className="text-xl text-foreground animate-pulse">大师正在思考中...</p>
                       <div className="flex items-center justify-center gap-1 mt-4">
                         <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                         <span className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                         <span className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-4">正在分析梦境符号与寓意</p>
+                      <p className="text-sm text-muted-foreground mt-4">正在分析梦境符号与寓意</p>
                     </div>
                   </div>
                 </CardContent>
@@ -537,9 +537,9 @@ export default function DreamInterpretPage() {
           {/* AI解析结果 - JSON格式化展示 */}
           {parsedResult && !isLoading && (
             <div ref={resultRef}>
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+              <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-amber-100 text-center flex items-center justify-center">
+                  <CardTitle className="text-2xl text-foreground text-center flex items-center justify-center">
                     <Moon className="w-6 h-6 mr-2" />
                     梦境解析
                   </CardTitle>
@@ -547,23 +547,23 @@ export default function DreamInterpretPage() {
                 <CardContent className="space-y-6">
                   {/* 梦境概括 */}
                   <div className="text-center">
-                    <p className="text-xl text-amber-100">{parsedResult.summary}</p>
+                    <p className="text-xl text-foreground">{parsedResult.summary}</p>
                   </div>
 
                   {/* 梦境符号 */}
                   {parsedResult.symbols && parsedResult.symbols.length > 0 && (
-                    <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
-                      <h4 className="text-sm font-bold text-amber-400 mb-4 flex items-center">
+                    <div className="bg-[#0a0a0a] rounded-lg p-6 border border-[var(--theme-border)]">
+                      <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-4 flex items-center">
                         <Sparkles className="w-4 h-4 mr-2" />
                         梦境符号解析
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {parsedResult.symbols.map((s, i) => (
                           <div key={i} className="bg-[#1a1a1a] rounded-lg p-3 flex items-start gap-2">
-                            <ChevronRight className="w-4 h-4 text-amber-500 mt-1 flex-shrink-0" />
+                            <ChevronRight className="w-4 h-4 text-[var(--theme-accent)] mt-1 flex-shrink-0" />
                             <div>
-                              <span className="font-bold text-amber-100">{s.symbol}</span>
-                              <span className="text-gray-400 ml-2">{s.meaning}</span>
+                              <span className="font-bold text-foreground">{s.symbol}</span>
+                              <span className="text-muted-foreground ml-2">{s.meaning}</span>
                             </div>
                           </div>
                         ))}
@@ -572,8 +572,8 @@ export default function DreamInterpretPage() {
                   )}
 
                   {/* 详细解析 */}
-                  <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
-                    <h4 className="text-sm font-bold text-amber-400 mb-3 flex items-center">
+                  <div className="bg-[#0a0a0a] rounded-lg p-6 border border-[var(--theme-border)]">
+                    <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-3 flex items-center">
                       <Moon className="w-4 h-4 mr-2" />
                       详细解析
                     </h4>
@@ -582,38 +582,38 @@ export default function DreamInterpretPage() {
 
                   {/* 心理学分析 */}
                   {parsedResult.psychology && (
-                    <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
+                    <div className="bg-[#0a0a0a] rounded-lg p-6 border border-[var(--theme-border)]">
                       <h4 className="text-sm font-bold text-amber-300 mb-3">心理学视角</h4>
-                      <p className="text-gray-400 leading-relaxed">{parsedResult.psychology}</p>
+                      <p className="text-muted-foreground leading-relaxed">{parsedResult.psychology}</p>
                     </div>
                   )}
 
                   {/* 运势预测 */}
                   {parsedResult.fortune && (
-                    <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-amber-500/20">
-                      <h4 className="text-sm font-bold text-amber-400 mb-4 text-center">运势预测</h4>
+                    <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-[var(--theme-border)]">
+                      <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-4 text-center">运势预测</h4>
                       <div className="grid grid-cols-5 gap-2 text-center">
                         <div>
                           <div className={`text-lg font-bold ${getFortuneColor(parsedResult.fortune.overall)}`}>
                             {parsedResult.fortune.overall}
                           </div>
-                          <div className="text-xs text-gray-500">整体</div>
+                          <div className="text-xs text-muted-foreground">整体</div>
                         </div>
                         <div>
-                          <div className="text-sm text-amber-100">{parsedResult.fortune.career}</div>
-                          <div className="text-xs text-gray-500">事业</div>
+                          <div className="text-sm text-foreground">{parsedResult.fortune.career}</div>
+                          <div className="text-xs text-muted-foreground">事业</div>
                         </div>
                         <div>
-                          <div className="text-sm text-amber-100">{parsedResult.fortune.love}</div>
-                          <div className="text-xs text-gray-500">感情</div>
+                          <div className="text-sm text-foreground">{parsedResult.fortune.love}</div>
+                          <div className="text-xs text-muted-foreground">感情</div>
                         </div>
                         <div>
-                          <div className="text-sm text-amber-100">{parsedResult.fortune.wealth}</div>
-                          <div className="text-xs text-gray-500">财运</div>
+                          <div className="text-sm text-foreground">{parsedResult.fortune.wealth}</div>
+                          <div className="text-xs text-muted-foreground">财运</div>
                         </div>
                         <div>
-                          <div className="text-sm text-amber-100">{parsedResult.fortune.health}</div>
-                          <div className="text-xs text-gray-500">健康</div>
+                          <div className="text-sm text-foreground">{parsedResult.fortune.health}</div>
+                          <div className="text-xs text-muted-foreground">健康</div>
                         </div>
                       </div>
                     </div>
@@ -621,14 +621,14 @@ export default function DreamInterpretPage() {
 
                   {/* 建议 */}
                   {parsedResult.advice && (
-                    <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-amber-500/20">
-                      <h4 className="text-sm font-bold text-amber-400 mb-3">温馨建议</h4>
+                    <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-[var(--theme-border)]">
+                      <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-3">温馨建议</h4>
                       <p className="text-gray-300 leading-relaxed">{parsedResult.advice}</p>
                     </div>
                   )}
 
-                  <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-amber-500/10">
-                    <p className="text-xs text-gray-500">
+                  <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-[var(--theme-border)]">
+                    <p className="text-xs text-muted-foreground">
                       梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
                     </p>
                   </div>
@@ -640,19 +640,19 @@ export default function DreamInterpretPage() {
           {/* AI解析结果 - 原始内容 */}
           {aiResult && !parsedResult && !isLoading && (
             <div ref={resultRef}>
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+              <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-amber-100 text-center flex items-center justify-center">
+                  <CardTitle className="text-2xl text-foreground text-center flex items-center justify-center">
                     <Moon className="w-6 h-6 mr-2" />
                     梦境解析
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
+                  <div className="bg-[#0a0a0a] rounded-lg p-6 border border-[var(--theme-border)]">
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{aiResult}</p>
                   </div>
-                  <div className="bg-[#0a0a0a] rounded-lg p-4 text-center mt-6 border border-amber-500/10">
-                    <p className="text-xs text-gray-500">
+                  <div className="bg-[#0a0a0a] rounded-lg p-4 text-center mt-6 border border-[var(--theme-border)]">
+                    <p className="text-xs text-muted-foreground">
                       梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
                     </p>
                   </div>
@@ -663,31 +663,31 @@ export default function DreamInterpretPage() {
 
           {/* 关键词解析结果 */}
           {keywordResult && mode === 'keyword' && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-card/50 border-[var(--theme-border)]">
               <CardHeader>
-                <CardTitle className="text-2xl text-amber-100 text-center">
+                <CardTitle className="text-2xl text-foreground text-center">
                   梦见「{keywordResult.keyword}」
                 </CardTitle>
-                <CardDescription className="text-center text-gray-500">
+                <CardDescription className="text-center text-muted-foreground">
                   分类：{keywordResult.category}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-[#0a0a0a] rounded-lg p-6 border border-amber-500/10">
-                  <h4 className="text-sm font-bold text-amber-400 mb-3 flex items-center">
+                <div className="bg-[#0a0a0a] rounded-lg p-6 border border-[var(--theme-border)]">
+                  <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-3 flex items-center">
                     <Moon className="w-4 h-4 mr-2" />
                     梦境解析
                   </h4>
                   <p className="text-gray-300 leading-relaxed">{keywordResult.meaning}</p>
                 </div>
 
-                <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-amber-500/20">
-                  <h4 className="text-sm font-bold text-amber-400 mb-3">💡 温馨提示</h4>
+                <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-lg p-6 border border-[var(--theme-border)]">
+                  <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-3">💡 温馨提示</h4>
                   <p className="text-gray-300 leading-relaxed">{keywordResult.advice}</p>
                 </div>
 
-                <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-amber-500/10">
-                  <p className="text-xs text-gray-500">
+                <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-[var(--theme-border)]">
+                  <p className="text-xs text-muted-foreground">
                     梦境解析仅供参考，切勿过度迷信。保持良好心态，积极面对生活。
                   </p>
                 </div>
@@ -697,15 +697,15 @@ export default function DreamInterpretPage() {
 
           {/* 关键词分类浏览 */}
           {mode === 'keyword' && Object.keys(keywords).length > 0 && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mt-6">
+            <Card className="bg-card/50 border-[var(--theme-border)] mt-6">
               <CardHeader>
-                <CardTitle className="text-xl text-amber-100">关键词分类</CardTitle>
+                <CardTitle className="text-xl text-foreground">关键词分类</CardTitle>
               </CardHeader>
               <CardContent>
                 {Object.entries(keywords).map(([category, kws]) => (
                   kws.length > 0 && (
                     <div key={category} className="mb-4">
-                      <h4 className="text-sm font-bold text-gray-400 mb-2">{category}类</h4>
+                      <h4 className="text-sm font-bold text-muted-foreground mb-2">{category}类</h4>
                       <div className="flex flex-wrap gap-2">
                         {kws.slice(0, 10).map((k) => (
                           <Button
@@ -716,7 +716,7 @@ export default function DreamInterpretPage() {
                               setKeyword(k.keyword);
                               interpretKeyword(k.keyword);
                             }}
-                            className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 hover:bg-amber-500/10"
+                            className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10"
                           >
                             {k.keyword}
                           </Button>

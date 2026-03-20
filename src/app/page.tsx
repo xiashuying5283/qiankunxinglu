@@ -60,14 +60,14 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* OAuth 登录成功处理 */}
       <Suspense fallback={null}>
         <OAuthHandler />
       </Suspense>
 
-      {/* 背景装饰 */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* 背景装饰 - 深色模式才显示 */}
+      <div className="dark:block hidden fixed inset-0 overflow-hidden pointer-events-none">
         {/* 顶部光晕 */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-radial from-amber-900/20 via-transparent to-transparent rounded-full blur-3xl" />
       </div>
@@ -75,31 +75,31 @@ export default function Home() {
       {/* 主内容 */}
       <div className="relative z-10">
         {/* 顶部导航栏 */}
-        <header className="sticky top-0 z-50 bg-[var(--header-bg)]/80 backdrop-blur-md border-b border-amber-500/10 transition-colors">
+        <header className="sticky top-0 z-50 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--theme-border)] transition-colors">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative w-10 h-10">
-                <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+                <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-accent)]/50 group-hover:border-[var(--theme-accent)] transition-colors" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--theme-accent)] group-hover:bg-[var(--theme-accent-hover)] transition-colors" />
               </div>
-              <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+              <span className="text-xl font-bold text-[var(--theme-gold)] group-hover:text-[var(--theme-accent)] transition-colors">
                 乾坤星路
               </span>
             </Link>
 
             {/* 导航链接 */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-amber-200 hover:text-amber-100 transition-colors">
+              <Link href="/" className="text-[var(--theme-accent)] hover:text-[var(--theme-gold)] transition-colors">
                 首页
               </Link>
-              <Link href="/learn" className="text-gray-400 hover:text-amber-200 transition-colors">
+              <Link href="/learn" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">
                 易经学院
               </Link>
-              <Link href="/learn-tarot" className="text-gray-400 hover:text-amber-200 transition-colors">
+              <Link href="/learn-tarot" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">
                 塔罗秘境
               </Link>
-              <Link href="/daily-fortune" className="text-gray-400 hover:text-amber-200 transition-colors">
+              <Link href="/daily-fortune" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">
                 每日一占
               </Link>
             </nav>
@@ -109,7 +109,7 @@ export default function Home() {
               <ThemeToggle />
               <Link 
                 href="/iching" 
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all text-sm"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--theme-gold-bg)] border border-[var(--theme-gold-border)] text-[var(--theme-gold-muted)] hover:bg-[var(--theme-accent)]/20 hover:border-[var(--theme-accent)]/50 transition-all text-sm"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>开启探索</span>
@@ -122,15 +122,15 @@ export default function Home() {
         {/* Hero 区域 */}
         <section className="container mx-auto px-4 pt-16 pb-20 text-center">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-amber-100 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               东方智慧 · 探寻命运法则
             </h1>
             <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500/50" />
-              <p className="text-lg text-gray-400">探索宇宙万物的演变逻辑</p>
-              <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-500/50" />
+              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--theme-accent)]/50" />
+              <p className="text-lg text-muted-foreground">探索宇宙万物的演变逻辑</p>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--theme-accent)]/50" />
             </div>
-            <p className="text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
+            <p className="text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
               从周易六十四卦到塔罗七十八牌，系统化学习传统智慧。<br />
               不止于占卜预测，更在于洞察规律、顺势而为。
             </p>
@@ -138,21 +138,21 @@ export default function Home() {
             {/* 双入口 */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/learn" className="group w-full sm:w-auto">
-                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 hover:border-amber-400/50 hover:from-amber-500/30 hover:to-amber-600/20 transition-all">
+                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-[var(--theme-accent)]/20 to-amber-600/10 border border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50 transition-all">
                   <div className="text-3xl">☰</div>
                   <div className="text-left">
-                    <div className="text-amber-100 font-medium">易经入门</div>
-                    <div className="text-amber-200/60 text-sm">零基础学习</div>
+                    <div className="text-foreground font-medium">易经入门</div>
+                    <div className="text-muted-foreground text-sm">零基础学习</div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-amber-400 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-5 h-5 text-[var(--theme-accent)] ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
               <Link href="/learn-tarot" className="group w-full sm:w-auto">
-                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/30 hover:border-indigo-400/50 hover:from-indigo-500/30 hover:to-purple-600/20 transition-all">
+                <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/30 hover:border-indigo-400/50 transition-all">
                   <div className="text-3xl">☆</div>
                   <div className="text-left">
-                    <div className="text-indigo-100 font-medium">塔罗牌意</div>
-                    <div className="text-indigo-200/60 text-sm">78张牌解读</div>
+                    <div className="text-foreground font-medium">塔罗牌意</div>
+                    <div className="text-muted-foreground text-sm">78张牌解读</div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-indigo-400 ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -163,8 +163,8 @@ export default function Home() {
           {/* 卦象装饰 */}
           <div className="mt-16 flex items-center justify-center">
             <div className="relative">
-              <div className="text-6xl text-amber-500/20 font-serif">谦</div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs text-amber-500/40 tracking-widest">
+              <div className="text-6xl text-[var(--theme-accent)]/20 font-serif">谦</div>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs text-[var(--theme-accent)]/40 tracking-widest">
                 地山谦
               </div>
             </div>
@@ -174,8 +174,8 @@ export default function Home() {
         {/* 学习资源 */}
         <section className="container mx-auto px-4 pb-16">
           <div className="max-w-6xl mx-auto text-center mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">学习资源</h2>
-            <p className="text-gray-400 text-sm">系统研习周易智慧，从古籍到术语，循序渐进</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">学习资源</h2>
+            <p className="text-muted-foreground text-sm">系统研习周易智慧，从古籍到术语，循序渐进</p>
           </div>
 
           <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -183,21 +183,21 @@ export default function Home() {
               <Link href={item.href} key={index} className="group">
                 <Card className={`h-full transition-all cursor-pointer ${
                   item.highlight 
-                    ? 'bg-[#1a1a1a] border-2 border-amber-500/60 hover:border-amber-400 shadow-lg shadow-amber-500/10' 
-                    : 'bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30'
+                    ? 'bg-card border-2 border-[var(--theme-accent)]/60 hover:border-[var(--theme-accent)] shadow-lg shadow-[var(--theme-accent)]/10' 
+                    : 'bg-card/50 border-border hover:border-[var(--theme-accent)]/30'
                 }`}>
                   <CardContent className="py-5 px-4">
                     <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3 ${
-                      item.highlight ? 'bg-amber-500/30' : 'bg-amber-500/10 group-hover:bg-amber-500/20'
+                      item.highlight ? 'bg-[var(--theme-accent)]/30' : 'bg-[var(--theme-gold-bg)] group-hover:bg-[var(--theme-accent)]/20'
                     } transition-colors`}>
-                      <div className={item.highlight ? 'text-amber-300' : 'text-amber-400'}>{item.icon}</div>
+                      <div className={item.highlight ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-gold-muted)]'}>{item.icon}</div>
                     </div>
                     <h3 className={`font-medium mb-1 transition-colors ${
-                      item.highlight ? 'text-amber-100' : 'text-white group-hover:text-amber-200'
+                      item.highlight ? 'text-foreground' : 'text-foreground group-hover:text-[var(--theme-accent)]'
                     }`}>
                       {item.title}
                     </h3>
-                    <p className="text-gray-500 text-xs">{item.description}</p>
+                    <p className="text-muted-foreground text-xs">{item.description}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -208,15 +208,15 @@ export default function Home() {
         {/* 数字化起卦系统 */}
         <section className="container mx-auto px-4 pb-20">
           <div className="max-w-6xl mx-auto text-center mb-10">
-            <h2 className="text-2xl font-bold text-white mb-2">数字化起卦系统</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">数字化起卦系统</h2>
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="h-px w-12 bg-gradient-to-r from-transparent to-amber-500/50" />
-              <p className="text-gray-400 text-sm">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--theme-accent)]/50" />
+              <p className="text-muted-foreground text-sm">
                 结合传统演卦方法，提供多种起卦工具
               </p>
-              <div className="h-px w-12 bg-gradient-to-l from-transparent to-amber-500/50" />
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--theme-accent)]/50" />
             </div>
-            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
               不止给出结论，更引导你研读爻辞，领悟背后哲学。
             </p>
           </div>
@@ -226,15 +226,15 @@ export default function Home() {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3">
               {tools.map((tool, index) => (
                 <Link href={tool.href} key={index}>
-                  <Card className="group bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
+                  <Card className="group bg-card/50 border-border hover:border-[var(--theme-accent)]/30 hover:bg-card transition-all cursor-pointer h-full">
                     <CardContent className="py-4 px-2 text-center">
-                      <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-500/10 mb-2 group-hover:bg-amber-500/20 transition-colors">
-                        <div className="text-amber-400">{tool.icon}</div>
+                      <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[var(--theme-gold-bg)] mb-2 group-hover:bg-[var(--theme-accent)]/20 transition-colors">
+                        <div className="text-[var(--theme-gold-muted)]">{tool.icon}</div>
                       </div>
-                      <h3 className="text-white text-sm font-medium mb-0.5 group-hover:text-amber-200 transition-colors">
+                      <h3 className="text-foreground text-sm font-medium mb-0.5 group-hover:text-[var(--theme-accent)] transition-colors">
                         {tool.title}
                       </h3>
-                      <p className="text-gray-500 text-xs">{tool.description}</p>
+                      <p className="text-muted-foreground text-xs">{tool.description}</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -243,7 +243,7 @@ export default function Home() {
 
             <div className="mt-8 text-center">
               <Link href="/iching">
-                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 transition-colors">
+                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--theme-accent)] text-black font-medium hover:bg-[var(--theme-accent-hover)] transition-colors">
                   <span>立即体验排盘</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -253,7 +253,7 @@ export default function Home() {
         </section>
 
         {/* 页脚 */}
-        <footer className="border-t border-amber-500/10 bg-[#0a0a0a]">
+        <footer className="border-t border-[var(--theme-border)] bg-background">
           <div className="container mx-auto px-4 py-12">
             <div className="max-w-6xl mx-auto">
               <div className="grid md:grid-cols-4 gap-8 mb-8">
@@ -261,54 +261,54 @@ export default function Home() {
                 <div className="md:col-span-1">
                   <Link href="/" className="flex items-center gap-2 mb-4">
                     <div className="relative w-8 h-8">
-                      <div className="absolute inset-0 rounded-full border-2 border-amber-500/50" />
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-amber-500" />
+                      <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-accent)]/50" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[var(--theme-accent)]" />
                     </div>
-                    <span className="text-lg font-bold text-amber-100">乾坤星路</span>
+                    <span className="text-lg font-bold text-[var(--theme-gold)]">乾坤星路</span>
                   </Link>
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     融合传统智慧与现代科技，打造专业的术数学习平台。
                   </p>
-                  <p className="text-amber-500/60 text-xs mt-2">
+                  <p className="text-[var(--theme-accent)]/60 text-xs mt-2">
                     民俗文化科普 · 仅供学习参考
                   </p>
                 </div>
 
                 {/* 学习中心 */}
                 <div>
-                  <h4 className="text-amber-200 font-medium mb-4">学习中心</h4>
+                  <h4 className="text-[var(--theme-gold-muted)] font-medium mb-4">学习中心</h4>
                   <ul className="space-y-2 text-sm">
-                    <li><Link href="/learn" className="text-gray-400 hover:text-amber-200 transition-colors">易经入门</Link></li>
-                    <li><Link href="/books" className="text-gray-400 hover:text-amber-200 transition-colors">六十四卦详解</Link></li>
-                    <li><Link href="/glossary" className="text-gray-400 hover:text-amber-200 transition-colors">古籍阅读</Link></li>
-                    <li><Link href="/learn-tarot" className="text-gray-400 hover:text-amber-200 transition-colors">塔罗牌意</Link></li>
+                    <li><Link href="/learn" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">易经入门</Link></li>
+                    <li><Link href="/books" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">六十四卦详解</Link></li>
+                    <li><Link href="/glossary" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">古籍阅读</Link></li>
+                    <li><Link href="/learn-tarot" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">塔罗牌意</Link></li>
                   </ul>
                 </div>
 
                 {/* 在线工具 */}
                 <div>
-                  <h4 className="text-amber-200 font-medium mb-4">在线工具</h4>
+                  <h4 className="text-[var(--theme-gold-muted)] font-medium mb-4">在线工具</h4>
                   <ul className="space-y-2 text-sm">
-                    <li><Link href="/iching" className="text-gray-400 hover:text-amber-200 transition-colors">周易起卦</Link></li>
-                    <li><Link href="/tarot" className="text-gray-400 hover:text-amber-200 transition-colors">塔罗占卜</Link></li>
-                    <li><Link href="/daily-fortune" className="text-gray-400 hover:text-amber-200 transition-colors">每日运势</Link></li>
-                    <li><Link href="/bazi" className="text-gray-400 hover:text-amber-200 transition-colors">生辰八字</Link></li>
+                    <li><Link href="/iching" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">周易起卦</Link></li>
+                    <li><Link href="/tarot" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">塔罗占卜</Link></li>
+                    <li><Link href="/daily-fortune" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">每日运势</Link></li>
+                    <li><Link href="/bazi" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">生辰八字</Link></li>
                   </ul>
                 </div>
 
                 {/* 关于 */}
                 <div>
-                  <h4 className="text-amber-200 font-medium mb-4">关于</h4>
+                  <h4 className="text-[var(--theme-gold-muted)] font-medium mb-4">关于</h4>
                   <ul className="space-y-2 text-sm">
-                    <li><Link href="/privacy" className="text-gray-400 hover:text-amber-200 transition-colors">服务条款</Link></li>
-                    <li><Link href="/privacy" className="text-gray-400 hover:text-amber-200 transition-colors">隐私协议</Link></li>
+                    <li><Link href="/privacy" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">服务条款</Link></li>
+                    <li><Link href="/privacy" className="text-muted-foreground hover:text-[var(--theme-accent)] transition-colors">隐私协议</Link></li>
                   </ul>
                 </div>
               </div>
 
               {/* 版权 */}
-              <div className="border-t border-amber-500/10 pt-6 text-center">
-                <p className="text-gray-500 text-sm">
+              <div className="border-t border-[var(--theme-border)] pt-6 text-center">
+                <p className="text-muted-foreground text-sm">
                   © 2024 乾坤星路 · 传承东方智慧
                 </p>
               </div>

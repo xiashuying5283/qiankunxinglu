@@ -101,27 +101,27 @@ export default function BaziPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Calendar className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">生辰八字</h1>
-            <Calendar className="w-10 h-10 text-amber-500 ml-3" />
+            <Calendar className="w-10 h-10 text-[var(--theme-accent)] mr-3" />
+            <h1 className="text-4xl font-bold text-foreground">生辰八字</h1>
+            <Calendar className="w-10 h-10 text-[var(--theme-accent)] ml-3" />
           </div>
-          <p className="text-gray-400">基于 lunar-javascript 精确算法，输入出生时间推算八字命盘</p>
-          <p className="text-xs text-gray-500 mt-1">精确计算：年柱以立春为界，月柱以节气为界</p>
+          <p className="text-muted-foreground">基于 lunar-javascript 精确算法，输入出生时间推算八字命盘</p>
+          <p className="text-xs text-muted-foreground mt-1">精确计算：年柱以立春为界，月柱以节气为界</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           {/* 输入区域 */}
-          <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mb-6">
+          <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-amber-100">输入出生信息</CardTitle>
-              <CardDescription className="text-gray-500">
+              <CardTitle className="text-2xl text-foreground">输入出生信息</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 支持公历（阳历）和农历（阴历）输入
               </CardDescription>
             </CardHeader>
@@ -134,7 +134,7 @@ export default function BaziPage() {
               <div className="text-center mt-6">
                 <Button
                   onClick={calculate}
-                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
+                  className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   推算八字
@@ -147,10 +147,10 @@ export default function BaziPage() {
           {result && (
             <div className="space-y-6">
               {/* 八字命盘 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl text-amber-100">八字命盘</CardTitle>
-                  <CardDescription className="text-gray-500">
+                  <CardTitle className="text-2xl text-foreground">八字命盘</CardTitle>
+                  <CardDescription className="text-muted-foreground">
                     生肖：{result.shengxiao} | 日主：{result.day.gan}（{tianGanWuXing[result.day.gan]}命）
                   </CardDescription>
                 </CardHeader>
@@ -162,14 +162,14 @@ export default function BaziPage() {
                       { label: '日柱', pillar: result.day, shishen: '日主', nayin: result.nayin.day },
                       { label: '时柱', pillar: result.hour, shishen: result.shishen.hourGan, nayin: result.nayin.hour }
                     ].map((item, i) => (
-                      <div key={i} className="bg-[#0a0a0a] rounded-lg p-4 border border-amber-500/10">
-                        <div className="text-xs text-gray-500 mb-2">{item.label}</div>
-                        <div className="text-3xl font-bold text-amber-100 mb-1">{item.pillar.gan}</div>
-                        <div className="text-3xl font-bold text-amber-100">{item.pillar.zhi}</div>
-                        <div className={`text-xs mt-2 ${shiShenColors[item.shishen] || 'text-amber-400'}`}>
+                      <div key={i} className="bg-[#0a0a0a] rounded-lg p-4 border border-[var(--theme-border)]">
+                        <div className="text-xs text-muted-foreground mb-2">{item.label}</div>
+                        <div className="text-3xl font-bold text-foreground mb-1">{item.pillar.gan}</div>
+                        <div className="text-3xl font-bold text-foreground">{item.pillar.zhi}</div>
+                        <div className={`text-xs mt-2 ${shiShenColors[item.shishen] || 'text-[var(--theme-accent)]'}`}>
                           {item.shishen}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">{item.nayin}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{item.nayin}</div>
                       </div>
                     ))}
                   </div>
@@ -177,34 +177,34 @@ export default function BaziPage() {
               </Card>
 
               {/* 节气信息 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100 flex items-center">
+                  <CardTitle className="text-xl text-foreground flex items-center">
                     <Compass className="w-5 h-5 mr-2" />
                     节气信息
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">上一个节气</div>
-                      <div className="text-amber-100">{result.jieqi.prev || '无'}</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">上一个节气</div>
+                      <div className="text-foreground">{result.jieqi.prev || '无'}</div>
                     </div>
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">下一个节气</div>
-                      <div className="text-amber-100">{result.jieqi.next || '无'}</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">下一个节气</div>
+                      <div className="text-foreground">{result.jieqi.next || '无'}</div>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-3">
+                  <p className="text-xs text-muted-foreground mt-3">
                     * 年柱以立春为界，月柱以节气为界。这是精确计算的关键。
                   </p>
                 </CardContent>
               </Card>
 
               {/* 五行分析 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">五行分析</CardTitle>
+                  <CardTitle className="text-xl text-foreground">五行分析</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-5 gap-3 mb-4">
@@ -213,16 +213,16 @@ export default function BaziPage() {
                         <div className={`w-full h-24 rounded-lg bg-gradient-to-b ${wuXingColors[wx]} flex items-center justify-center`}>
                           <span className="text-3xl font-bold text-white">{result.wuxing[wx]}</span>
                         </div>
-                        <div className="text-sm text-gray-400 mt-2">{wx}</div>
+                        <div className="text-sm text-muted-foreground mt-2">{wx}</div>
                       </div>
                     ))}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#0a0a0a] rounded-lg p-4 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">最旺五行</div>
-                      <div className="text-lg font-bold text-amber-100">{result.dominantWuXing}</div>
-                      <div className="text-xs text-gray-400 mt-1">{getWuXingCharacter(result.dominantWuXing)}</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-4 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">最旺五行</div>
+                      <div className="text-lg font-bold text-foreground">{result.dominantWuXing}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{getWuXingCharacter(result.dominantWuXing)}</div>
                     </div>
                     
                     {result.missingWuXing.length > 0 && (
@@ -237,9 +237,9 @@ export default function BaziPage() {
 
               {/* 神煞信息 */}
               {result.shensha.length > 0 && (
-                <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+                <Card className="bg-card/50 border-[var(--theme-border)]">
                   <CardHeader>
-                    <CardTitle className="text-xl text-amber-100 flex items-center">
+                    <CardTitle className="text-xl text-foreground flex items-center">
                       <Star className="w-5 h-5 mr-2" />
                       神煞
                     </CardTitle>
@@ -255,7 +255,7 @@ export default function BaziPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="mt-4 text-xs text-gray-500">
+                    <div className="mt-4 text-xs text-muted-foreground">
                       <p>• 天乙贵人：逢凶化吉，有贵人相助</p>
                       <p>• 文昌贵人：聪明好学，利于学业考试</p>
                       <p>• 桃花：人缘好，异性缘佳</p>
@@ -267,30 +267,30 @@ export default function BaziPage() {
               )}
 
               {/* 胎元命宫 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">胎元 · 命宫</CardTitle>
+                  <CardTitle className="text-xl text-foreground">胎元 · 命宫</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">胎元</div>
-                      <div className="text-xl font-bold text-amber-100">{result.taiyuan}</div>
-                      <div className="text-xs text-gray-500 mt-1">受胎之月，先天体质</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">胎元</div>
+                      <div className="text-xl font-bold text-foreground">{result.taiyuan}</div>
+                      <div className="text-xs text-muted-foreground mt-1">受胎之月，先天体质</div>
                     </div>
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">命宫</div>
-                      <div className="text-xl font-bold text-amber-100">{result.minggong}</div>
-                      <div className="text-xs text-gray-500 mt-1">命运归宿，人生方向</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">命宫</div>
+                      <div className="text-xl font-bold text-foreground">{result.minggong}</div>
+                      <div className="text-xs text-muted-foreground mt-1">命运归宿，人生方向</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* 命理分析 */}
-              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
+              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100 flex items-center">
+                  <CardTitle className="text-xl text-foreground flex items-center">
                     <User className="w-5 h-5 mr-2" />
                     命理分析
                   </CardTitle>
@@ -325,8 +325,8 @@ export default function BaziPage() {
               </Card>
 
               {/* 温馨提示 */}
-              <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-amber-500/10">
-                <p className="text-xs text-gray-500">
+              <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-[var(--theme-border)]">
+                <p className="text-xs text-muted-foreground">
                   本命盘基于 lunar-javascript 精确算法计算，年柱以立春为界，月柱以节气为界。
                   八字命理仅供参考，命运掌握在自己手中。切勿过度迷信，应以积极乐观的态度面对人生。
                 </p>

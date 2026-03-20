@@ -453,11 +453,11 @@ export default function MatchPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {birth.isLunar ? (
-            <Moon className="w-4 h-4 text-amber-500" />
+            <Moon className="w-4 h-4 text-[var(--theme-accent)]" />
           ) : (
-            <Sun className="w-4 h-4 text-amber-500" />
+            <Sun className="w-4 h-4 text-[var(--theme-accent)]" />
           )}
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             {birth.isLunar ? '农历' : '公历'}
           </span>
         </div>
@@ -466,7 +466,7 @@ export default function MatchPage() {
           variant="ghost"
           size="sm"
           onClick={() => toggleCalendarType(birth, setBirth)}
-          className="text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 h-7 px-2 text-xs"
+          className="text-[var(--theme-accent)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/10 h-7 px-2 text-xs"
         >
           切换为{birth.isLunar ? '公历' : '农历'}
         </Button>
@@ -485,7 +485,7 @@ export default function MatchPage() {
               updateLunarDisplay(newBirth, setBirth);
             }}
             placeholder="年"
-            className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center h-10"
+            className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center h-10"
           />
         </div>
         <div>
@@ -501,7 +501,7 @@ export default function MatchPage() {
             placeholder="月"
             min="1"
             max="12"
-            className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center h-10"
+            className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center h-10"
           />
         </div>
         <div>
@@ -517,7 +517,7 @@ export default function MatchPage() {
             placeholder="日"
             min="1"
             max={birth.isLunar ? 30 : 31}
-            className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center h-10"
+            className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center h-10"
           />
         </div>
       </div>
@@ -526,10 +526,10 @@ export default function MatchPage() {
       <select
         value={birth.hour}
         onChange={(e) => setBirth({ ...birth, hour: parseInt(e.target.value) })}
-        className="w-full h-10 rounded-md bg-[#0a0a0a] border border-amber-500/20 text-amber-100 px-3"
+        className="w-full h-10 rounded-md bg-[#0a0a0a] border border-[var(--theme-border)] text-foreground px-3"
       >
         {hourOptions.map(opt => (
-          <option key={opt.value} value={opt.value} className="bg-[#1a1a1a] text-amber-100">
+          <option key={opt.value} value={opt.value} className="bg-[#1a1a1a] text-foreground">
             {opt.label}
           </option>
         ))}
@@ -537,7 +537,7 @@ export default function MatchPage() {
 
       {/* 农历/公历对应显示 */}
       {birth.lunarDisplay && (
-        <div className="text-xs text-amber-400 bg-amber-900/20 rounded px-3 py-2">
+        <div className="text-xs text-[var(--theme-accent)] bg-amber-900/20 rounded px-3 py-2">
           对应{birth.isLunar ? '公历' : '农历'}：{birth.lunarDisplay}
         </div>
       )}
@@ -545,18 +545,18 @@ export default function MatchPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Heart className="w-10 h-10 text-amber-500 mr-3 fill-amber-500" />
-            <h1 className="text-4xl font-bold text-amber-100">姻缘匹配</h1>
-            <Heart className="w-10 h-10 text-amber-500 ml-3 fill-amber-500" />
+            <Heart className="w-10 h-10 text-[var(--theme-accent)] mr-3 fill-amber-500" />
+            <h1 className="text-4xl font-bold text-foreground">姻缘匹配</h1>
+            <Heart className="w-10 h-10 text-[var(--theme-accent)] ml-3 fill-amber-500" />
           </div>
-          <p className="text-gray-400">基于 lunar-javascript 精确算法，支持公农历输入</p>
+          <p className="text-muted-foreground">基于 lunar-javascript 精确算法，支持公农历输入</p>
         </div>
 
         <div className="max-w-5xl mx-auto">
@@ -565,7 +565,7 @@ export default function MatchPage() {
             <Button
               variant="ghost"
               onClick={toggleHistory}
-              className="w-full text-gray-400 hover:text-amber-100 hover:bg-amber-500/10 justify-between"
+              className="w-full text-muted-foreground hover:text-foreground hover:bg-[var(--theme-accent)]/10 justify-between"
             >
               <span className="flex items-center">
                 <History className="w-4 h-4 mr-2" />
@@ -575,18 +575,18 @@ export default function MatchPage() {
             </Button>
 
             {showHistory && (
-              <Card className="mt-2 bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="mt-2 bg-card/50 border-[var(--theme-border)]">
                 <CardContent className="p-4">
                   {isLoadingHistory ? (
-                    <p className="text-center text-gray-500 py-4">加载中...</p>
+                    <p className="text-center text-muted-foreground py-4">加载中...</p>
                   ) : historyRecords.length === 0 ? (
-                    <p className="text-center text-gray-500 py-4">暂无历史记录</p>
+                    <p className="text-center text-muted-foreground py-4">暂无历史记录</p>
                   ) : (
                     <div className="space-y-3">
                       {historyRecords.map(record => (
                         <div
                           key={record.id}
-                          className="bg-[#0a0a0a] rounded-lg p-4 border border-amber-500/10"
+                          className="bg-[#0a0a0a] rounded-lg p-4 border border-[var(--theme-border)]"
                         >
                           <div className="flex justify-between items-center">
                             <div
@@ -594,16 +594,16 @@ export default function MatchPage() {
                               onClick={() => setExpandedRecord(expandedRecord === record.id ? null : record.id)}
                             >
                               <div className="flex items-center gap-3">
-                                <span className="text-amber-100 font-medium">{record.name1}</span>
-                                <Heart className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                <span className="text-amber-100 font-medium">{record.name2}</span>
+                                <span className="text-foreground font-medium">{record.name1}</span>
+                                <Heart className="w-4 h-4 text-[var(--theme-accent)] fill-amber-500" />
+                                <span className="text-foreground font-medium">{record.name2}</span>
                               </div>
-                              <div className="text-sm text-gray-500 mt-1">
+                              <div className="text-sm text-muted-foreground mt-1">
                                 {new Date(record.created_at).toLocaleString('zh-CN')}
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-2xl font-bold text-amber-100">{record.score}分</span>
+                              <span className="text-2xl font-bold text-foreground">{record.score}分</span>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -615,17 +615,17 @@ export default function MatchPage() {
                             </div>
                           </div>
                           {expandedRecord === record.id && (
-                            <div className="mt-4 pt-4 border-t border-amber-500/10">
+                            <div className="mt-4 pt-4 border-t border-[var(--theme-border)]">
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                  <span className="text-gray-500">生肖关系：</span>
+                                  <span className="text-muted-foreground">生肖关系：</span>
                                   <span className={getRelationColor(record.shengxiao_match.relation)}>
                                     {record.shengxiao_match.relation}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">匹配等级：</span>
-                                  <span className="text-amber-100">{record.level}</span>
+                                  <span className="text-muted-foreground">匹配等级：</span>
+                                  <span className="text-foreground">{record.level}</span>
                                 </div>
                               </div>
                               {record.ai_interpretation && (
@@ -646,10 +646,10 @@ export default function MatchPage() {
 
           {/* 输入区域 */}
           {!result && !isMatching && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-card/50 border-[var(--theme-border)]">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-100">输入双方信息</CardTitle>
-                <CardDescription className="text-gray-500">
+                <CardTitle className="text-2xl text-foreground">输入双方信息</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   支持公历（阳历）和农历（阴历）输入，系统将精确计算八字命盘
                 </CardDescription>
               </CardHeader>
@@ -662,13 +662,13 @@ export default function MatchPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">姓名</label>
+                      <label className="block text-sm text-muted-foreground mb-2">姓名</label>
                       <Input
                         type="text"
                         value={name1}
                         onChange={(e) => setName1(e.target.value)}
                         placeholder="请输入姓名"
-                        className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center h-12"
+                        className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center h-12"
                       />
                     </div>
                     <DateInput birth={birth1} setBirth={setBirth1} label="出生日期" />
@@ -678,7 +678,7 @@ export default function MatchPage() {
                 {/* 分隔线 */}
                 <div className="flex items-center gap-4">
                   <div className="flex-1 h-px bg-amber-500/20"></div>
-                  <Heart className="w-6 h-6 text-amber-500 fill-amber-500" />
+                  <Heart className="w-6 h-6 text-[var(--theme-accent)] fill-amber-500" />
                   <div className="flex-1 h-px bg-amber-500/20"></div>
                 </div>
 
@@ -690,13 +690,13 @@ export default function MatchPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">姓名</label>
+                      <label className="block text-sm text-muted-foreground mb-2">姓名</label>
                       <Input
                         type="text"
                         value={name2}
                         onChange={(e) => setName2(e.target.value)}
                         placeholder="请输入姓名"
-                        className="bg-[#0a0a0a] border-amber-500/20 text-amber-100 placeholder:text-gray-500 text-center h-12"
+                        className="bg-[#0a0a0a] border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center h-12"
                       />
                     </div>
                     <DateInput birth={birth2} setBirth={setBirth2} label="出生日期" />
@@ -707,7 +707,7 @@ export default function MatchPage() {
                   <Button
                     onClick={startMatch}
                     disabled={!name1.trim() || !birth1.year || !name2.trim() || !birth2.year}
-                    className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
+                    className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
                   >
                     <Heart className="w-5 h-5 mr-2 fill-white" />
                     开始匹配
@@ -719,14 +719,14 @@ export default function MatchPage() {
 
           {/* 匹配中动画 */}
           {isMatching && (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-card/50 border-[var(--theme-border)]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <div className="relative">
-                  <Heart className="w-20 h-20 text-amber-500 animate-pulse fill-amber-500" />
-                  <Sparkles className="w-8 h-8 text-amber-400 absolute -top-2 -right-2 animate-spin" />
+                  <Heart className="w-20 h-20 text-[var(--theme-accent)] animate-pulse fill-amber-500" />
+                  <Sparkles className="w-8 h-8 text-[var(--theme-accent)] absolute -top-2 -right-2 animate-spin" />
                 </div>
-                <p className="text-xl text-amber-100 mt-6">正在测算缘分...</p>
-                <p className="text-sm text-gray-500 mt-2">使用 lunar-javascript 精确计算八字</p>
+                <p className="text-xl text-foreground mt-6">正在测算缘分...</p>
+                <p className="text-sm text-muted-foreground mt-2">使用 lunar-javascript 精确计算八字</p>
               </CardContent>
             </Card>
           )}
@@ -735,7 +735,7 @@ export default function MatchPage() {
           {result && !isMatching && (
             <div className="space-y-6">
               {/* 匹配分数 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20 overflow-hidden">
+              <Card className="bg-card/50 border-[var(--theme-border)] overflow-hidden">
                 <CardContent className="relative py-12">
                   <div className="text-center">
                     <div className="relative inline-block mb-6">
@@ -768,13 +768,13 @@ export default function MatchPage() {
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div>
-                          <div className="text-4xl font-bold text-amber-100">{result.score}</div>
-                          <div className="text-sm text-gray-400">分</div>
+                          <div className="text-4xl font-bold text-foreground">{result.score}</div>
+                          <div className="text-sm text-muted-foreground">分</div>
                         </div>
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-amber-100 mb-2">{result.level}</div>
-                    <div className="text-gray-400">{result.name1} & {result.name2}</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">{result.level}</div>
+                    <div className="text-muted-foreground">{result.name1} & {result.name2}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -782,11 +782,11 @@ export default function MatchPage() {
               {/* 双方八字 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[{ name: result.name1, bazi: result.bazi1 }, { name: result.name2, bazi: result.bazi2 }].map((person, idx) => (
-                  <Card key={idx} className="bg-[#1a1a1a]/50 border-amber-500/20">
+                  <Card key={idx} className="bg-card/50 border-[var(--theme-border)]">
                     <CardHeader>
-                      <CardTitle className="text-xl text-amber-100 flex items-center justify-between">
+                      <CardTitle className="text-xl text-foreground flex items-center justify-between">
                         <span>{person.name}</span>
-                        <span className="text-sm font-normal px-2 py-1 bg-amber-500/20 rounded text-amber-400">
+                        <span className="text-sm font-normal px-2 py-1 bg-amber-500/20 rounded text-[var(--theme-accent)]">
                           属{person.bazi.shengxiao}
                         </span>
                       </CardTitle>
@@ -799,9 +799,9 @@ export default function MatchPage() {
                           { label: '日', pillar: person.bazi.day },
                           { label: '时', pillar: person.bazi.hour }
                         ].map((item, i) => (
-                          <div key={i} className="bg-[#0a0a0a] rounded-lg p-2 border border-amber-500/10">
-                            <div className="text-xs text-gray-500">{item.label}</div>
-                            <div className="text-xl font-bold text-amber-100">{item.pillar.gan}{item.pillar.zhi}</div>
+                          <div key={i} className="bg-[#0a0a0a] rounded-lg p-2 border border-[var(--theme-border)]">
+                            <div className="text-xs text-muted-foreground">{item.label}</div>
+                            <div className="text-xl font-bold text-foreground">{item.pillar.gan}{item.pillar.zhi}</div>
                           </div>
                         ))}
                       </div>
@@ -811,11 +811,11 @@ export default function MatchPage() {
                             <div className={`h-12 rounded bg-gradient-to-b ${wuXingColors[wx]} flex items-center justify-center`}>
                               <span className="text-lg font-bold text-white">{person.bazi.wuxing[wx]}</span>
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">{wx}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{wx}</div>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-3 text-sm text-gray-400">
+                      <div className="mt-3 text-sm text-muted-foreground">
                         主命{person.bazi.dominantWuXing}
                         {person.bazi.missingWuXing.length > 0 && `，缺${person.bazi.missingWuXing.join('、')}`}
                       </div>
@@ -825,26 +825,26 @@ export default function MatchPage() {
               </div>
 
               {/* 生肖配对 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">生肖配对</CardTitle>
+                  <CardTitle className="text-xl text-foreground">生肖配对</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-center">
                       <div className="text-3xl mb-2">{result.bazi1.shengxiao}</div>
-                      <div className="text-sm text-gray-400">{result.name1}</div>
+                      <div className="text-sm text-muted-foreground">{result.name1}</div>
                     </div>
                     <div className="text-center">
                       <div className={`text-lg font-bold ${getRelationColor(result.shengxiaoMatch.relation)}`}>
                         {result.shengxiaoMatch.relation}
                       </div>
-                      <Heart className="w-8 h-8 text-amber-500 fill-amber-500 my-2" />
-                      <div className="text-xl font-bold text-amber-100">{result.shengxiaoMatch.score}分</div>
+                      <Heart className="w-8 h-8 text-[var(--theme-accent)] fill-amber-500 my-2" />
+                      <div className="text-xl font-bold text-foreground">{result.shengxiaoMatch.score}分</div>
                     </div>
                     <div className="text-center">
                       <div className="text-3xl mb-2">{result.bazi2.shengxiao}</div>
-                      <div className="text-sm text-gray-400">{result.name2}</div>
+                      <div className="text-sm text-muted-foreground">{result.name2}</div>
                     </div>
                   </div>
                   <p className="text-gray-300 leading-relaxed">{result.shengxiaoMatch.description}</p>
@@ -852,19 +852,19 @@ export default function MatchPage() {
               </Card>
 
               {/* 八字配对 */}
-              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+              <Card className="bg-card/50 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">八字配对</CardTitle>
+                  <CardTitle className="text-xl text-foreground">八字配对</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">日柱关系</div>
-                      <div className="text-amber-100">{result.baziMatch.dayPillarRelation}</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">日柱关系</div>
+                      <div className="text-foreground">{result.baziMatch.dayPillarRelation}</div>
                     </div>
-                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-amber-500/10">
-                      <div className="text-sm text-gray-500 mb-1">八字评分</div>
-                      <div className="text-xl font-bold text-amber-100">{result.baziMatch.score}分</div>
+                    <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[var(--theme-border)]">
+                      <div className="text-sm text-muted-foreground mb-1">八字评分</div>
+                      <div className="text-xl font-bold text-foreground">{result.baziMatch.score}分</div>
                     </div>
                   </div>
                   <p className="text-gray-300 leading-relaxed">{result.baziMatch.description}</p>
@@ -872,12 +872,12 @@ export default function MatchPage() {
               </Card>
 
               {/* AI解读 */}
-              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
+              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-[var(--theme-border)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-100 flex items-center">
+                  <CardTitle className="text-xl text-foreground flex items-center">
                     <Sparkles className="w-5 h-5 mr-2" />
                     大师解读
-                    {isInterpreting && <span className="ml-2 text-sm text-amber-400 animate-pulse">生成中...</span>}
+                    {isInterpreting && <span className="ml-2 text-sm text-[var(--theme-accent)] animate-pulse">生成中...</span>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -887,8 +887,8 @@ export default function MatchPage() {
                         className="text-gray-300 leading-relaxed whitespace-pre-wrap"
                         dangerouslySetInnerHTML={{
                           __html: aiInterpretation
-                            .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-100 mt-4 mb-2">$1</h2>')
-                            .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-100">$1</strong>')
+                            .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-foreground mt-4 mb-2">$1</h2>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground">$1</strong>')
                         }}
                       />
                     </div>
@@ -905,12 +905,12 @@ export default function MatchPage() {
                 <Button
                   onClick={reset}
                   variant="outline"
-                  className="border-amber-500/20 text-amber-100 hover:bg-amber-500/10"
+                  className="border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10"
                 >
                   重新匹配
                 </Button>
                 {savedRecordId && (
-                  <div className="text-sm text-amber-400 flex items-center">
+                  <div className="text-sm text-[var(--theme-accent)] flex items-center">
                     <History className="w-4 h-4 mr-1" />
                     已保存到历史记录
                   </div>

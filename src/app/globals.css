@@ -42,6 +42,19 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  
+  /* 自定义主题颜色 */
+  --color-theme-bg: var(--theme-bg);
+  --color-theme-card: var(--theme-card);
+  --color-theme-border: var(--theme-border);
+  --color-theme-text: var(--theme-text);
+  --color-theme-text-secondary: var(--theme-text-secondary);
+  --color-theme-text-muted: var(--theme-text-muted);
+  --color-theme-accent: var(--theme-accent);
+  --color-theme-accent-hover: var(--theme-accent-hover);
+  --color-theme-gold: var(--theme-gold);
+  --color-theme-gold-muted: var(--theme-gold-muted);
+  
   --font-sans:
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif,
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
@@ -56,7 +69,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -67,12 +80,12 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.45 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -88,33 +101,42 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   
-  /* 自定义主题变量 */
-  --header-bg: #ffffff;
+  /* 浅色模式主题变量 */
+  --theme-bg: #fafafa;
+  --theme-card: #ffffff;
+  --theme-card-hover: #f5f5f5;
+  --theme-border: rgba(212, 175, 55, 0.3);
+  --theme-text: #1a1a1a;
+  --theme-text-secondary: #525252;
+  --theme-text-muted: #737373;
+  --theme-accent: #d4af37;
+  --theme-accent-hover: #b8962e;
+  --theme-gold: #92400e;
+  --theme-gold-muted: #a16207;
+  --theme-gold-bg: rgba(212, 175, 55, 0.1);
+  --theme-gold-border: rgba(212, 175, 55, 0.3);
+  
+  --header-bg: rgba(255, 255, 255, 0.9);
   --page-bg: #fafafa;
-  --card-bg: #ffffff;
-  --card-border: rgba(212, 175, 55, 0.2);
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --text-muted: #999999;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.18 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(0.98 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -131,14 +153,23 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   
-  /* 自定义主题变量 */
-  --header-bg: #0a0a0a;
+  /* 深色模式主题变量 */
+  --theme-bg: #0a0a0a;
+  --theme-card: rgba(26, 26, 26, 0.6);
+  --theme-card-hover: rgba(38, 38, 38, 0.8);
+  --theme-border: rgba(212, 175, 55, 0.25);
+  --theme-text: #f5f5f5;
+  --theme-text-secondary: #a3a3a3;
+  --theme-text-muted: #737373;
+  --theme-accent: #d4af37;
+  --theme-accent-hover: #e5c04b;
+  --theme-gold: #fbbf24;
+  --theme-gold-muted: #f59e0b;
+  --theme-gold-bg: rgba(212, 175, 55, 0.15);
+  --theme-gold-border: rgba(212, 175, 55, 0.3);
+  
+  --header-bg: rgba(10, 10, 10, 0.9);
   --page-bg: #0a0a0a;
-  --card-bg: rgba(26, 26, 26, 0.5);
-  --card-border: rgba(212, 175, 55, 0.2);
-  --text-primary: #f5f5f5;
-  --text-secondary: #a3a3a3;
-  --text-muted: #737373;
 }
 
 @layer base {
@@ -198,13 +229,22 @@ body {
   background: transparent;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 9999px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.5);
+}
+
+:root:not(.dark) .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+
+:root:not(.dark) .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.35);
 }
 
 /* 首页星空背景 */
