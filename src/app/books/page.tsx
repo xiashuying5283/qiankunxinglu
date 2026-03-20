@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, ChevronRight, ChevronLeft, Sparkles, BookMarked, Scroll, Library, Home } from 'lucide-react';
+import { BookOpen, ChevronRight, ChevronLeft, Sparkles, BookMarked, Scroll, Library } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { getBooks } from '@/lib/books-service';
 
 export const metadata: Metadata = {
   title: '古籍阅读 - 传统智慧经典',
@@ -18,36 +19,11 @@ const CATEGORY_CONFIG: Record<string, { icon: any; color: string; label: string 
   '集': { icon: Library, color: 'from-green-500 to-emerald-500', label: '集部' },
 };
 
-interface Book {
-  id: number;
-  title: string;
-  author: string | null;
-  dynasty: string | null;
-  category: string | null;
-  description: string | null;
-  total_chapters: number | null;
-}
-
-// 服务端获取书籍列表
-async function getBooks(): Promise<Book[]> {
-  try {
-    const baseUrl = process.env.DEPLOY_RUN_PORT 
-      ? `http://localhost:${process.env.DEPLOY_RUN_PORT}` 
-      : 'http://localhost:5000';
-    const res = await fetch(`${baseUrl}/api/books`, { cache: 'no-store' });
-    const data = await res.json();
-    return data.books || [];
-  } catch (error) {
-    console.error('获取书籍列表失败:', error);
-    return [];
-  }
-}
-
 export default async function BooksPage() {
   const allBooks = await getBooks();
   
   // 按分类分组
-  const booksByCategory: Record<string, Book[]> = {};
+  const booksByCategory: Record<string, typeof allBooks> = {};
   allBooks.forEach((book) => {
     const category = book.category || '其他';
     if (!booksByCategory[category]) {
@@ -84,7 +60,7 @@ export default async function BooksPage() {
             <div className="text-center py-12">
               <BookOpen className="w-16 h-16 text-amber-300 mx-auto mb-4" />
               <p className="text-amber-700/50">暂无书籍</p>
-              <p className="text-amber-600/40 text-sm mt-2">请先初始化数据库</p>
+              <p className="text-amber-600/40 text-sm mt-2">请稍后再来</p>
             </div>
           ) : (
             Object.entries(booksByCategory).map(([category, categoryBooks]) => {

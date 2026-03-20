@@ -5,46 +5,7 @@ import { BookOpen, ChevronRight, ChevronLeft, List, Hash } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-interface Chapter {
-  id: number;
-  book_id: number;
-  parent_id: number | null;
-  title: string;
-  slug: string | null;
-  chapter_order: number;
-  level: number;
-  is_leaf: boolean;
-  children: Chapter[];
-}
-
-interface Book {
-  id: number;
-  title: string;
-  author: string | null;
-  dynasty: string | null;
-  description: string | null;
-  total_chapters: number | null;
-}
-
-// 服务端获取书籍和章节
-async function getBookWithChapters(bookId: number): Promise<{ book: Book | null; chapters: Chapter[]; flatChapters: Chapter[] }> {
-  try {
-    const baseUrl = process.env.DEPLOY_RUN_PORT 
-      ? `http://localhost:${process.env.DEPLOY_RUN_PORT}` 
-      : 'http://localhost:5000';
-    const res = await fetch(`${baseUrl}/api/books/${bookId}`, { cache: 'no-store' });
-    const data = await res.json();
-    return {
-      book: data.book || null,
-      chapters: data.chapters || [],
-      flatChapters: data.allChapters || [],
-    };
-  } catch (error) {
-    console.error('获取书籍详情失败:', error);
-    return { book: null, chapters: [], flatChapters: [] };
-  }
-}
+import { getBookWithChapters, type Chapter } from '@/lib/books-service';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -113,14 +74,14 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
     notFound();
   }
   
-  const { book, chapters, flatChapters } = await getBookWithChapters(bookId);
+  const { book, chapters, allChapters } = await getBookWithChapters(bookId);
   
   if (!book) {
     notFound();
   }
   
   // 找到第一个可读章节
-  const firstChapter = flatChapters.find((c) => c.is_leaf);
+  const firstChapter = allChapters.find((c: Chapter) => c.is_leaf);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">

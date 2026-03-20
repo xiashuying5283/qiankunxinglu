@@ -3,51 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { 
   BookOpen, ChevronRight, ChevronLeft, 
-  List, Home, Hash, Bookmark
+  List, Home, Bookmark
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-interface ContentItem {
-  id: number;
-  chapter_id: number;
-  content_type: string;
-  content: string;
-  source: string | null;
-  content_order: number | null;
-}
-
-interface Chapter {
-  id: number;
-  book_id: number;
-  parent_id: number | null;
-  title: string;
-  slug: string | null;
-  chapter_order: number;
-  level: number;
-  is_leaf: boolean;
-}
-
-interface Book {
-  id: number;
-  title: string;
-  author: string | null;
-}
-
-// 服务端获取数据
-async function getChapterData(bookId: number, chapterId: number) {
-  try {
-    const baseUrl = process.env.DEPLOY_RUN_PORT 
-      ? `http://localhost:${process.env.DEPLOY_RUN_PORT}` 
-      : 'http://localhost:5000';
-    const res = await fetch(`${baseUrl}/api/books/${bookId}/chapters/${chapterId}`, { cache: 'no-store' });
-    return await res.json();
-  } catch (error) {
-    console.error('获取章节内容失败:', error);
-    return { book: null, chapter: null, contents: [], navigation: null };
-  }
-}
+import { getChapterContent, type ContentItem } from '@/lib/books-service';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; chapterId: string }> }): Promise<Metadata> {
   const { id, chapterId } = await params;
@@ -58,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     return { title: '章节不存在' };
   }
   
-  const { book, chapter } = await getChapterData(bookId, chId);
+  const { book, chapter } = await getChapterContent(bookId, chId);
   
   if (!book || !chapter) {
     return { title: '章节不存在' };
@@ -79,24 +40,11 @@ const CONTENT_TYPE_CONFIG: Record<string, { label: string; color: string; bgColo
 };
 
 // 渲染内容
-function renderContent(contents: ContentItem[]) {
-  const grouped: Record<string, ContentItem[]> = {
-    original: [],
-    note: [],
-    commentary: [],
-    translation: [],
-  };
-  
-  contents.forEach((c) => {
-    if (grouped[c.content_type]) {
-      grouped[c.content_type].push(c);
-    }
-  });
-  
+function renderContent(contents: ContentItem[], groupedContents: Record<string, ContentItem[]>) {
   return (
     <div className="space-y-6">
       {/* 原文 */}
-      {grouped.original.map((item, idx) => (
+      {groupedContents.original.map((item, idx) => (
         <div key={item.id || idx} className="space-y-2">
           <Badge className={`${CONTENT_TYPE_CONFIG.original.bgColor} ${CONTENT_TYPE_CONFIG.original.color} border-0`}>
             {item.source || '原文'}
@@ -110,9 +58,9 @@ function renderContent(contents: ContentItem[]) {
       ))}
       
       {/* 译文 */}
-      {grouped.translation.length > 0 && (
+      {groupedContents.translation.length > 0 && (
         <div className="border-t border-amber-200 pt-6">
-          {grouped.translation.map((item, idx) => (
+          {groupedContents.translation.map((item, idx) => (
             <div key={item.id || idx} className="space-y-2">
               <Badge className={`${CONTENT_TYPE_CONFIG.translation.bgColor} ${CONTENT_TYPE_CONFIG.translation.color} border-0`}>
                 {item.source || '译文'}
@@ -128,13 +76,13 @@ function renderContent(contents: ContentItem[]) {
       )}
       
       {/* 注释 */}
-      {grouped.note.length > 0 && (
+      {groupedContents.note.length > 0 && (
         <div className="border-t border-amber-200 pt-6">
           <h3 className="text-lg font-medium text-amber-800 mb-4 flex items-center gap-2">
             <Bookmark className="w-4 h-4 text-blue-600" />
             注释
           </h3>
-          {grouped.note.map((item, idx) => (
+          {groupedContents.note.map((item, idx) => (
             <div key={item.id || idx} className="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
               {item.source && (
                 <p className="text-sm text-blue-600 mb-2">{item.source}</p>
@@ -150,13 +98,13 @@ function renderContent(contents: ContentItem[]) {
       )}
       
       {/* 疏解 */}
-      {grouped.commentary.length > 0 && (
+      {groupedContents.commentary.length > 0 && (
         <div className="border-t border-amber-200 pt-6">
           <h3 className="text-lg font-medium text-amber-800 mb-4 flex items-center gap-2">
             <Bookmark className="w-4 h-4 text-purple-600" />
             疏解
           </h3>
-          {grouped.commentary.map((item, idx) => (
+          {groupedContents.commentary.map((item, idx) => (
             <div key={item.id || idx} className="mb-4 p-4 rounded-lg bg-purple-50 border border-purple-200">
               {item.source && (
                 <p className="text-sm text-purple-600 mb-2">{item.source}</p>
@@ -183,7 +131,7 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
     notFound();
   }
   
-  const { book, chapter, contents, navigation } = await getChapterData(bookId, chId);
+  const { book, chapter, contents, groupedContents, navigation } = await getChapterContent(bookId, chId);
   
   if (!book || !chapter) {
     notFound();
@@ -235,14 +183,14 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
         {/* 内容区域 */}
         <Card className="bg-white/90 border-amber-200 shadow-sm mb-8">
           <CardContent className="pt-8">
-            {!contents || contents.length === 0 ? (
+            {contents.length === 0 ? (
               <div className="text-center py-12 text-amber-700/50">
                 <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-50" />
                 <p>暂无内容</p>
                 <p className="text-sm mt-2">请稍后再来</p>
               </div>
             ) : (
-              renderContent(contents)
+              renderContent(contents, groupedContents)
             )}
           </CardContent>
         </Card>
