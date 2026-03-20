@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { Converter } from 'opencc-js';
+
+// 繁体转简体转换器
+const converter = Converter({ from: 'tw', to: 'cn' });
+
+// 繁体转简体
+function toSimplified(text: string): string {
+  return converter(text);
+}
 
 // 从目录页面动态获取所有章节URL
 async function fetchChapterUrls(): Promise<{ url: string; title: string; order: number }[]> {
@@ -238,7 +247,7 @@ export async function GET() {
         
         // 从URL中提取章节标识
         const slug = chapterInfo.url.split('/').pop() || `chapter-${chapterInfo.order}`;
-        const title = chapterInfo.title || slug;
+        const title = toSimplified(chapterInfo.title || slug);
         
         // 创建或更新章节
         const { data: existingChapter } = await client
@@ -265,6 +274,12 @@ export async function GET() {
             .single();
           
           chapterId = newChapter?.id;
+        } else {
+          // 更新现有章节的标题（转换为简体）
+          await client
+            .from('chapters')
+            .update({ title: title })
+            .eq('id', chapterId);
         }
         
         if (chapterId) {
@@ -282,9 +297,9 @@ export async function GET() {
             contents.push({
               chapter_id: chapterId,
               content_type: unit.original ? 'original' : 'commentary',
-              content: unit.original || '',
-              note: unit.note || null,
-              commentary: unit.commentary || null,
+              content: toSimplified(unit.original || ''),
+              note: unit.note ? toSimplified(unit.note) : null,
+              commentary: unit.commentary ? toSimplified(unit.commentary) : null,
               source: '周易正义',
               content_order: order++,
             });
