@@ -89,6 +89,25 @@ async function fetchChapterUrls(): Promise<{ url: string; title: string; order: 
   }
 }
 
+// 清理HTML标签和无关内容
+function cleanText(text: string): string {
+  // 1. 先删除透明文字标签及其内容（这些是隐藏的广告/追踪内容）
+  text = text.replace(/<span[^>]*color:\s*transparent[^>]*>[\s\S]*?<\/span>/gi, '');
+  // 2. 删除所有HTML标签
+  text = text.replace(/<[^>]+>/g, '');
+  // 3. 清理HTML实体
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&amp;/g, '&');
+  text = text.replace(/&quot;/g, '"');
+  // 4. 清理多余的空白
+  text = text.replace(/\s+/g, ' ').trim();
+  // 5. 删除开头可能残留的不完整标签
+  text = text.replace(/^[^a-zA-Z\u4e00-\u9fa5\[\(（【「『〈《]*/, '');
+  return text.trim();
+}
+
 // 解析HTML内容
 function parseContent(html: string): { original: string[]; notes: string[]; commentaries: string[] } {
   const original: string[] = [];
@@ -99,7 +118,7 @@ function parseContent(html: string): { original: string[]; notes: string[]; comm
   const shuRegex = /\[疏\]([\s\S]*?)(?=\[疏\]|$)/g;
   let match;
   while ((match = shuRegex.exec(html)) !== null) {
-    const text = match[1].replace(/<[^>]+>/g, '').trim();
+    const text = cleanText(match[1]);
     if (text.length > 20) {
       commentaries.push(text.substring(0, 2000)); // 限制长度
     }
@@ -108,7 +127,7 @@ function parseContent(html: string): { original: string[]; notes: string[]; comm
   // 提取 < > 中的注文  
   const zhuRegex = /〈([^〉]+)〉/g;
   while ((match = zhuRegex.exec(html)) !== null) {
-    const text = match[1].trim();
+    const text = cleanText(match[1]);
     if (text.length > 5) {
       notes.push(text);
     }
