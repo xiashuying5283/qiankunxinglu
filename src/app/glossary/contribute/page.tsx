@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,7 +31,8 @@ import {
   AlertCircle,
   Trash2,
   ExternalLink,
-  HelpCircle
+  HelpCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -180,6 +182,16 @@ function ContributePageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-amber-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* 返回按钮 */}
+        <div className="mb-6">
+          <Link href="/glossary">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回词典
+            </Button>
+          </Link>
+        </div>
+        
         {/* 页面标题 */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 text-primary mb-2">
