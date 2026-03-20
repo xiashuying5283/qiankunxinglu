@@ -153,9 +153,9 @@ export default function FortuneStickPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Scroll className="w-10 h-10 text-[var(--theme-accent)] mr-3" />
+            <Scroll className="w-10 h-10 text-amber-500 mr-3" />
             <h1 className="text-4xl font-bold text-foreground">观音灵签</h1>
-            <Scroll className="w-10 h-10 text-[var(--theme-accent)] ml-3" />
+            <Scroll className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-muted-foreground">诚心祈愿，抽签问卦，观音菩萨指点迷津</p>
           <p className="text-muted-foreground text-sm mt-2">共一百签，涵盖人生各事</p>
@@ -163,7 +163,7 @@ export default function FortuneStickPage() {
 
         <div className="max-w-2xl mx-auto">
           {!result ? (
-            <Card className="bg-card/50 border-[var(--theme-border)]">
+            <Card className="bg-card/50 border-amber-500/20">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-foreground">诚心祈愿</CardTitle>
                 <CardDescription className="text-muted-foreground">
@@ -216,7 +216,7 @@ export default function FortuneStickPage() {
                 <Button
                   onClick={drawStick}
                   disabled={isDrawing || !isInitialized}
-                  className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   {isDrawing ? (
                     <>
@@ -233,7 +233,7 @@ export default function FortuneStickPage() {
             </Card>
           ) : (
             <div className={`space-y-6 transition-all duration-500 ${showResult ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <Card className="bg-card/50 border-[var(--theme-border)] overflow-hidden">
+              <Card className="bg-card/50 border-amber-500/20 overflow-hidden">
                 {/* 签头 */}
                 <div className={`bg-gradient-to-r ${getLevelBg(result.level)} py-6 text-center relative border-b border-amber-500/20`}>
                   <div className="absolute inset-0 opacity-20">
@@ -251,37 +251,37 @@ export default function FortuneStickPage() {
                 <CardContent className="pt-6 space-y-6">
                   <div className="text-center">
                     <h3 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-                      <BookOpen className="w-5 h-5 text-[var(--theme-accent)]" />
+                      <BookOpen className="w-5 h-5 text-amber-500" />
                       {result.title}
                     </h3>
                   </div>
 
-                  <div className="bg-background rounded-xl p-6 text-center border border-[var(--theme-border)]">
-                    <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-4 tracking-wider">签 诗</h4>
+                  <div className="bg-background rounded-xl p-6 text-center border border-amber-500/20">
+                    <h4 className="text-sm font-bold text-amber-500 mb-4 tracking-wider">签 诗</h4>
                     <p className="text-xl text-foreground leading-loose whitespace-pre-line font-medium">
                       {result.poem}
                     </p>
                   </div>
 
-                  <div className="bg-background rounded-xl p-6 border border-[var(--theme-border)]">
-                    <h4 className="text-sm font-bold text-[var(--theme-accent)] mb-3 tracking-wider">解 签</h4>
+                  <div className="bg-background rounded-xl p-6 border border-amber-500/20">
+                    <h4 className="text-sm font-bold text-amber-500 mb-3 tracking-wider">解 签</h4>
                     <p className="text-muted-foreground leading-relaxed">{result.meaning}</p>
                   </div>
 
                   {result.story && (
-                    <div className="bg-background rounded-xl overflow-hidden border border-[var(--theme-border)]">
+                    <div className="bg-background rounded-xl overflow-hidden border border-amber-500/20">
                       <button
                         onClick={() => toggleSection('story')}
-                        className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--theme-accent)]/5 transition-colors"
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-500/5 transition-colors"
                       >
-                        <h4 className="text-sm font-bold text-[var(--theme-accent)] tracking-wider flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-amber-500 tracking-wider flex items-center gap-2">
                           <Scroll className="w-4 h-4" />
                           古人典故
                         </h4>
                         {expandedSections.story ? (
-                          <ChevronUp className="w-4 h-4 text-[var(--theme-accent)]" />
+                          <ChevronUp className="w-4 h-4 text-amber-500" />
                         ) : (
-                          <ChevronDown className="w-4 h-4 text-[var(--theme-accent)]" />
+                          <ChevronDown className="w-4 h-4 text-amber-500" />
                         )}
                       </button>
                       {expandedSections.story && (
@@ -292,19 +292,19 @@ export default function FortuneStickPage() {
                     </div>
                   )}
 
-                  <div className="bg-background rounded-xl overflow-hidden border border-[var(--theme-border)]">
+                  <div className="bg-background rounded-xl overflow-hidden border border-amber-500/20">
                     <button
                       onClick={() => toggleSection('interpretation')}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--theme-accent)]/5 transition-colors"
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-500/5 transition-colors"
                     >
-                      <h4 className="text-sm font-bold text-[var(--theme-accent)] tracking-wider flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-amber-500 tracking-wider flex items-center gap-2">
                         <Sparkles className="w-4 h-4" />
                         分类解签
                       </h4>
                       {expandedSections.interpretation ? (
-                        <ChevronUp className="w-4 h-4 text-[var(--theme-accent)]" />
+                        <ChevronUp className="w-4 h-4 text-amber-500" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-[var(--theme-accent)]" />
+                        <ChevronDown className="w-4 h-4 text-amber-500" />
                       )}
                     </button>
                     {expandedSections.interpretation && (
@@ -321,8 +321,8 @@ export default function FortuneStickPage() {
                             lost: '失物'
                           };
                           return (
-                            <div key={key} className="bg-card rounded-lg p-3 border border-[var(--theme-border)]">
-                              <div className="text-[var(--theme-accent)] text-xs font-bold mb-1">{labels[key]}</div>
+                            <div key={key} className="bg-card rounded-lg p-3 border border-amber-500/20">
+                              <div className="text-amber-500 text-xs font-bold mb-1">{labels[key]}</div>
                               <div className="text-muted-foreground text-sm">{value}</div>
                             </div>
                           );
@@ -331,7 +331,7 @@ export default function FortuneStickPage() {
                     )}
                   </div>
 
-                  <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-xl p-5 text-center border border-[var(--theme-border)]">
+                  <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-xl p-5 text-center border border-amber-500/20">
                     <p className="text-muted-foreground">
                       此签为<strong className={`text-lg ${getLevelColor(result.level)}`}>{result.level}</strong>
                       {result.level.includes('上上') && '，大吉大利，万事如意。'}
@@ -347,7 +347,7 @@ export default function FortuneStickPage() {
               <div className="text-center">
                 <Button
                   onClick={() => setResult(null)}
-                  className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新抽签

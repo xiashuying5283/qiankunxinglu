@@ -234,7 +234,7 @@ export default function CharDivinationPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Card className="bg-card/50 border-[var(--theme-border)]">
+        <Card className="bg-card/50 border-amber-500/20">
           <CardContent className="py-12 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
             <p className="text-muted-foreground">正在加载卦象数据...</p>
@@ -254,7 +254,7 @@ export default function CharDivinationPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={loadData} className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black">
+            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-black">
               重试
             </Button>
           </CardContent>
@@ -271,16 +271,16 @@ export default function CharDivinationPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <PenTool className="w-10 h-10 text-[var(--theme-accent)] mr-3" />
+            <PenTool className="w-10 h-10 text-amber-500 mr-3" />
             <h1 className="text-4xl font-bold text-foreground">测字算卦</h1>
-            <PenTool className="w-10 h-10 text-[var(--theme-accent)] ml-3" />
+            <PenTool className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-muted-foreground">一字一世界，一笔一乾坤，通过文字探索命运的奥秘</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           {!result && (
-            <Card className="bg-card/50 border-[var(--theme-border)] mb-6">
+            <Card className="bg-card/50 border-amber-500/20 mb-6">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-foreground">请输入您想测算的汉字</CardTitle>
                 <CardDescription className="text-muted-foreground">
@@ -288,7 +288,7 @@ export default function CharDivinationPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-background rounded-lg p-4 mb-4 text-center border border-[var(--theme-border)]">
+                <div className="bg-background rounded-lg p-4 mb-4 text-center border border-amber-500/20">
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     上卦取笔画数除以八的余数，下卦取笔画数加时辰除以八的余数，
                     动爻取笔画数加时辰除以六的余数。
@@ -302,12 +302,12 @@ export default function CharDivinationPage() {
                     value={inputChar}
                     onChange={(e) => setInputChar(e.target.value)}
                     placeholder="请输入一个汉字"
-                    className="bg-background border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center text-2xl h-14"
+                    className="bg-background border-amber-500/20 text-foreground placeholder:text-muted-foreground text-center text-2xl h-14"
                   />
                   <Button
                     onClick={divine}
                     disabled={!inputChar.trim()}
-                    className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-8"
+                    className="bg-amber-500 hover:bg-amber-600 text-black px-8"
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     开始测字
@@ -323,7 +323,7 @@ export default function CharDivinationPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setInputChar(char)}
-                        className="bg-background border-[var(--theme-border)] text-foreground hover:bg-[var(--theme-accent)]/10 hover:text-foreground"
+                        className="bg-background border-amber-500/20 text-foreground hover:bg-amber-500/10 hover:text-foreground"
                       >
                         {char}
                       </Button>
@@ -337,7 +337,7 @@ export default function CharDivinationPage() {
           {result && (
             <div className="space-y-6">
               {/* 字和笔画信息 */}
-              <Card className="bg-card/50 border-[var(--theme-border)]">
+              <Card className="bg-card/50 border-amber-500/20">
                 <CardContent className="py-8">
                   <div className="text-center">
                     <div className="text-9xl font-bold text-foreground mb-4" style={{ fontFamily: 'serif' }}>
@@ -359,7 +359,7 @@ export default function CharDivinationPage() {
               {result.decomposition && (() => {
                 const decomp = result.decomposition;
                 return (
-                <Card className="bg-card/50 border-[var(--theme-border)]">
+                <Card className="bg-card/50 border-amber-500/20">
                   <CardHeader>
                     <CardTitle className="text-xl text-foreground">字形拆解</CardTitle>
                   </CardHeader>
@@ -374,15 +374,15 @@ export default function CharDivinationPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="bg-background rounded-lg p-4 border border-[var(--theme-border)]">
+                    <div className="bg-background rounded-lg p-4 border border-amber-500/20">
                       <p className="text-muted-foreground leading-relaxed">{decomp.overall}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-background rounded-lg p-3 text-center border border-[var(--theme-border)]">
+                      <div className="bg-background rounded-lg p-3 text-center border border-amber-500/20">
                         <div className="text-sm text-muted-foreground">五行属性</div>
                         <div className="text-xl font-bold text-foreground">{decomp.fiveElement}</div>
                       </div>
-                      <div className="bg-background rounded-lg p-3 text-center border border-[var(--theme-border)]">
+                      <div className="bg-background rounded-lg p-3 text-center border border-amber-500/20">
                         <div className="text-sm text-muted-foreground">阴阳属性</div>
                         <div className="text-xl font-bold text-foreground">{decomp.yinYang}</div>
                       </div>
@@ -393,7 +393,7 @@ export default function CharDivinationPage() {
               })()}
 
               {/* 卦象显示 */}
-              <Card className="bg-card/50 border-[var(--theme-border)]">
+              <Card className="bg-card/50 border-amber-500/20">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-foreground">所成卦象</CardTitle>
                   <CardDescription className="text-muted-foreground">
@@ -411,13 +411,13 @@ export default function CharDivinationPage() {
                       <div className="text-lg text-foreground">{result.upperTrigram.name}</div>
                       <div className="text-sm text-muted-foreground">上卦·{result.upperTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-[var(--theme-accent)]">+</div>
+                    <div className="text-2xl text-amber-500">+</div>
                     <div className="text-center">
                       <div className="text-5xl mb-2">{result.lowerTrigram.symbol}</div>
                       <div className="text-lg text-foreground">{result.lowerTrigram.name}</div>
                       <div className="text-sm text-muted-foreground">下卦·{result.lowerTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-[var(--theme-accent)]">=</div>
+                    <div className="text-2xl text-amber-500">=</div>
                     <div className="text-center">
                       <div className="text-5xl mb-2">{result.hexagram.symbol}</div>
                       <div className="text-lg text-foreground">{result.hexagram.name}</div>
@@ -425,25 +425,25 @@ export default function CharDivinationPage() {
                     </div>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 mb-4 border border-[var(--theme-border)]">
-                    <h3 className="text-lg font-bold text-[var(--theme-accent)] mb-2">卦辞</h3>
+                  <div className="bg-background rounded-lg p-6 mb-4 border border-amber-500/20">
+                    <h3 className="text-lg font-bold text-amber-500 mb-2">卦辞</h3>
                     <p className="text-foreground text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-[var(--theme-border)] pt-3 mt-3">
+                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-amber-500/20 pt-3 mt-3">
                       💡 {result.hexagram.judgementMeaning}
                     </p>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 mb-4 border border-[var(--theme-border)]">
-                    <h3 className="text-lg font-bold text-[var(--theme-accent)] mb-2">象辞</h3>
+                  <div className="bg-background rounded-lg p-6 mb-4 border border-amber-500/20">
+                    <h3 className="text-lg font-bold text-amber-500 mb-2">象辞</h3>
                     <p className="text-foreground text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-[var(--theme-border)] pt-3 mt-3">
+                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-amber-500/20 pt-3 mt-3">
                       💡 {result.hexagram.imageMeaning}
                     </p>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 border border-[var(--theme-border)]">
+                  <div className="bg-background rounded-lg p-6 border border-amber-500/20">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-[var(--theme-accent)]">爻辞（点击查看注解）</h3>
+                      <h3 className="text-lg font-bold text-amber-500">爻辞（点击查看注解）</h3>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -465,25 +465,25 @@ export default function CharDivinationPage() {
                           key={index}
                           className={`rounded-lg overflow-hidden transition-all ${
                             result.changingLine === index + 1
-                              ? 'bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30'
+                              ? 'bg-amber-500/10 border border-amber-500/30'
                               : 'bg-card'
                           }`}
                         >
                           <div
-                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-[var(--theme-accent)]/5 transition-colors"
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-amber-500/5 transition-colors"
                             onClick={() => toggleLine(index)}
                           >
                             <div className="flex-1">
                               <p className="text-foreground font-medium">
                                 {line.text}
                                 {result.changingLine === index + 1 && (
-                                  <span className="ml-2 text-[var(--theme-accent)] font-bold text-sm bg-[var(--theme-accent)]/20 px-2 py-1 rounded">
+                                  <span className="ml-2 text-amber-500 font-bold text-sm bg-amber-500/20 px-2 py-1 rounded">
                                     动爻
                                   </span>
                                 )}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 text-[var(--theme-accent)]">
+                            <div className="flex items-center gap-2 text-amber-500">
                               {expandedLines.has(index) ? (
                                 <ChevronUp className="w-4 h-4" />
                               ) : (
@@ -492,7 +492,7 @@ export default function CharDivinationPage() {
                             </div>
                           </div>
                           {expandedLines.has(index) && (
-                            <div className="px-4 pb-4 pt-0 border-t border-[var(--theme-border)]">
+                            <div className="px-4 pb-4 pt-0 border-t border-amber-500/20">
                               <div className="bg-background rounded-lg p-4 mt-2">
                                 <p className="text-muted-foreground leading-relaxed">
                                   📖 {line.meaning}
@@ -511,7 +511,7 @@ export default function CharDivinationPage() {
               {result.changedHexagram && (
                 <>
                   <div className="text-center py-4">
-                    <div className="inline-flex items-center gap-4 text-4xl text-[var(--theme-accent)]">
+                    <div className="inline-flex items-center gap-4 text-4xl text-amber-500">
                       <span>{result.hexagram.symbol}</span>
                       <span className="text-2xl">→</span>
                       <span>{result.changedHexagram.symbol}</span>
@@ -519,7 +519,7 @@ export default function CharDivinationPage() {
                     <p className="text-muted-foreground mt-2">动爻变化，本卦变为之卦</p>
                   </div>
 
-                  <Card className="bg-card/50 border-[var(--theme-border)]">
+                  <Card className="bg-card/50 border-amber-500/20">
                     <CardHeader className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Button
@@ -540,10 +540,10 @@ export default function CharDivinationPage() {
                     </CardHeader>
                     {showChangedHexagram && (
                       <CardContent className="space-y-4">
-                        <div className="bg-background rounded-lg p-6 border border-[var(--theme-border)]">
-                          <h3 className="text-lg font-bold text-[var(--theme-accent)] mb-2">卦辞</h3>
+                        <div className="bg-background rounded-lg p-6 border border-amber-500/20">
+                          <h3 className="text-lg font-bold text-amber-500 mb-2">卦辞</h3>
                           <p className="text-foreground text-lg leading-relaxed mb-2">{result.changedHexagram.judgement}</p>
-                          <p className="text-muted-foreground text-sm leading-relaxed border-t border-[var(--theme-border)] pt-3 mt-3">
+                          <p className="text-muted-foreground text-sm leading-relaxed border-t border-amber-500/20 pt-3 mt-3">
                             💡 {result.changedHexagram.judgementMeaning}
                           </p>
                         </div>
@@ -554,14 +554,14 @@ export default function CharDivinationPage() {
               )}
 
               {/* 综合解读 */}
-              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-[var(--theme-border)]">
+              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
                 <CardHeader>
                   <CardTitle className="text-xl text-foreground">测字综合解读</CardTitle>
                 </CardHeader>
                 <CardContent className="text-muted-foreground leading-relaxed space-y-4">
                   <p>
                     您所测之字「<strong className="text-foreground">{result.char}</strong>」，
-                    笔画数为<strong className="text-[var(--theme-accent)]">{result.strokes}</strong>画。
+                    笔画数为<strong className="text-amber-500">{result.strokes}</strong>画。
                   </p>
                   <p>
                     以笔画起卦，得上卦<strong className="text-foreground">{result.upperTrigram.name}</strong>
@@ -570,19 +570,19 @@ export default function CharDivinationPage() {
                     （第{result.hexagram.number}卦）。
                   </p>
                   <p>
-                    第<strong className="text-[var(--theme-accent)]">{result.changingLine}</strong>爻为动爻，
+                    第<strong className="text-amber-500">{result.changingLine}</strong>爻为动爻，
                     动爻爻辞：{result.hexagram.lines[result.changingLine - 1].meaning}
                   </p>
                   
                   {result.decomposition && (
                     <>
-                      <div className="bg-background rounded-lg p-4 border border-[var(--theme-border)]">
+                      <div className="bg-background rounded-lg p-4 border border-amber-500/20">
                         <p className="font-medium text-foreground mb-2">📐 字形分析</p>
                         <p className="text-muted-foreground">{result.decomposition.overall}</p>
                       </div>
                       <p>
-                        此字五行属<strong className="text-[var(--theme-accent)]">{result.decomposition.fiveElement}</strong>，
-                        阴阳属<strong className="text-[var(--theme-accent)]">{result.decomposition.yinYang}</strong>。
+                        此字五行属<strong className="text-amber-500">{result.decomposition.fiveElement}</strong>，
+                        阴阳属<strong className="text-amber-500">{result.decomposition.yinYang}</strong>。
                       </p>
                     </>
                   )}
@@ -595,7 +595,7 @@ export default function CharDivinationPage() {
                     </p>
                   )}
                   
-                  <div className="mt-4 p-4 bg-background rounded-lg border border-[var(--theme-border)]">
+                  <div className="mt-4 p-4 bg-background rounded-lg border border-amber-500/20">
                     <p className="text-sm text-muted-foreground">
                       <strong className="text-foreground">温馨提示：</strong>
                       测字算卦仅供参考，人生道路需要自己把握。愿此字带给您启示与力量。
@@ -613,7 +613,7 @@ export default function CharDivinationPage() {
                     setExpandedLines(new Set());
                     setShowChangedHexagram(false);
                   }}
-                  className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   重新测字

@@ -295,9 +295,9 @@ export default function PlumBlossomPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Card className="bg-card/50 border-[var(--theme-border)]">
+        <Card className="bg-card/50 border-amber-500/20">
           <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-[var(--theme-accent)] animate-spin mb-4" />
+            <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
             <p className="text-muted-foreground">正在加载卦象数据...</p>
           </CardContent>
         </Card>
@@ -308,13 +308,13 @@ export default function PlumBlossomPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Card className="bg-card/50 border-[var(--theme-border)] max-w-md">
+        <Card className="bg-card/50 border-amber-500/20 max-w-md">
           <CardHeader>
             <CardTitle className="text-foreground">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={loadData} className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black">
+            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-black">
               重试
             </Button>
           </CardContent>
@@ -331,9 +331,9 @@ export default function PlumBlossomPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Star className="w-10 h-10 text-[var(--theme-accent)] mr-3" />
+            <Star className="w-10 h-10 text-amber-500 mr-3" />
             <h1 className="text-4xl font-bold text-foreground">梅花易数</h1>
-            <Star className="w-10 h-10 text-[var(--theme-accent)] ml-3" />
+            <Star className="w-10 h-10 text-amber-500 ml-3" />
           </div>
           <p className="text-muted-foreground">以数明理，以象言事，探索数字与命运的关联</p>
         </div>
@@ -346,13 +346,13 @@ export default function PlumBlossomPage() {
                 key={m.id}
                 className={`cursor-pointer transition-all ${
                   method === m.id
-                    ? 'bg-card border-[var(--theme-accent)]/50'
-                    : 'bg-card/50 border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30'
+                    ? 'bg-card border-amber-500/50'
+                    : 'bg-card/50 border-amber-500/20 hover:border-amber-500/30'
                 }`}
                 onClick={() => handleMethodSelect(m.id as Method)}
               >
                 <CardContent className="py-6 text-center">
-                  <m.icon className={`w-8 h-8 mx-auto mb-2 ${method === m.id ? 'text-[var(--theme-accent)]' : 'text-muted-foreground'}`} />
+                  <m.icon className={`w-8 h-8 mx-auto mb-2 ${method === m.id ? 'text-amber-500' : 'text-muted-foreground'}`} />
                   <div className="text-lg font-medium text-foreground">{m.name}</div>
                   <div className="text-sm text-muted-foreground mt-1">{m.description}</div>
                 </CardContent>
@@ -363,7 +363,7 @@ export default function PlumBlossomPage() {
           {/* 输入区域 */}
           {!result && (
             <div ref={inputAreaRef}>
-              <Card className="bg-card/50 border-[var(--theme-border)]">
+              <Card className="bg-card/50 border-amber-500/20">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-foreground">
                   {method === 'time' && '时间起卦'}
@@ -384,7 +384,7 @@ export default function PlumBlossomPage() {
                     </p>
                     <Button
                       onClick={divineByTime}
-                      className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                      className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                     >
                       <Clock className="w-5 h-5 mr-2" />
                       开始起卦
@@ -402,7 +402,7 @@ export default function PlumBlossomPage() {
                           value={numberInput.num1}
                           onChange={(e) => setNumberInput({ ...numberInput, num1: e.target.value })}
                           placeholder="上卦"
-                          className="bg-background border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
+                          className="bg-background border-amber-500/20 text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
                         />
                       </div>
                       <div>
@@ -412,7 +412,7 @@ export default function PlumBlossomPage() {
                           value={numberInput.num2}
                           onChange={(e) => setNumberInput({ ...numberInput, num2: e.target.value })}
                           placeholder="下卦"
-                          className="bg-background border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
+                          className="bg-background border-amber-500/20 text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
                         />
                       </div>
                       <div>
@@ -422,7 +422,7 @@ export default function PlumBlossomPage() {
                           value={numberInput.num3}
                           onChange={(e) => setNumberInput({ ...numberInput, num3: e.target.value })}
                           placeholder="动爻"
-                          className="bg-background border-[var(--theme-border)] text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
+                          className="bg-background border-amber-500/20 text-foreground placeholder:text-muted-foreground text-center text-xl h-14"
                         />
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export default function PlumBlossomPage() {
                       <Button
                         onClick={divineByNumber}
                         disabled={!numberInput.num1 || !numberInput.num2 || !numberInput.num3}
-                        className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                        className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                       >
                         <Star className="w-5 h-5 mr-2" />
                         开始起卦
@@ -446,7 +446,7 @@ export default function PlumBlossomPage() {
                     </p>
                     <Button
                       onClick={divineRandom}
-                      className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                      className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
                       随机起卦
@@ -463,7 +463,7 @@ export default function PlumBlossomPage() {
             <div className="space-y-6">
               {/* 数字信息 */}
               {result.numbers && (
-                <Card className="bg-card/50 border-[var(--theme-border)]">
+                <Card className="bg-card/50 border-amber-500/20">
                   <CardContent className="py-6">
                     <div className="text-center">
                       <div className="text-lg text-muted-foreground mb-2">{result.method}</div>
@@ -472,12 +472,12 @@ export default function PlumBlossomPage() {
                           <div className="text-2xl font-bold text-foreground">{result.numbers.upper}</div>
                           <div className="text-xs text-muted-foreground">上卦数</div>
                         </div>
-                        <div className="text-2xl text-[var(--theme-accent)]">+</div>
+                        <div className="text-2xl text-amber-500">+</div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-foreground">{result.numbers.lower}</div>
                           <div className="text-xs text-muted-foreground">下卦数</div>
                         </div>
-                        <div className="text-2xl text-[var(--theme-accent)]">+</div>
+                        <div className="text-2xl text-amber-500">+</div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-foreground">{result.numbers.change}</div>
                           <div className="text-xs text-muted-foreground">动爻数</div>
@@ -489,7 +489,7 @@ export default function PlumBlossomPage() {
               )}
 
               {/* 卦象显示 */}
-              <Card className="bg-card/50 border-[var(--theme-border)]">
+              <Card className="bg-card/50 border-amber-500/20">
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-foreground">所成卦象</CardTitle>
                 </CardHeader>
@@ -510,13 +510,13 @@ export default function PlumBlossomPage() {
                       <div className="text-sm text-foreground">{result.upperTrigram.name}</div>
                       <div className="text-xs text-muted-foreground">上卦·{result.upperTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-[var(--theme-accent)]">+</div>
+                    <div className="text-2xl text-amber-500">+</div>
                     <div className="text-center">
                       <div className="text-4xl mb-1">{result.lowerTrigram.symbol}</div>
                       <div className="text-sm text-foreground">{result.lowerTrigram.name}</div>
                       <div className="text-xs text-muted-foreground">下卦·{result.lowerTrigram.nature}</div>
                     </div>
-                    <div className="text-2xl text-[var(--theme-accent)]">=</div>
+                    <div className="text-2xl text-amber-500">=</div>
                     <div className="text-center">
                       <div className="text-4xl mb-1">{result.hexagram.symbol}</div>
                       <div className="text-sm text-foreground">{result.hexagram.name}</div>
@@ -524,25 +524,25 @@ export default function PlumBlossomPage() {
                     </div>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 mb-4 border border-[var(--theme-border)]">
-                    <h4 className="text-lg font-bold text-[var(--theme-accent)] mb-2">卦辞</h4>
+                  <div className="bg-background rounded-lg p-6 mb-4 border border-amber-500/20">
+                    <h4 className="text-lg font-bold text-amber-500 mb-2">卦辞</h4>
                     <p className="text-foreground text-lg leading-relaxed mb-2">{result.hexagram.judgement}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-[var(--theme-border)] pt-3 mt-3">
+                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-amber-500/20 pt-3 mt-3">
                       💡 {result.hexagram.judgementMeaning}
                     </p>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 mb-4 border border-[var(--theme-border)]">
-                    <h4 className="text-lg font-bold text-[var(--theme-accent)] mb-2">象辞</h4>
+                  <div className="bg-background rounded-lg p-6 mb-4 border border-amber-500/20">
+                    <h4 className="text-lg font-bold text-amber-500 mb-2">象辞</h4>
                     <p className="text-foreground text-lg leading-relaxed mb-2">{result.hexagram.image}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-[var(--theme-border)] pt-3 mt-3">
+                    <p className="text-muted-foreground text-sm leading-relaxed border-t border-amber-500/20 pt-3 mt-3">
                       💡 {result.hexagram.imageMeaning}
                     </p>
                   </div>
 
-                  <div className="bg-background rounded-lg p-6 border border-[var(--theme-border)]">
+                  <div className="bg-background rounded-lg p-6 border border-amber-500/20">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-bold text-[var(--theme-accent)]">爻辞（点击查看注解）</h4>
+                      <h4 className="text-lg font-bold text-amber-500">爻辞（点击查看注解）</h4>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -564,25 +564,25 @@ export default function PlumBlossomPage() {
                           key={index}
                           className={`rounded-lg overflow-hidden transition-all ${
                             result.changingLine === index + 1
-                              ? 'bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30'
+                              ? 'bg-amber-500/10 border border-amber-500/30'
                               : 'bg-card'
                           }`}
                         >
                           <div
-                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-[var(--theme-accent)]/5 transition-colors"
+                            className="p-4 cursor-pointer flex items-start justify-between gap-4 hover:bg-amber-500/5 transition-colors"
                             onClick={() => toggleLine(index)}
                           >
                             <div className="flex-1">
                               <p className="text-foreground font-medium">
                                 {line.text}
                                 {result.changingLine === index + 1 && (
-                                  <span className="ml-2 text-[var(--theme-accent)] font-bold text-sm bg-[var(--theme-accent)]/20 px-2 py-1 rounded">
+                                  <span className="ml-2 text-amber-500 font-bold text-sm bg-amber-500/20 px-2 py-1 rounded">
                                     动爻
                                   </span>
                                 )}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 text-[var(--theme-accent)]">
+                            <div className="flex items-center gap-2 text-amber-500">
                               <BookOpen className="w-4 h-4" />
                               {expandedLines.has(index) ? (
                                 <ChevronUp className="w-4 h-4" />
@@ -592,7 +592,7 @@ export default function PlumBlossomPage() {
                             </div>
                           </div>
                           {expandedLines.has(index) && (
-                            <div className="px-4 pb-4 pt-0 border-t border-[var(--theme-border)]">
+                            <div className="px-4 pb-4 pt-0 border-t border-amber-500/20">
                               <div className="bg-background rounded-lg p-4 mt-2">
                                 <p className="text-muted-foreground leading-relaxed">
                                   📖 {line.meaning}
@@ -608,7 +608,7 @@ export default function PlumBlossomPage() {
               </Card>
 
               {/* 解读 */}
-              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-[var(--theme-border)]">
+              <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
                 <CardHeader>
                   <CardTitle className="text-xl text-foreground">梅花易数解读</CardTitle>
                 </CardHeader>
@@ -625,11 +625,11 @@ export default function PlumBlossomPage() {
                   <p className="mb-4">
                     第{result.changingLine}爻为动爻，象征事物发展的关键转折点。
                   </p>
-                  <div className="bg-background rounded-lg p-4 mb-4 border border-[var(--theme-border)]">
+                  <div className="bg-background rounded-lg p-4 mb-4 border border-amber-500/20">
                     <p className="text-foreground font-medium mb-2">⚡ 动爻提示</p>
                     <p className="text-muted-foreground">{result.hexagram.lines[result.changingLine - 1].meaning}</p>
                   </div>
-                  <div className="mt-4 p-4 bg-background rounded-lg border border-[var(--theme-border)]">
+                  <div className="mt-4 p-4 bg-background rounded-lg border border-amber-500/20">
                     <p className="text-sm text-muted-foreground">
                       <strong className="text-foreground">温馨提示：</strong>
                       梅花易数以数明理，仅供参考。人生道路需要自己把握，愿此卦带给您启示。
@@ -645,7 +645,7 @@ export default function PlumBlossomPage() {
                     setResult(null);
                     setExpandedLines(new Set());
                   }}
-                  className="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-black px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   重新起卦
