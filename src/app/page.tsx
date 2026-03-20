@@ -7,76 +7,21 @@ import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
 import { 
-  BookOpen, Moon, Compass, PenTool, Star, Wand2, 
-  Calendar, Heart, Sparkles, ArrowRight, ChevronRight,
-  BookMarked, FileText, Layers, Zap
+  BookOpen, Moon, PenTool, Star, Wand2, 
+  Calendar, Heart, Sparkles, ArrowRight, ChevronRight
 } from 'lucide-react';
 
 export default function Home() {
-  // 易经学习功能
-  const ichingLearning = [
-    {
-      title: '六十四卦详解',
-      description: '卦辞、爻辞、象传图解',
-      icon: <Layers className="w-5 h-5" />,
-      href: '/learn',
-    },
-    {
-      title: '古籍阅读',
-      description: '周易正义注疏对照',
-      icon: <BookMarked className="w-5 h-5" />,
-      href: '/books',
-    },
-    {
-      title: '科普词典',
-      description: '术语百科快速查询',
-      icon: <FileText className="w-5 h-5" />,
-      href: '/glossary',
-    },
-    {
-      title: '每日运势',
-      description: '今日卦运宜忌速查',
-      icon: <Zap className="w-5 h-5" />,
-      href: '/daily-fortune',
-    },
-  ];
-
-  // 易经工具功能
-  const ichingTools = [
-    { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
-    { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
-    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
-    { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },
-    { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
-    { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
-  ];
-
-  // 塔罗学习功能
-  const tarotLearning = [
-    {
-      title: '牌意详解',
-      description: '78张牌完整解读',
-      icon: <Layers className="w-5 h-5" />,
-      href: '/learn-tarot',
-    },
-    {
-      title: '牌阵教程',
-      description: '经典牌阵使用指南',
-      icon: <Compass className="w-5 h-5" />,
-      href: '/learn-tarot',
-    },
-    {
-      title: '每日一牌',
-      description: '今日牌灵指引',
-      icon: <Sparkles className="w-5 h-5" />,
-      href: '/tarot',
-    },
-  ];
-
-  // 塔罗工具功能
-  const tarotTools = [
-    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
-    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream' },
+  // 占卜工具
+  const tools = [
+    { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching', color: 'amber' },
+    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot', color: 'indigo' },
+    { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination', color: 'amber' },
+    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom', color: 'amber' },
+    { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick', color: 'amber' },
+    { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi', color: 'amber' },
+    { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match', color: 'amber' },
+    { title: '周公解梦', description: '梦境解析', icon: <Moon className="w-5 h-5" />, href: '/dream', color: 'indigo' },
   ];
 
   return (
@@ -190,71 +135,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 双主线板块 */}
-        <section className="container mx-auto px-4 pb-20">
-          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {/* 易经学院 */}
-            <div className="bg-gradient-to-br from-amber-500/5 to-transparent rounded-2xl border border-amber-500/20 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-amber-500 text-xs px-2 py-0.5 rounded border border-amber-500/30">
-                  核心板块
-                </div>
-                <div className="text-amber-100 text-2xl">☰</div>
-              </div>
-              <h2 className="text-2xl font-bold text-amber-100 mb-2">易经学院</h2>
-              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                系统研习周易智慧，从卦象到古籍注疏，循序渐进掌握易学精髓。
-              </p>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {ichingLearning.map((item, index) => (
-                  <Link href={item.href} key={index} className="group">
-                    <div className="p-4 rounded-xl bg-[#1a1a1a]/50 border border-amber-500/10 hover:border-amber-500/30 transition-all h-full">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="text-amber-400">{item.icon}</div>
-                        <span className="text-white font-medium text-sm group-hover:text-amber-200 transition-colors">
-                          {item.title}
-                        </span>
-                      </div>
-                      <p className="text-gray-500 text-xs">{item.description}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* 塔罗秘境 */}
-            <div className="bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl border border-indigo-500/20 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-indigo-400 text-xs px-2 py-0.5 rounded border border-indigo-500/30">
-                  延伸探索
-                </div>
-                <div className="text-indigo-300 text-2xl">☆</div>
-              </div>
-              <h2 className="text-2xl font-bold text-indigo-100 mb-2">塔罗秘境</h2>
-              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                探索西方神秘符号，从潜意识到原型意象，对话内心直觉。
-              </p>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {tarotLearning.map((item, index) => (
-                  <Link href={item.href} key={index} className="group">
-                    <div className="p-4 rounded-xl bg-[#1a1a1a]/50 border border-indigo-500/10 hover:border-indigo-500/30 transition-all h-full">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="text-indigo-400">{item.icon}</div>
-                        <span className="text-white font-medium text-sm group-hover:text-indigo-200 transition-colors">
-                          {item.title}
-                        </span>
-                      </div>
-                      <p className="text-gray-500 text-xs">{item.description}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* 数字化起卦系统 */}
         <section className="container mx-auto px-4 pb-20">
           <div className="max-w-6xl mx-auto text-center mb-10">
@@ -273,15 +153,21 @@ export default function Home() {
 
           {/* 工具卡片 */}
           <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {ichingTools.map((tool, index) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
+              {tools.map((tool, index) => (
                 <Link href={tool.href} key={index}>
-                  <Card className="group bg-[#1a1a1a]/50 border-amber-500/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
-                    <CardContent className="py-5 px-4 text-center">
-                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 mb-3 group-hover:bg-amber-500/20 transition-colors">
-                        <div className="text-amber-400">{tool.icon}</div>
+                  <Card className="group bg-[#1a1a1a]/50 border-white/10 hover:border-amber-500/30 hover:bg-[#1a1a1a] transition-all cursor-pointer h-full">
+                    <CardContent className="py-4 px-3 text-center">
+                      <div className={`inline-flex items-center justify-center w-9 h-9 rounded-lg mb-2 transition-colors ${
+                        tool.color === 'indigo' 
+                          ? 'bg-indigo-500/10 group-hover:bg-indigo-500/20' 
+                          : 'bg-amber-500/10 group-hover:bg-amber-500/20'
+                      }`}>
+                        <div className={tool.color === 'indigo' ? 'text-indigo-400' : 'text-amber-400'}>
+                          {tool.icon}
+                        </div>
                       </div>
-                      <h3 className="text-white text-sm font-medium mb-1 group-hover:text-amber-200 transition-colors">
+                      <h3 className="text-white text-sm font-medium mb-0.5 group-hover:text-amber-200 transition-colors">
                         {tool.title}
                       </h3>
                       <p className="text-gray-500 text-xs">{tool.description}</p>
@@ -291,7 +177,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <Link href="/iching">
                 <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 transition-colors">
                   <span>立即体验排盘</span>
