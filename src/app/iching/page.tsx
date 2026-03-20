@@ -46,17 +46,14 @@ interface TrigramData {
   attribute: string;
 }
 
-// 爻的类型
 type LineType = 'old-yang' | 'young-yang' | 'old-yin' | 'young-yin';
 
-// 单次抛币结果
 interface CoinThrow {
   coins: boolean[];
   lineType: LineType;
   lineValue: number;
 }
 
-// 占卜结果
 interface DivinationResult {
   originalHexagram: HexagramData;
   changedHexagram: HexagramData | null;
@@ -76,19 +73,15 @@ export default function IChingPage() {
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
   const [showChangedHexagram, setShowChangedHexagram] = useState(false);
   
-  // AI解读状态
   const [aiInterpretation, setAiInterpretation] = useState('');
   const [isInterpreting, setIsInterpreting] = useState(false);
   const interpretationRef = useRef<HTMLDivElement>(null);
   
-  // 登录弹窗状态
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingDivinationResult, setPendingDivinationResult] = useState<DivinationResult | null>(null);
   
-  // 使用预加载数据服务
   const { hexagrams, trigrams, isLoading, error, refresh } = useHexagramData();
 
-  // 抛三枚铜钱
   const throwThreeCoins = (): CoinThrow => {
     const coins: boolean[] = [
       Math.random() < 0.5,
@@ -122,13 +115,11 @@ export default function IChingPage() {
     return { coins, lineType, lineValue };
   };
 
-  // 根据二进制找到对应的卦
   const findHexagramByBinary = (binary: string): HexagramData => {
     const found = hexagrams.find(h => h.binary === binary);
     return found || hexagrams[0];
   };
 
-  // 保存占卜记录
   const saveDivinationRecord = async (divinationResult: DivinationResult, interpretation: string) => {
     try {
       await fetch('/api/divination/records', {
@@ -154,12 +145,10 @@ export default function IChingPage() {
     }
   };
 
-  // 流式AI解读
   const streamInterpretation = async (divinationResult: DivinationResult) => {
     setIsInterpreting(true);
     setAiInterpretation('');
 
-    // 构建完整问题（包含类型）
     const categoryLabels: Record<QuestionCategory, string> = {
       career: '事业发展',
       love: '感情姻缘',
@@ -229,7 +218,6 @@ export default function IChingPage() {
         }
       }
       
-      // 保存占卜记录
       await saveDivinationRecord(divinationResult, fullText);
     } catch (error) {
       console.error('Interpretation error:', error);
@@ -239,7 +227,6 @@ export default function IChingPage() {
     }
   };
 
-  // 正宗铜钱占卜法
   const divine = async () => {
     if (hexagrams.length === 0) return;
     
@@ -252,7 +239,6 @@ export default function IChingPage() {
     
     const coinThrows: CoinThrow[] = [];
     
-    // 抛6次铜钱，从下往上（初爻到上爻）
     for (let i = 0; i < 6; i++) {
       await new Promise(resolve => setTimeout(resolve, 600));
       const throwResult = throwThreeCoins();
@@ -260,18 +246,15 @@ export default function IChingPage() {
       setCurrentThrow(i + 1);
     }
     
-    // 构建本卦二进制
     const originalBinary = coinThrows
       .map(t => (t.lineType === 'old-yang' || t.lineType === 'young-yang') ? '1' : '0')
       .reverse()
       .join('');
     
-    // 找出动爻位置
     const changingLines: number[] = coinThrows
       .map((t, i) => (t.lineType === 'old-yang' || t.lineType === 'old-yin') ? i + 1 : -1)
       .filter(i => i > 0);
     
-    // 构建变卦二进制
     const changedBinary = coinThrows
       .map((t, i) => {
         if (t.lineType === 'old-yang') return '0';
@@ -281,7 +264,6 @@ export default function IChingPage() {
       .reverse()
       .join('');
     
-    // 找到本卦和变卦
     const originalHexagram = findHexagramByBinary(originalBinary);
     const changedHexagram = changingLines.length > 0 
       ? findHexagramByBinary(changedBinary) 
@@ -300,29 +282,23 @@ export default function IChingPage() {
       setResult(divinationResult);
       setIsDivining(false);
       
-      // 检查登录状态
       if (!isLoggedIn) {
-        // 未登录，保存结果并显示登录弹窗
         setPendingDivinationResult(divinationResult);
         setShowLoginDialog(true);
       } else {
-        // 已登录，开始AI解读
         streamInterpretation(divinationResult);
       }
     }, 500);
   };
 
-  // 登录成功后的回调
   const handleLoginSuccess = () => {
     setShowLoginDialog(false);
-    // 如果有待处理的占卜结果，开始AI解读
     if (pendingDivinationResult) {
       streamInterpretation(pendingDivinationResult);
       setPendingDivinationResult(null);
     }
   };
 
-  // 切换爻辞展开状态
   const toggleLine = (index: number) => {
     setExpandedLines(prev => {
       const newSet = new Set(prev);
@@ -335,13 +311,11 @@ export default function IChingPage() {
     });
   };
 
-  // 获取卦象符号
   const getTrigramSymbol = (trigramName: string) => {
     const trigram = trigrams.find(t => t.name === trigramName);
     return trigram?.symbol || '';
   };
 
-  // 获取爻的显示符号
   const getLineSymbol = (lineType: LineType): string => {
     switch (lineType) {
       case 'old-yang': return '○';
@@ -351,7 +325,6 @@ export default function IChingPage() {
     }
   };
 
-  // 获取爻的颜色类
   const getLineColorClass = (lineType: LineType): string => {
     switch (lineType) {
       case 'old-yang': return 'text-red-400';
@@ -360,7 +333,6 @@ export default function IChingPage() {
     }
   };
 
-  // 重置占卜
   const reset = () => {
     setQuestion('');
     setQuestionCategory(null);
@@ -372,31 +344,29 @@ export default function IChingPage() {
     setPendingDivinationResult(null);
   };
 
-  // 加载中状态
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
           <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-amber-300 animate-spin mb-4" />
-            <p className="text-amber-100">正在加载卦象数据...</p>
+            <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+            <p className="text-gray-300">正在加载卦象数据...</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // 错误状态
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 max-w-md">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Card className="bg-[#1a1a1a]/50 border-amber-500/20 max-w-md">
           <CardHeader>
             <CardTitle className="text-amber-100">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-amber-200 mb-4">{error}</p>
-            <Button onClick={refresh} className="bg-amber-500 hover:bg-amber-600 text-white">
+            <p className="text-gray-400 mb-4">{error}</p>
+            <Button onClick={refresh} className="bg-amber-500 hover:bg-amber-600 text-black">
               重试
             </Button>
           </CardContent>
@@ -406,40 +376,41 @@ export default function IChingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* 顶部导航栏 */}
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/">
-            <Button variant="ghost" className="text-amber-200 hover:text-amber-100 hover:bg-white/10">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回首页
-            </Button>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* 顶部导航栏 */}
+      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+            </div>
+            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+              乾坤星路
+            </span>
           </Link>
-          
-          {/* 用户菜单 */}
-          <div className="flex items-center gap-2">
-            <UserMenu />
-          </div>
+          <UserMenu />
         </div>
+      </header>
 
+      <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Sparkles className="w-10 h-10 text-amber-300 mr-3" />
+            <Sparkles className="w-10 h-10 text-amber-500 mr-3" />
             <h1 className="text-4xl font-bold text-amber-100">周易占卜</h1>
-            <Sparkles className="w-10 h-10 text-amber-300 ml-3" />
+            <Sparkles className="w-10 h-10 text-amber-500 ml-3" />
           </div>
-          <p className="text-amber-200/80">诚心祈愿，掷币问卦，探知天机</p>
+          <p className="text-gray-400">诚心祈愿，掷币问卦，探知天机</p>
         </div>
 
         {/* 占卜区域 */}
         <div className="max-w-4xl mx-auto">
           {!result ? (
-            <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-amber-100">投掷铜钱</CardTitle>
-                <CardDescription className="text-amber-200/60">
+                <CardDescription className="text-gray-500">
                   心中默念您想问的问题，点击下方按钮开始占卜
                 </CardDescription>
               </CardHeader>
@@ -453,21 +424,21 @@ export default function IChingPage() {
 
                 {/* 问题输入 */}
                 <div className="w-full max-w-lg mb-4">
-                  <label className="block text-sm text-amber-200 mb-2 text-center">
+                  <label className="block text-sm text-gray-400 mb-2 text-center">
                     具体问题（可选，{getQuestionHint(questionCategory)}）
                   </label>
                   <textarea
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder={getQuestionPlaceholder(questionCategory)}
-                    className="w-full h-24 bg-white/10 border border-amber-300/30 rounded-lg p-4 text-amber-100 placeholder:text-amber-200/40 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                    className="w-full h-24 bg-[#0a0a0a] border border-amber-500/20 rounded-lg p-4 text-gray-200 placeholder:text-gray-600 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                     disabled={isDivining}
                   />
                 </div>
 
                 {/* 占卜说明 */}
-                <div className="bg-amber-950/40 rounded-lg p-4 mb-6 max-w-lg text-center">
-                  <p className="text-amber-200/80 text-sm leading-relaxed">
+                <div className="bg-[#0a0a0a] rounded-lg p-4 mb-6 max-w-lg text-center border border-amber-500/10">
+                  <p className="text-gray-400 text-sm leading-relaxed">
                     每次抛三枚铜钱，共抛六次，从下往上排成六爻。
                     三正为老阳（变爻），两正一反为少阳，一正两反为少阴，三反为老阴（变爻）。
                   </p>
@@ -475,7 +446,7 @@ export default function IChingPage() {
 
                 {/* 铜钱动画区域 */}
                 <div className="mb-6">
-                  <div className="text-center mb-2 text-amber-200">
+                  <div className="text-center mb-2 text-gray-400">
                     {isDivining ? `第 ${currentThrow} 次抛币（共6次）` : '准备开始'}
                   </div>
                   <div className="flex justify-center gap-4">
@@ -484,8 +455,8 @@ export default function IChingPage() {
                         key={i}
                         className={`w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold transition-all duration-300 ${
                           isDivining
-                            ? 'bg-amber-400 border-amber-600 text-amber-900 shadow-lg shadow-amber-500/50 animate-bounce'
-                            : 'bg-amber-900/50 border-amber-600/30 text-amber-400/30'
+                            ? 'bg-amber-500 border-amber-600 text-black shadow-lg shadow-amber-500/30 animate-bounce'
+                            : 'bg-[#1a1a1a] border-amber-500/20 text-gray-600'
                         }`}
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
@@ -503,8 +474,8 @@ export default function IChingPage() {
                         key={i}
                         className={`w-10 h-10 rounded border-2 flex items-center justify-center text-sm font-bold transition-all ${
                           i < currentThrow
-                            ? 'bg-amber-500/30 border-amber-400 text-amber-100'
-                            : 'bg-amber-900/30 border-amber-600/30 text-amber-400/30'
+                            ? 'bg-amber-500/20 border-amber-500/50 text-amber-100'
+                            : 'bg-[#1a1a1a] border-amber-500/10 text-gray-600'
                         }`}
                       >
                         {i < currentThrow ? (i + 1) : ''}
@@ -516,7 +487,7 @@ export default function IChingPage() {
                 <Button
                   onClick={divine}
                   disabled={isDivining}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   {isDivining ? (
                     <>
@@ -531,27 +502,27 @@ export default function IChingPage() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* 本卦显示 - 带科普词条 */}
-              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
+              {/* 本卦显示 */}
+              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
                 <CardHeader className="text-center pb-2">
                   <div className="flex items-center justify-center gap-8">
                     {/* 本卦 */}
                     <div className="text-center">
                       <div className="text-5xl mb-2">{result.originalHexagram.symbol}</div>
                       <CardTitle className="text-2xl text-amber-100">{result.originalHexagram.name}卦</CardTitle>
-                      <CardDescription className="text-amber-200/60 text-sm">
+                      <CardDescription className="text-gray-500 text-sm">
                         <GlossaryTerm term="本卦">本卦</GlossaryTerm> · 第{result.originalHexagram.number}卦
                       </CardDescription>
                     </div>
                     
-                    {/* 变卦（如果有动爻） */}
+                    {/* 变卦 */}
                     {result.changedHexagram && (
                       <>
-                        <div className="text-3xl text-amber-400">→</div>
+                        <div className="text-3xl text-amber-500">→</div>
                         <div className="text-center">
                           <div className="text-5xl mb-2">{result.changedHexagram.symbol}</div>
                           <CardTitle className="text-2xl text-amber-100">{result.changedHexagram.name}卦</CardTitle>
-                          <CardDescription className="text-amber-200/60 text-sm">
+                          <CardDescription className="text-gray-500 text-sm">
                             <GlossaryTerm term="变卦">变卦</GlossaryTerm> · 第{result.changedHexagram.number}卦
                           </CardDescription>
                         </div>
@@ -563,7 +534,7 @@ export default function IChingPage() {
                   {/* 动爻信息 */}
                   {result.changingLines.length > 0 ? (
                     <div className="text-center mb-4">
-                      <span className="text-amber-200">
+                      <span className="text-gray-400">
                         <GlossaryTerm term="动爻">动爻</GlossaryTerm>：
                       </span>
                       <span className="text-amber-100 font-bold">
@@ -571,43 +542,43 @@ export default function IChingPage() {
                       </span>
                     </div>
                   ) : (
-                    <div className="text-center mb-4 text-amber-200/60">无动爻，以<GlossaryTerm term="卦辞">卦辞</GlossaryTerm>为主</div>
+                    <div className="text-center mb-4 text-gray-500">无动爻，以<GlossaryTerm term="卦辞">卦辞</GlossaryTerm>为主</div>
                   )}
                   
                   {/* 卦辞 */}
-                  <div className="bg-amber-950/60 rounded-lg p-4 text-center">
+                  <div className="bg-[#0a0a0a] rounded-lg p-4 text-center border border-amber-500/10">
                     <div className="text-xs text-amber-400 mb-2">卦辞</div>
                     <p className="text-amber-100 text-lg">{result.originalHexagram.judgement}</p>
-                    <p className="text-amber-200/70 text-sm mt-2">{result.originalHexagram.judgementMeaning}</p>
+                    <p className="text-gray-400 text-sm mt-2">{result.originalHexagram.judgementMeaning}</p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* AI大师解读 - 固定高度 */}
-              <Card className="bg-gradient-to-r from-amber-900/60 to-orange-900/60 border-amber-400/30">
+              {/* AI大师解读 */}
+              <Card className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-amber-500/20">
                 <CardHeader>
                   <CardTitle className="text-xl text-amber-100 flex items-center">
-                    <Sparkles className="w-5 h-5 mr-2" />
+                    <Sparkles className="w-5 h-5 mr-2 text-amber-500" />
                     大师解读
-                    {isInterpreting && <span className="ml-2 text-sm text-amber-300 animate-pulse">生成中...</span>}
+                    {isInterpreting && <span className="ml-2 text-sm text-amber-400 animate-pulse">生成中...</span>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {isInterpreting && !aiInterpretation ? (
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="relative mb-4">
-                        <Sparkles className="w-12 h-12 text-amber-400 animate-pulse" />
+                        <Sparkles className="w-12 h-12 text-amber-500 animate-pulse" />
                       </div>
-                      <p className="text-amber-200 animate-pulse">大师正在为您解读卦象...</p>
+                      <p className="text-gray-400 animate-pulse">大师正在为您解读卦象...</p>
                     </div>
                   ) : (
                     <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-amber-600/50 scrollbar-track-transparent">
                       <div className="prose prose-invert prose-amber max-w-none">
                         <div
-                          className="text-amber-100 leading-relaxed whitespace-pre-wrap"
+                          className="text-gray-200 leading-relaxed whitespace-pre-wrap"
                           dangerouslySetInnerHTML={{
                             __html: aiInterpretation
-                              .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-200 mt-6 mb-3">$1</h2>')
+                              .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-amber-100 mt-6 mb-3">$1</h2>')
                               .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-200">$1</strong>')
                           }}
                         />
@@ -625,20 +596,20 @@ export default function IChingPage() {
               />
 
               {/* 进阶学习入口 */}
-              <Card className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border-purple-400/30">
+              <Card className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-indigo-500/20">
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-purple-100 font-medium flex items-center gap-2">
+                      <div className="text-indigo-100 font-medium flex items-center gap-2">
                         <GraduationCap className="w-5 h-5" />
                         想深入学习周易？
                       </div>
-                      <div className="text-purple-200/60 text-sm mt-1">
+                      <div className="text-gray-500 text-sm mt-1">
                         前往学习中心，系统学习卦象知识与断卦技巧
                       </div>
                     </div>
                     <Link href="/learn">
-                      <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600">
+                      <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
                         开始学习
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Button>
@@ -654,7 +625,7 @@ export default function IChingPage() {
               <div className="text-center">
                 <Button
                   onClick={reset}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-12 py-6 text-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新占卜

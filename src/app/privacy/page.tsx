@@ -1,23 +1,23 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '隐私政策 - 占卜问卦',
-  description: '占卜问卦隐私政策，了解我们如何收集、使用和保护您的个人信息。',
+  title: '隐私政策 - 乾坤星路',
+  description: '乾坤星路隐私政策，了解我们如何收集、使用和保护您的个人信息。',
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-3xl font-bold text-white mb-8">隐私政策</h1>
+        <h1 className="text-3xl font-bold text-amber-100 mb-8">隐私政策</h1>
         
-        <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 text-gray-200 space-y-6">
-          <p className="text-sm text-gray-400">更新日期：2025年1月</p>
+        <div className="bg-[#1a1a1a]/50 border border-amber-500/20 rounded-lg p-8 space-y-6">
+          <p className="text-sm text-gray-500">更新日期：2025年1月</p>
           
           <section>
             <h2 className="text-xl font-bold text-amber-200 mb-3">一、引言</h2>
             <p className="text-gray-300 leading-relaxed">
-              欢迎使用占卜问卦网站（以下简称"本站"）。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。
+              欢迎使用乾坤星路网站（以下简称"本站"）。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。
               使用本站服务即表示您同意本隐私政策的条款。我们严格遵守《中华人民共和国个人信息保护法》等相关法律法规。
             </p>
           </section>
@@ -27,10 +27,10 @@ export default function PrivacyPage() {
             <div className="space-y-3 text-gray-300">
               <p>我们可能收集以下类型的信息：</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li><strong>账户信息</strong>：当您注册账户时，我们会收集您的邮箱地址、用户名等基本信息。</li>
-                <li><strong>占卜相关数据</strong>：为了提供占卜服务，我们会收集您输入的出生日期、时间、问题内容等信息。这些信息仅用于生成占卜结果。</li>
-                <li><strong>使用记录</strong>：我们会记录您的占卜历史、学习进度等，以便为您提供个性化服务。</li>
-                <li><strong>设备信息</strong>：我们可能收集您的设备类型、浏览器类型等技术信息，用于优化网站性能。</li>
+                <li><strong className="text-gray-200">账户信息</strong>：当您注册账户时，我们会收集您的邮箱地址、用户名等基本信息。</li>
+                <li><strong className="text-gray-200">占卜相关数据</strong>：为了提供占卜服务，我们会收集您输入的出生日期、时间、问题内容等信息。这些信息仅用于生成占卜结果。</li>
+                <li><strong className="text-gray-200">使用记录</strong>：我们会记录您的占卜历史、学习进度等，以便为您提供个性化服务。</li>
+                <li><strong className="text-gray-200">设备信息</strong>：我们可能收集您的设备类型、浏览器类型等技术信息，用于优化网站性能。</li>
               </ul>
             </div>
           </section>
@@ -80,10 +80,10 @@ export default function PrivacyPage() {
             <div className="space-y-3 text-gray-300">
               <p>您对自己的个人信息享有以下权利：</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li><strong>访问权</strong>：您可以查看我们持有的您的个人信息</li>
-                <li><strong>更正权</strong>：您可以更新或更正不准确的信息</li>
-                <li><strong>删除权</strong>：您可以要求删除您的个人信息</li>
-                <li><strong>导出权</strong>：您可以要求导出您的数据</li>
+                <li><strong className="text-gray-200">访问权</strong>：您可以查看我们持有的您的个人信息</li>
+                <li><strong className="text-gray-200">更正权</strong>：您可以更新或更正不准确的信息</li>
+                <li><strong className="text-gray-200">删除权</strong>：您可以要求删除您的个人信息</li>
+                <li><strong className="text-gray-200">导出权</strong>：您可以要求导出您的数据</li>
               </ul>
               <p>如需行使以上权利，请通过网站内的反馈功能联系我们。</p>
             </div>
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <a href="/" className="text-purple-300 hover:text-purple-200">
+          <a href="/" className="text-amber-400 hover:text-amber-300 transition-colors">
             返回首页
           </a>
         </div>

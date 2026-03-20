@@ -63,7 +63,6 @@ export default function HistoryPage() {
 
   const checkAuthAndLoadRecords = async () => {
     try {
-      // 检查登录状态
       const meRes = await fetch('/api/auth/me');
       const meData = await meRes.json();
       
@@ -76,7 +75,6 @@ export default function HistoryPage() {
 
       setIsLoggedIn(true);
 
-      // 加载历史记录
       const res = await fetch('/api/history');
       const data = await res.json();
       
@@ -124,7 +122,7 @@ export default function HistoryPage() {
       case 'iching':
         return { icon: <BookOpen className="w-5 h-5" />, label: '周易占卜', color: 'text-amber-400', bgColor: 'bg-amber-500/20' };
       case 'tarot':
-        return { icon: <Star className="w-5 h-5" />, label: '塔罗占卜', color: 'text-purple-400', bgColor: 'bg-purple-500/20' };
+        return { icon: <Star className="w-5 h-5" />, label: '塔罗占卜', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' };
       case 'fortune_stick':
         return { icon: <Scroll className="w-5 h-5" />, label: '观音灵签', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' };
       case 'char':
@@ -145,12 +143,12 @@ export default function HistoryPage() {
       return (
         <div className="space-y-4">
           <div>
-            <h4 className="text-sm font-bold text-purple-200 mb-2">梦境内容</h4>
-            <p className="text-purple-100/90 leading-relaxed">{record.content}</p>
+            <h4 className="text-sm font-bold text-amber-200 mb-2">梦境内容</h4>
+            <p className="text-gray-300 leading-relaxed">{record.content}</p>
           </div>
           <div>
-            <h4 className="text-sm font-bold text-purple-200 mb-2">解读结果</h4>
-            <div className="bg-purple-950/40 rounded-lg p-4 text-purple-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+            <h4 className="text-sm font-bold text-amber-200 mb-2">解读结果</h4>
+            <div className="bg-[#0a0a0a] rounded-lg p-4 text-gray-300 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
               {record.interpretation}
             </div>
           </div>
@@ -162,19 +160,19 @@ export default function HistoryPage() {
       return (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-rose-950/30 rounded-lg p-3">
-              <div className="text-sm text-rose-200/60 mb-1">生肖配对</div>
-              <div className="text-rose-100">{record.shengxiaoMatch.relation} - {record.shengxiaoMatch.score}分</div>
+            <div className="bg-rose-900/20 rounded-lg p-3 border border-rose-500/20">
+              <div className="text-sm text-gray-500 mb-1">生肖配对</div>
+              <div className="text-rose-200">{record.shengxiaoMatch.relation} - {record.shengxiaoMatch.score}分</div>
             </div>
-            <div className="bg-rose-950/30 rounded-lg p-3">
-              <div className="text-sm text-rose-200/60 mb-1">八字配对</div>
-              <div className="text-rose-100">{record.baziMatch.score}分</div>
+            <div className="bg-rose-900/20 rounded-lg p-3 border border-rose-500/20">
+              <div className="text-sm text-gray-500 mb-1">八字配对</div>
+              <div className="text-rose-200">{record.baziMatch.score}分</div>
             </div>
           </div>
           {record.aiInterpretation && (
             <div>
-              <h4 className="text-sm font-bold text-rose-200 mb-2">AI解读</h4>
-              <div className="bg-rose-950/40 rounded-lg p-4 text-rose-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+              <h4 className="text-sm font-bold text-amber-200 mb-2">AI解读</h4>
+              <div className="bg-[#0a0a0a] rounded-lg p-4 text-gray-300 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
                 {record.aiInterpretation}
               </div>
             </div>
@@ -183,19 +181,18 @@ export default function HistoryPage() {
       );
     }
 
-    // 占卜记录
     return (
       <div className="space-y-4">
         {record.question && (
           <div>
-            <h4 className="text-sm font-bold text-purple-200 mb-2">问题</h4>
-            <p className="text-purple-100/90">{record.question}</p>
+            <h4 className="text-sm font-bold text-amber-200 mb-2">问题</h4>
+            <p className="text-gray-300">{record.question}</p>
           </div>
         )}
         {record.aiInterpretation && (
           <div>
-            <h4 className="text-sm font-bold text-purple-200 mb-2">AI解读</h4>
-            <div className="bg-purple-950/40 rounded-lg p-4 text-purple-100/90 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+            <h4 className="text-sm font-bold text-amber-200 mb-2">AI解读</h4>
+            <div className="bg-[#0a0a0a] rounded-lg p-4 text-gray-300 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
               {record.aiInterpretation}
             </div>
           </div>
@@ -205,65 +202,64 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* 星空背景 */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="stars absolute w-full h-full bg-[radial-gradient(2px_2px_at_20px_30px,white,transparent),radial-gradient(2px_2px_at_40px_70px,rgba(255,255,255,0.8),transparent),radial-gradient(1px_1px_at_90px_40px,white,transparent),radial-gradient(2px_2px_at_160px_120px,rgba(255,255,255,0.9),transparent)] bg-[length:350px_200px] animate-twinkle opacity-30"></div>
-      </div>
-
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* 顶部导航栏 */}
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/">
-            <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回首页
-            </Button>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* 顶部导航栏 */}
+      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+            </div>
+            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+              乾坤星路
+            </span>
           </Link>
-          
           <UserMenu />
         </div>
+      </header>
 
+      <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <History className="w-10 h-10 text-purple-300 mr-3" />
-            <h1 className="text-4xl font-bold text-white">历史记录</h1>
-            <History className="w-10 h-10 text-purple-300 ml-3" />
+            <History className="w-10 h-10 text-amber-500 mr-3" />
+            <h1 className="text-4xl font-bold text-amber-100">历史记录</h1>
+            <History className="w-10 h-10 text-amber-500 ml-3" />
           </div>
-          <p className="text-purple-200/80">查看您的所有占卜记录</p>
+          <p className="text-gray-400">查看您的所有占卜记录</p>
         </div>
 
         {/* 内容区域 */}
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
-            <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
-                <p className="text-purple-200">加载中...</p>
+                <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+                <p className="text-gray-300">加载中...</p>
               </CardContent>
             </Card>
           ) : !isLoggedIn ? (
-            <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <History className="w-16 h-16 text-purple-300/50 mb-4" />
-                <p className="text-purple-200 mb-4">请登录后查看历史记录</p>
+                <History className="w-16 h-16 text-gray-600 mb-4" />
+                <p className="text-gray-300 mb-4">请登录后查看历史记录</p>
                 <Button
                   onClick={() => setShowLoginDialog(true)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                  className="bg-amber-500 hover:bg-amber-600 text-black"
                 >
                   立即登录
                 </Button>
               </CardContent>
             </Card>
           ) : records.length === 0 ? (
-            <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <History className="w-16 h-16 text-purple-300/50 mb-4" />
-                <p className="text-purple-200 mb-4">暂无历史记录</p>
-                <p className="text-purple-200/60 text-sm">开始您的占卜之旅，记录将保存在这里</p>
+                <History className="w-16 h-16 text-gray-600 mb-4" />
+                <p className="text-gray-300 mb-4">暂无历史记录</p>
+                <p className="text-gray-500 text-sm">开始您的占卜之旅，记录将保存在这里</p>
                 <Link href="/">
-                  <Button className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+                  <Button className="mt-4 bg-amber-500 hover:bg-amber-600 text-black">
                     开始占卜
                   </Button>
                 </Link>
@@ -279,24 +275,24 @@ export default function HistoryPage() {
                 return (
                   <Card 
                     key={recordKey} 
-                    className="bg-white/10 backdrop-blur-md border-purple-300/30 overflow-hidden"
+                    className="bg-[#1a1a1a]/50 border-amber-500/20 overflow-hidden hover:border-amber-500/40 transition-colors"
                   >
                     <CardHeader className="cursor-pointer" onClick={() => setExpandedRecord(isExpanded ? null : recordKey)}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${typeInfo.bgColor}`}>
+                          <div className={`p-2 rounded-lg ${typeInfo.bgColor} border border-amber-500/10`}>
                             <span className={typeInfo.color}>{typeInfo.icon}</span>
                           </div>
                           <div>
-                            <h3 className="text-lg text-white font-medium">{record.title}</h3>
+                            <h3 className="text-lg text-gray-100 font-medium">{record.title}</h3>
                             <div className="flex items-center gap-3 mt-1">
-                              <span className={`text-xs px-2 py-0.5 rounded ${typeInfo.bgColor} ${typeInfo.color}`}>
+                              <span className={`text-xs px-2 py-0.5 rounded ${typeInfo.bgColor} ${typeInfo.color} border border-amber-500/10`}>
                                 {typeInfo.label}
                               </span>
                               {record.type === 'match' && (
-                                <span className="text-rose-300 font-bold">{record.score}分</span>
+                                <span className="text-rose-400 font-bold">{record.score}分</span>
                               )}
-                              <span className="text-purple-300/60 text-xs flex items-center">
+                              <span className="text-gray-500 text-xs flex items-center">
                                 <Clock className="w-3 h-3 mr-1" />
                                 {formatDate(record.createdAt)}
                               </span>
@@ -315,13 +311,13 @@ export default function HistoryPage() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
-                          <ChevronRight className={`w-5 h-5 text-purple-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          <ChevronRight className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                         </div>
                       </div>
                     </CardHeader>
                     
                     {isExpanded && (
-                      <CardContent className="border-t border-purple-300/20 pt-4">
+                      <CardContent className="border-t border-amber-500/10 pt-4">
                         {renderExpandedContent(record)}
                       </CardContent>
                     )}
@@ -344,13 +340,6 @@ export default function HistoryPage() {
           checkAuthAndLoadRecords();
         }}
       />
-
-      <style jsx>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
     </div>
   );
 }
