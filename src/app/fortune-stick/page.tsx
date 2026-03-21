@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Scroll, ChevronDown, ChevronUp, BookOpen, Sparkles } from 'lucide-react';
 import { SiteHeader } from '@/components/SiteHeader';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { UserMenu } from '@/components/auth/UserMenu';
 
 interface FortuneInterpretation {
   wealth: string;
@@ -146,19 +148,19 @@ export default function FortuneStickPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Scroll className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">观音灵签</h1>
-            <Scroll className="w-10 h-10 text-amber-500 ml-3" />
+            <Scroll className="w-10 h-10 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">观音灵签</h1>
+            <Scroll className="w-10 h-10 text-[var(--theme-gold)] ml-3" />
           </div>
-          <p className="text-muted-foreground">诚心祈愿，抽签问卦，观音菩萨指点迷津</p>
-          <p className="text-muted-foreground text-sm mt-2">共一百签，涵盖人生各事</p>
+          <p className="text-[var(--theme-text-secondary)]">诚心祈愿，抽签问卦，观音菩萨指点迷津</p>
+          <p className="text-[var(--theme-text-muted)] text-sm mt-2">共一百签，涵盖人生各事</p>
         </div>
 
         <div className="max-w-2xl mx-auto">

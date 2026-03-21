@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, History, Moon, Heart, Clock, Trash2, ChevronRight, Loader2, BookOpen, Star, Scroll, PenTool, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 
 interface DivinationRecord {
@@ -202,20 +203,23 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--theme-gold-border)]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+              <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-gold)]/50 group-hover:border-[var(--theme-gold)] transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--theme-gold)] group-hover:opacity-80 transition-opacity" />
             </div>
-            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-[var(--theme-gold)] group-hover:opacity-80 transition-opacity">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -223,43 +227,43 @@ export default function HistoryPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <History className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">历史记录</h1>
-            <History className="w-10 h-10 text-amber-500 ml-3" />
+            <History className="w-10 h-10 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">历史记录</h1>
+            <History className="w-10 h-10 text-[var(--theme-gold)] ml-3" />
           </div>
-          <p className="text-gray-400">查看您的所有占卜记录</p>
+          <p className="text-[var(--theme-text-secondary)]">查看您的所有占卜记录</p>
         </div>
 
         {/* 内容区域 */}
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)]">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-                <p className="text-gray-300">加载中...</p>
+                <Loader2 className="w-12 h-12 text-[var(--theme-gold)] animate-spin mb-4" />
+                <p className="text-[var(--theme-text)]">加载中...</p>
               </CardContent>
             </Card>
           ) : !isLoggedIn ? (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)]">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <History className="w-16 h-16 text-gray-600 mb-4" />
-                <p className="text-gray-300 mb-4">请登录后查看历史记录</p>
+                <History className="w-16 h-16 text-[var(--theme-text-muted)] mb-4" />
+                <p className="text-[var(--theme-text)] mb-4">请登录后查看历史记录</p>
                 <Button
                   onClick={() => setShowLoginDialog(true)}
-                  className="bg-amber-500 hover:bg-amber-600 text-black"
+                  className="bg-[var(--theme-gold)] hover:opacity-90 text-black"
                 >
                   立即登录
                 </Button>
               </CardContent>
             </Card>
           ) : records.length === 0 ? (
-            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
+            <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)]">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <History className="w-16 h-16 text-gray-600 mb-4" />
-                <p className="text-gray-300 mb-4">暂无历史记录</p>
-                <p className="text-gray-500 text-sm">开始您的占卜之旅，记录将保存在这里</p>
+                <History className="w-16 h-16 text-[var(--theme-text-muted)] mb-4" />
+                <p className="text-[var(--theme-text)] mb-4">暂无历史记录</p>
+                <p className="text-[var(--theme-text-muted)] text-sm">开始您的占卜之旅，记录将保存在这里</p>
                 <Link href="/">
-                  <Button className="mt-4 bg-amber-500 hover:bg-amber-600 text-black">
+                  <Button className="mt-4 bg-[var(--theme-gold)] hover:opacity-90 text-black">
                     开始占卜
                   </Button>
                 </Link>
@@ -275,24 +279,24 @@ export default function HistoryPage() {
                 return (
                   <Card 
                     key={recordKey} 
-                    className="bg-[#1a1a1a]/50 border-amber-500/20 overflow-hidden hover:border-amber-500/40 transition-colors"
+                    className="bg-[var(--theme-card)] border-[var(--theme-gold-border)] overflow-hidden hover:border-[var(--theme-gold)] transition-colors"
                   >
                     <CardHeader className="cursor-pointer" onClick={() => setExpandedRecord(isExpanded ? null : recordKey)}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${typeInfo.bgColor} border border-amber-500/10`}>
+                          <div className={`p-2 rounded-lg ${typeInfo.bgColor} border border-[var(--theme-gold-border)]`}>
                             <span className={typeInfo.color}>{typeInfo.icon}</span>
                           </div>
                           <div>
-                            <h3 className="text-lg text-gray-100 font-medium">{record.title}</h3>
+                            <h3 className="text-lg text-[var(--theme-text)] font-medium">{record.title}</h3>
                             <div className="flex items-center gap-3 mt-1">
-                              <span className={`text-xs px-2 py-0.5 rounded ${typeInfo.bgColor} ${typeInfo.color} border border-amber-500/10`}>
+                              <span className={`text-xs px-2 py-0.5 rounded ${typeInfo.bgColor} ${typeInfo.color} border border-[var(--theme-gold-border)]`}>
                                 {typeInfo.label}
                               </span>
                               {record.type === 'match' && (
                                 <span className="text-rose-400 font-bold">{record.score}分</span>
                               )}
-                              <span className="text-gray-500 text-xs flex items-center">
+                              <span className="text-[var(--theme-text-muted)] text-xs flex items-center">
                                 <Clock className="w-3 h-3 mr-1" />
                                 {formatDate(record.createdAt)}
                               </span>

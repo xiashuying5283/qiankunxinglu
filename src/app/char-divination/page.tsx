@@ -233,11 +233,11 @@ export default function CharDivinationPage() {
   // 加载中状态
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Card className="bg-card/50 border-amber-500/20">
+      <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex items-center justify-center">
+        <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)]">
           <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-            <p className="text-muted-foreground">正在加载卦象数据...</p>
+            <Loader2 className="w-12 h-12 text-[var(--theme-gold)] animate-spin mb-4" />
+            <p className="text-[var(--theme-text-muted)]">正在加载卦象数据...</p>
           </CardContent>
         </Card>
       </div>
@@ -247,14 +247,14 @@ export default function CharDivinationPage() {
   // 错误状态
   if (error) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Card className="bg-[#1a1a1a]/50 border-amber-500/20 max-w-md">
+      <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex items-center justify-center">
+        <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)] max-w-md">
           <CardHeader>
-            <CardTitle className="text-foreground">加载失败</CardTitle>
+            <CardTitle className="text-[var(--theme-gold)]">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={loadData} className="bg-amber-500 hover:bg-amber-600 text-black">
+            <p className="text-[var(--theme-text-muted)] mb-4">{error}</p>
+            <Button onClick={loadData} className="bg-[var(--theme-gold)] hover:opacity-90 text-black">
               重试
             </Button>
           </CardContent>
@@ -264,32 +264,32 @@ export default function CharDivinationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <PenTool className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">测字算卦</h1>
-            <PenTool className="w-10 h-10 text-amber-500 ml-3" />
+            <PenTool className="w-10 h-10 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">测字算卦</h1>
+            <PenTool className="w-10 h-10 text-[var(--theme-gold)] ml-3" />
           </div>
-          <p className="text-muted-foreground">一字一世界，一笔一乾坤，通过文字探索命运的奥秘</p>
+          <p className="text-[var(--theme-text-secondary)]">一字一世界，一笔一乾坤，通过文字探索命运的奥秘</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           {!result && (
-            <Card className="bg-card/50 border-amber-500/20 mb-6">
+            <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)] mb-6">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-foreground">请输入您想测算的汉字</CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardTitle className="text-2xl text-[var(--theme-gold)]">请输入您想测算的汉字</CardTitle>
+                <CardDescription className="text-[var(--theme-text-muted)]">
                   输入一个汉字，我们将根据其笔画数起卦推演
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-background rounded-lg p-4 mb-4 text-center border border-amber-500/20">
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                <div className="bg-[var(--theme-bg-secondary)] rounded-lg p-4 mb-4 text-center border border-[var(--theme-gold-border)]">
+                  <p className="text-[var(--theme-text-muted)] text-sm leading-relaxed">
                     上卦取笔画数除以八的余数，下卦取笔画数加时辰除以八的余数，
                     动爻取笔画数加时辰除以六的余数。
                   </p>
@@ -302,12 +302,12 @@ export default function CharDivinationPage() {
                     value={inputChar}
                     onChange={(e) => setInputChar(e.target.value)}
                     placeholder="请输入一个汉字"
-                    className="bg-background border-amber-500/20 text-foreground placeholder:text-muted-foreground text-center text-2xl h-14"
+                    className="bg-[var(--theme-bg-secondary)] border-[var(--theme-gold-border)] text-[var(--theme-text)] placeholder:text-[var(--theme-text-muted)] text-center text-2xl h-14"
                   />
                   <Button
                     onClick={divine}
                     disabled={!inputChar.trim()}
-                    className="bg-amber-500 hover:bg-amber-600 text-black px-8"
+                    className="bg-[var(--theme-gold)] hover:opacity-90 text-black px-8"
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     开始测字
@@ -315,7 +315,7 @@ export default function CharDivinationPage() {
                 </div>
 
                 <div className="pt-4">
-                  <p className="text-sm text-muted-foreground mb-2 text-center">常用测字：</p>
+                  <p className="text-sm text-[var(--theme-text-muted)] mb-2 text-center">常用测字：</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {['福', '禄', '寿', '喜', '财', '爱', '缘', '命', '运', '吉', '安', '成', '婚', '业', '问'].map((char) => (
                       <Button
@@ -323,7 +323,7 @@ export default function CharDivinationPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setInputChar(char)}
-                        className="bg-background border-amber-500/20 text-foreground hover:bg-amber-500/10 hover:text-foreground"
+                        className="bg-[var(--theme-bg-secondary)] border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)] hover:text-[var(--theme-text)]"
                       >
                         {char}
                       </Button>
@@ -337,16 +337,16 @@ export default function CharDivinationPage() {
           {result && (
             <div className="space-y-6">
               {/* 字和笔画信息 */}
-              <Card className="bg-card/50 border-amber-500/20">
+              <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)]">
                 <CardContent className="py-8">
                   <div className="text-center">
-                    <div className="text-9xl font-bold text-foreground mb-4" style={{ fontFamily: 'serif' }}>
+                    <div className="text-9xl font-bold text-[var(--theme-text)] mb-4" style={{ fontFamily: 'serif' }}>
                       {result.char}
                     </div>
-                    <div className="text-xl text-muted-foreground mb-2">
-                      笔画数：<span className="text-foreground font-bold text-2xl">{result.strokes}</span> 画
+                    <div className="text-xl text-[var(--theme-text-secondary)] mb-2">
+                      笔画数：<span className="text-[var(--theme-gold)] font-bold text-2xl">{result.strokes}</span> 画
                     </div>
-                    <div className="flex justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex justify-center gap-6 text-sm text-[var(--theme-text-muted)]">
                       <span>上卦数：{result.upperStrokes}</span>
                       <span>下卦数：{result.lowerStrokes}</span>
                       <span>时辰：第{result.timeStrokes}辰</span>

@@ -11,6 +11,7 @@ import {
   Sparkles, Atom, Compass, Plus, PenLine
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   Dialog,
   DialogContent,
@@ -121,20 +122,23 @@ export default function GlossaryPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--theme-gold-border)]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+              <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-gold)]/50 group-hover:border-[var(--theme-gold)] transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--theme-gold)] group-hover:opacity-80 transition-opacity" />
             </div>
-            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-[var(--theme-gold)] group-hover:opacity-80 transition-opacity">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -142,14 +146,14 @@ export default function GlossaryPage() {
         {/* 标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <BookOpen className="w-12 h-12 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">术语词典</h1>
+            <BookOpen className="w-12 h-12 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">术语词典</h1>
           </div>
-          <p className="text-gray-400 mb-4">系统学习周易、八字等传统文化术语</p>
+          <p className="text-[var(--theme-text-secondary)] mb-4">系统学习周易、八字等传统文化术语</p>
           
           {/* 贡献词条入口 */}
           <Link href="/glossary/contribute">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-black">
+            <Button className="bg-[var(--theme-gold)] hover:opacity-90 text-black">
               <Plus className="w-4 h-4 mr-2" />
               贡献词条
             </Button>
@@ -159,12 +163,12 @@ export default function GlossaryPage() {
         {/* 搜索栏 */}
         <div className="max-w-xl mx-auto mb-8">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-muted)]" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="搜索术语..."
-              className="pl-12 h-12 bg-[#1a1a1a] border-amber-500/20 text-white placeholder:text-gray-500 focus:border-amber-500/50"
+              className="pl-12 h-12 bg-[var(--theme-card)] border-[var(--theme-gold-border)] text-[var(--theme-text)] placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-gold)]"
             />
           </div>
         </div>
@@ -174,8 +178,8 @@ export default function GlossaryPage() {
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             className={selectedCategory === null 
-              ? 'bg-amber-500 hover:bg-amber-600 text-black' 
-              : 'bg-transparent border-amber-500/30 text-gray-300 hover:bg-amber-500/10 hover:text-amber-200'
+              ? 'bg-[var(--theme-gold)] hover:opacity-90 text-black' 
+              : 'bg-transparent border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)] hover:text-[var(--theme-gold)]'
             }
             onClick={() => setSelectedCategory(null)}
           >
@@ -188,8 +192,8 @@ export default function GlossaryPage() {
                 key={cat.key}
                 variant={selectedCategory === cat.key ? 'default' : 'outline'}
                 className={selectedCategory === cat.key 
-                  ? `bg-amber-500 hover:bg-amber-600 text-black` 
-                  : 'bg-transparent border-amber-500/30 text-gray-300 hover:bg-amber-500/10 hover:text-amber-200'
+                  ? `bg-[var(--theme-gold)] hover:opacity-90 text-black` 
+                  : 'bg-transparent border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)] hover:text-[var(--theme-gold)]'
                 }
                 onClick={() => setSelectedCategory(cat.key)}
               >

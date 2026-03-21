@@ -276,18 +276,18 @@ export default function DreamInterpretPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       <SiteHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* 标题 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Moon className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">周公解梦</h1>
-            <Moon className="w-10 h-10 text-amber-500 ml-3" />
+            <Moon className="w-10 h-10 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">周公解梦</h1>
+            <Moon className="w-10 h-10 text-[var(--theme-gold)] ml-3" />
           </div>
-          <p className="text-muted-foreground">探索梦境的奥秘，解读潜意识的密码</p>
+          <p className="text-[var(--theme-text-secondary)]">探索梦境的奥秘，解读潜意识的密码</p>
         </div>
 
         {/* 模式切换和历史按钮 */}
@@ -297,8 +297,8 @@ export default function DreamInterpretPage() {
               onClick={() => setMode('ai')}
               variant={mode === 'ai' ? 'default' : 'outline'}
               className={mode === 'ai' 
-                ? 'bg-amber-500 hover:bg-amber-600 text-black' 
-                : 'bg-[#1a1a1a] border-amber-500/20 text-foreground hover:bg-amber-500/10'}
+                ? 'bg-[var(--theme-gold)] hover:opacity-90 text-black' 
+                : 'bg-[var(--theme-card)] border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)]'}
             >
               <Bot className="w-4 h-4 mr-2" />
               AI智能解梦
@@ -307,8 +307,8 @@ export default function DreamInterpretPage() {
               onClick={() => setMode('keyword')}
               variant={mode === 'keyword' ? 'default' : 'outline'}
               className={mode === 'keyword' 
-                ? 'bg-amber-500 hover:bg-amber-600 text-black' 
-                : 'bg-[#1a1a1a] border-amber-500/20 text-foreground hover:bg-amber-500/10'}
+                ? 'bg-[var(--theme-gold)] hover:opacity-90 text-black' 
+                : 'bg-[var(--theme-card)] border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)]'}
             >
               <BookOpen className="w-4 h-4 mr-2" />
               关键词查询
@@ -316,12 +316,12 @@ export default function DreamInterpretPage() {
             <Button
               onClick={() => setShowHistory(!showHistory)}
               variant="outline"
-              className="bg-[#1a1a1a] border-amber-500/20 text-foreground hover:bg-amber-500/10"
+              className="bg-[var(--theme-card)] border-[var(--theme-gold-border)] text-[var(--theme-text)] hover:bg-[var(--theme-gold-bg)]"
             >
               <History className="w-4 h-4 mr-2" />
               历史记录
               {history.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-amber-500 text-black rounded-full">
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-[var(--theme-gold)] text-black rounded-full">
                   {history.length}
                 </span>
               )}

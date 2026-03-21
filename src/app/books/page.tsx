@@ -38,16 +38,16 @@ export default async function BooksPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--theme-gold-border)]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+              <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-gold)]/50 group-hover:border-[var(--theme-gold)] transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--theme-gold)] group-hover:opacity-80 transition-opacity" />
             </div>
-            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-[var(--theme-gold)] group-hover:opacity-80 transition-opacity">
               乾坤星路
             </span>
           </Link>
@@ -62,19 +62,19 @@ export default async function BooksPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <BookOpen className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-100">古籍阅读</h1>
+            <BookOpen className="w-10 h-10 text-[var(--theme-gold)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-gold)]">古籍阅读</h1>
           </div>
-          <p className="text-gray-400">研习经典，传承智慧</p>
+          <p className="text-[var(--theme-text-secondary)]">研习经典，传承智慧</p>
         </div>
 
         {/* 书籍列表 */}
         <div className="max-w-5xl mx-auto">
           {Object.keys(booksByCategory).length === 0 ? (
             <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-500">暂无书籍</p>
-              <p className="text-gray-600 text-sm mt-2">请稍后再来</p>
+              <BookOpen className="w-16 h-16 text-[var(--theme-text-muted)] mx-auto mb-4" />
+              <p className="text-[var(--theme-text-secondary)]">暂无书籍</p>
+              <p className="text-[var(--theme-text-muted)] text-sm mt-2">请稍后再来</p>
             </div>
           ) : (
             Object.entries(booksByCategory).map(([category, categoryBooks]) => {
@@ -83,29 +83,29 @@ export default async function BooksPage() {
               
               return (
                 <div key={category} className="mb-10">
-                  <h2 className="text-xl font-medium text-amber-200 mb-6 flex items-center gap-2">
-                    <IconComponent className="w-5 h-5 text-amber-500" />
+                  <h2 className="text-xl font-medium text-[var(--theme-gold)] mb-6 flex items-center gap-2">
+                    <IconComponent className="w-5 h-5 text-[var(--theme-gold)]" />
                     {config.label}
                   </h2>
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     {categoryBooks.map((book) => (
                       <Link key={book.id} href={`/books/${book.id}`}>
-                        <Card className="bg-[#1a1a1a]/50 border-amber-500/20 hover:border-amber-500/40 hover:bg-[#1a1a1a] transition-all cursor-pointer group h-full">
+                        <Card className="bg-[var(--theme-card)] border-[var(--theme-gold-border)] hover:border-[var(--theme-gold)] hover:bg-[var(--theme-card-hover)] transition-all cursor-pointer group h-full">
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <div>
-                                <CardTitle className="text-2xl text-amber-100 group-hover:text-amber-50 transition-colors">
+                                <CardTitle className="text-2xl text-[var(--theme-gold)] group-hover:opacity-80 transition-opacity">
                                   {book.title}
                                 </CardTitle>
                                 {book.author && (
-                                  <p className="text-gray-500 text-sm mt-1">
+                                  <p className="text-[var(--theme-text-muted)] text-sm mt-1">
                                     {book.dynasty ? `〔${book.dynasty}〕` : ''}{book.author}
                                   </p>
                                 )}
                               </div>
                               {book.total_chapters && book.total_chapters > 0 && (
-                                <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <Badge className="bg-[var(--theme-gold-bg)] text-[var(--theme-gold)] border border-[var(--theme-gold-border)]">
                                   {book.total_chapters} 章
                                 </Badge>
                               )}
@@ -113,9 +113,9 @@ export default async function BooksPage() {
                           </CardHeader>
                           <CardContent>
                             {book.description && (
-                              <p className="text-gray-400 leading-relaxed line-clamp-2">{book.description}</p>
+                              <p className="text-[var(--theme-text-secondary)] leading-relaxed line-clamp-2">{book.description}</p>
                             )}
-                            <div className="flex items-center mt-4 text-amber-400 text-sm">
+                            <div className="flex items-center mt-4 text-[var(--theme-gold)] text-sm">
                               开始阅读
                               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                             </div>
@@ -131,7 +131,7 @@ export default async function BooksPage() {
         </div>
 
         {/* 版权说明 */}
-        <div className="text-center mt-12 text-gray-500 text-sm">
+        <div className="text-center mt-12 text-[var(--theme-text-muted)] text-sm">
           <p>内容来源于公开领域古籍文献</p>
           <p className="mt-1">仅供学习研究使用</p>
         </div>

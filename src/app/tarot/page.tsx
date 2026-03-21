@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { QuestionCategorySelector, QuestionCategory } from '@/components/QuestionCategorySelector';
@@ -320,11 +321,11 @@ export default function TarotPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Card className="bg-card/50 border-amber-500/20">
+      <div className="min-h-screen bg-[var(--theme-bg)] flex items-center justify-center">
+        <Card className="bg-[var(--theme-card)] border-[var(--theme-purple-border)]">
           <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-indigo-400 animate-spin mb-4" />
-            <p className="text-muted-foreground">正在加载塔罗牌数据...</p>
+            <Loader2 className="w-12 h-12 text-[var(--theme-purple)] animate-spin mb-4" />
+            <p className="text-[var(--theme-text-secondary)]">正在加载塔罗牌数据...</p>
           </CardContent>
         </Card>
       </div>
@@ -333,14 +334,14 @@ export default function TarotPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Card className="bg-card/50 border-amber-500/20 max-w-md">
+      <div className="min-h-screen bg-[var(--theme-bg)] flex items-center justify-center">
+        <Card className="bg-[var(--theme-card)] border-[var(--theme-purple-border)] max-w-md">
           <CardHeader>
-            <CardTitle className="text-foreground">加载失败</CardTitle>
+            <CardTitle className="text-[var(--theme-purple-text)]">加载失败</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={loadCards} className="bg-indigo-500 hover:bg-indigo-600 text-white">
+            <p className="text-[var(--theme-text-secondary)] mb-4">{error}</p>
+            <Button onClick={loadCards} className="bg-[var(--theme-purple)] hover:opacity-90 text-white">
               重试
             </Button>
           </CardContent>
@@ -350,20 +351,23 @@ export default function TarotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] transition-colors">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--theme-purple-border)]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
+              <div className="absolute inset-0 rounded-full border-2 border-[var(--theme-purple)]/50 group-hover:border-[var(--theme-purple)] transition-colors" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--theme-purple)] group-hover:opacity-80 transition-opacity" />
             </div>
-            <span className="text-xl font-bold text-foreground group-hover:text-amber-50 transition-colors">
+            <span className="text-xl font-bold text-[var(--theme-purple-text)] group-hover:opacity-80 transition-opacity">
               乾坤星路
             </span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -371,32 +375,32 @@ export default function TarotPage() {
         {/* 标题 */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Star className="w-10 h-10 text-indigo-400 mr-3" />
-            <h1 className="text-4xl font-bold text-foreground">塔罗占卜</h1>
-            <Star className="w-10 h-10 text-indigo-400 ml-3" />
+            <Star className="w-10 h-10 text-[var(--theme-purple)] mr-3" />
+            <h1 className="text-4xl font-bold text-[var(--theme-purple-text)]">塔罗占卜</h1>
+            <Star className="w-10 h-10 text-[var(--theme-purple)] ml-3" />
           </div>
-          <p className="text-muted-foreground">凝神静心，选择牌阵，探索命运的指引</p>
+          <p className="text-[var(--theme-text-secondary)]">凝神静心，选择牌阵，探索命运的指引</p>
         </div>
 
         {/* 占卜区域 */}
         <div className="max-w-5xl mx-auto">
           {drawnCards.length === 0 ? (
-            <Card className="bg-card/50 border-amber-500/20">
+            <Card className="bg-[var(--theme-card)] border-[var(--theme-purple-border)]">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-foreground">选择牌阵</CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardTitle className="text-2xl text-[var(--theme-purple-text)]">选择牌阵</CardTitle>
+                <CardDescription className="text-[var(--theme-text-secondary)]">
                   心中默念您想问的问题，选择合适的牌阵后开始抽牌
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-8">
                 {/* 问题输入 */}
                 <div className="w-full max-w-lg mb-6">
-                  <label className="block text-sm text-muted-foreground mb-2 text-center">您想问什么事？（可选）</label>
+                  <label className="block text-sm text-[var(--theme-text-secondary)] mb-2 text-center">您想问什么事？（可选）</label>
                   <textarea
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder="例如：我的感情发展如何？这次机会我应该把握吗？"
-                    className="w-full h-24 bg-[#0a0a0a] border border-amber-500/20 rounded-lg p-4 text-gray-200 placeholder:text-gray-600 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    className="w-full h-24 bg-[var(--theme-bg-secondary)] border border-[var(--theme-purple-border)] rounded-lg p-4 text-[var(--theme-text)] placeholder:text-[var(--theme-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--theme-purple)]/50"
                     disabled={isDrawing}
                   />
                 </div>
@@ -406,6 +410,7 @@ export default function TarotPage() {
                   <QuestionCategorySelector
                     value={questionCategory}
                     onChange={setQuestionCategory}
+                    theme="purple"
                   />
                 </div>
 
@@ -416,19 +421,19 @@ export default function TarotPage() {
                       key={type}
                       className={`cursor-pointer transition-all ${
                         spreadType === type
-                          ? 'bg-indigo-500/20 border-indigo-500/50 ring-2 ring-indigo-500/30'
-                          : 'bg-[#0a0a0a] border-amber-500/20 hover:border-amber-500/40'
+                          ? 'bg-[var(--theme-purple-bg)] border-[var(--theme-purple)] ring-2 ring-[var(--theme-purple)]/30'
+                          : 'bg-[var(--theme-bg-secondary)] border-[var(--theme-purple-border)] hover:border-[var(--theme-purple)]/50'
                       }`}
                       onClick={() => setSpreadType(type)}
                     >
                       <CardContent className="py-6 text-center">
-                        <h3 className="text-lg font-bold text-foreground mb-2">{spreadNames[type]}</h3>
-                        <p className="text-muted-foreground text-sm">
+                        <h3 className="text-lg font-bold text-[var(--theme-purple-text)] mb-2">{spreadNames[type]}</h3>
+                        <p className="text-[var(--theme-text-secondary)] text-sm">
                           {type === 'single' && '简单直接，适合快速决策'}
                           {type === 'three' && '过去现在未来，全方位分析'}
                           {type === 'celtic' && '深度探索，全面解读'}
                         </p>
-                        <p className="text-indigo-400 text-xs mt-2">
+                        <p className="text-[var(--theme-purple)] text-xs mt-2">
                           {type === 'single' && '1张牌'}
                           {type === 'three' && '3张牌'}
                           {type === 'celtic' && '10张牌'}
@@ -441,7 +446,7 @@ export default function TarotPage() {
                 <Button
                   onClick={drawCards}
                   disabled={isDrawing}
-                  className="bg-indigo-500 hover:bg-indigo-600 text-white px-12 py-6 text-lg"
+                  className="bg-[var(--theme-purple)] hover:opacity-90 text-white px-12 py-6 text-lg"
                 >
                   {isDrawing ? (
                     <>
@@ -460,13 +465,13 @@ export default function TarotPage() {
           ) : (
             <div className="space-y-6">
               {/* 牌阵显示 */}
-              <Card className="bg-card/50 border-amber-500/20">
+              <Card className="bg-[var(--theme-card)] border-[var(--theme-purple-border)]">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-xl text-foreground">
+                  <CardTitle className="text-xl text-[var(--theme-purple-text)]">
                     {spreadNames[spreadType]}
                   </CardTitle>
                   {question && (
-                    <CardDescription className="text-muted-foreground">
+                    <CardDescription className="text-[var(--theme-text-secondary)]">
                       您的问题：{question}
                     </CardDescription>
                   )}
@@ -488,7 +493,7 @@ export default function TarotPage() {
                       >
                         {/* 牌位说明 */}
                         <div className="text-center mb-2">
-                          <span className="text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded">
+                          <span className="text-xs text-[var(--theme-purple)] bg-[var(--theme-purple-bg)] border border-[var(--theme-purple-border)] px-2 py-1 rounded">
                             {spreadPositions[spreadType][index]}
                           </span>
                         </div>
@@ -496,7 +501,7 @@ export default function TarotPage() {
                         {/* 卡牌 */}
                         <div
                           className={`relative w-32 h-48 md:w-40 md:h-60 mx-auto transition-all duration-500 ${
-                            showCards[index] ? '' : 'hover:shadow-lg hover:shadow-indigo-500/30'
+                            showCards[index] ? '' : 'hover:shadow-lg hover:shadow-purple-500/30'
                           }`}
                           style={{ perspective: '1000px' }}
                         >
@@ -511,12 +516,12 @@ export default function TarotPage() {
                           >
                             {/* 正面 */}
                             <div
-                              className="absolute inset-0 rounded-xl overflow-hidden border-2 border-indigo-500/30 shadow-lg shadow-indigo-500/20"
+                              className="absolute inset-0 rounded-xl overflow-hidden border-2 border-[var(--theme-purple-border)] shadow-lg shadow-purple-500/20"
                               style={{ backfaceVisibility: 'hidden' }}
                             >
                               <div className={`w-full h-full bg-gradient-to-br ${
                                 drawn.card.arcana === 'major'
-                                  ? 'from-indigo-600/50 to-purple-700/50'
+                                  ? 'from-[var(--theme-purple)]/50 to-purple-700/50'
                                   : drawn.card.suit === 'wands' ? 'from-orange-600/50 to-red-700/50' :
                                   drawn.card.suit === 'cups' ? 'from-blue-600/50 to-cyan-700/50' :
                                   drawn.card.suit === 'swords' ? 'from-gray-600/50 to-slate-700/50' :
@@ -538,13 +543,13 @@ export default function TarotPage() {
                             
                             {/* 背面 */}
                             <div
-                              className="absolute inset-0 rounded-xl overflow-hidden border-2 border-indigo-500/30 bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center"
+                              className="absolute inset-0 rounded-xl overflow-hidden border-2 border-[var(--theme-purple-border)] bg-gradient-to-br from-[var(--theme-card)] to-[var(--theme-bg)] flex items-center justify-center"
                               style={{
                                 backfaceVisibility: 'hidden',
                                 transform: 'rotateY(180deg)'
                               }}
                             >
-                              <div className="text-indigo-400">
+                              <div className="text-[var(--theme-purple)]">
                                 <Star className="w-16 h-16" />
                               </div>
                             </div>
@@ -554,7 +559,7 @@ export default function TarotPage() {
                         {/* 正逆位标记 */}
                         {showCards[index] && (
                           <div className={`text-center mt-2 text-sm font-medium ${
-                            drawn.isReversed ? 'text-indigo-300' : 'text-muted-foreground'
+                            drawn.isReversed ? 'text-[var(--theme-purple)]' : 'text-[var(--theme-text-secondary)]'
                           }`}>
                             {drawn.isReversed ? '逆位' : '正位'}
                           </div>
@@ -569,7 +574,7 @@ export default function TarotPage() {
                       <Button
                         onClick={revealAll}
                         variant="outline"
-                        className="border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10"
+                        className="border-[var(--theme-purple-border)] text-[var(--theme-purple)] hover:bg-[var(--theme-purple-bg)]"
                       >
                         全部翻开
                       </Button>
@@ -580,16 +585,16 @@ export default function TarotPage() {
 
               {/* 已翻开的牌详情 */}
               {allRevealed && (
-                <Card className="bg-card/50 border-amber-500/20">
+                <Card className="bg-[var(--theme-card)] border-[var(--theme-purple-border)]">
                   <CardHeader>
-                    <CardTitle className="text-xl text-foreground">牌面解读</CardTitle>
+                    <CardTitle className="text-xl text-[var(--theme-purple-text)]">牌面解读</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {drawnCards.map((drawn, index) => (
                       <div
                         key={index}
-                        className={`bg-[#0a0a0a] rounded-lg p-4 ${
-                          drawn.isReversed ? 'border-l-4 border-indigo-500' : ''
+                        className={`bg-[var(--theme-bg-secondary)] rounded-lg p-4 ${
+                          drawn.isReversed ? 'border-l-4 border-[var(--theme-purple)]' : ''
                         }`}
                       >
                         <div className="flex items-start gap-4">
@@ -598,26 +603,26 @@ export default function TarotPage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className="text-lg font-bold text-foreground">{drawn.card.name}</h3>
+                              <h3 className="text-lg font-bold text-[var(--theme-text)]">{drawn.card.name}</h3>
                               <span className={`text-xs px-2 py-1 rounded ${
                                 drawn.isReversed
-                                  ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/30'
-                                  : 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                                  ? 'bg-[var(--theme-purple-bg)] text-[var(--theme-purple)] border border-[var(--theme-purple-border)]'
+                                  : 'bg-[var(--theme-gold-bg)] text-[var(--theme-gold)] border border-[var(--theme-gold-border)]'
                               }`}>
                                 {drawn.isReversed ? '逆位' : '正位'}
                               </span>
-                              <span className="text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded">
+                              <span className="text-xs text-[var(--theme-purple)] bg-[var(--theme-purple-bg)] border border-[var(--theme-purple-border)] px-2 py-1 rounded">
                                 {spreadPositions[spreadType][index]}
                               </span>
                             </div>
-                            <p className="text-muted-foreground text-sm mb-2">
+                            <p className="text-[var(--theme-text-secondary)] text-sm mb-2">
                               {drawn.isReversed ? drawn.card.reversed : drawn.card.upright}
                             </p>
                             <div className="flex flex-wrap gap-1">
                               {drawn.card.keywords.map((keyword, k) => (
                                 <span
                                   key={k}
-                                  className="text-xs bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20"
+                                  className="text-xs bg-[var(--theme-purple-bg)] text-[var(--theme-purple)] px-2 py-0.5 rounded border border-[var(--theme-purple-border)]"
                                 >
                                   {keyword}
                                 </span>
@@ -633,31 +638,31 @@ export default function TarotPage() {
 
               {/* AI大师解读 */}
               {allRevealed && (
-                <Card className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-indigo-500/20">
+                <Card className="bg-gradient-to-r from-[var(--theme-purple-bg)] to-purple-900/30 border-[var(--theme-purple-border)]">
                   <CardHeader>
-                    <CardTitle className="text-xl text-foreground flex items-center">
-                      <Sparkles className="w-5 h-5 mr-2 text-indigo-400" />
+                    <CardTitle className="text-xl text-[var(--theme-text)] flex items-center">
+                      <Sparkles className="w-5 h-5 mr-2 text-[var(--theme-purple)]" />
                       大师解读
-                      {isInterpreting && <span className="ml-2 text-sm text-indigo-300 animate-pulse">生成中...</span>}
+                      {isInterpreting && <span className="ml-2 text-sm text-[var(--theme-purple)] animate-pulse">生成中...</span>}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {isInterpreting && !aiInterpretation ? (
                       <div className="flex flex-col items-center justify-center py-12">
                         <div className="relative mb-4">
-                          <Sparkles className="w-12 h-12 text-indigo-400 animate-pulse" />
+                          <Sparkles className="w-12 h-12 text-[var(--theme-purple)] animate-pulse" />
                         </div>
-                        <p className="text-muted-foreground animate-pulse">大师正在为您解读牌面...</p>
+                        <p className="text-[var(--theme-text-secondary)] animate-pulse">大师正在为您解读牌面...</p>
                       </div>
                     ) : (
-                      <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-indigo-600/50 scrollbar-track-transparent">
-                        <div className="prose prose-invert prose-indigo max-w-none">
+                      <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-600/50 scrollbar-track-transparent">
+                        <div className="prose prose-invert prose-purple max-w-none">
                           <div
-                            className="text-gray-200 leading-relaxed whitespace-pre-wrap"
+                            className="text-[var(--theme-text)] leading-relaxed whitespace-pre-wrap"
                             dangerouslySetInnerHTML={{
                               __html: aiInterpretation
-                                .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-foreground mt-6 mb-3">$1</h2>')
-                                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-200">$1</strong>')
+                                .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-[var(--theme-text)] mt-6 mb-3">$1</h2>')
+                                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--theme-purple)]">$1</strong>')
                             }}
                           />
                         </div>
@@ -676,7 +681,7 @@ export default function TarotPage() {
                 <div className="text-center">
                   <Button
                     onClick={reset}
-                    className="bg-indigo-500 hover:bg-indigo-600 text-white px-12 py-6 text-lg"
+                    className="bg-[var(--theme-purple)] hover:opacity-90 text-white px-12 py-6 text-lg"
                   >
                     <RefreshCw className="w-5 h-5 mr-2" />
                     重新占卜

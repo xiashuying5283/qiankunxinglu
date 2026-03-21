@@ -101,31 +101,44 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   
-  /* 浅色模式主题变量 */
-  --theme-bg: #fafafa;
+  /* 浅色模式主题变量 - 宣纸质感 */
+  --theme-bg: #F8F9FA;
+  --theme-bg-secondary: #f3f4f6;
   --theme-card: #ffffff;
   --theme-card-hover: #f5f5f5;
-  --theme-border: rgba(212, 175, 55, 0.3);
+  --theme-border: rgba(180, 150, 80, 0.25);
   --theme-text: #1a1a1a;
-  --theme-text-secondary: #525252;
-  --theme-text-muted: #737373;
-  --theme-accent: #d4af37;
-  --theme-accent-hover: #b8962e;
+  --theme-text-secondary: #4a4a4a;
+  --theme-text-muted: #6b6b6b;
+  --theme-accent: #b8962e;
+  --theme-accent-hover: #9a7a24;
+  
+  /* 金色系（周易） */
   --theme-gold: #92400e;
   --theme-gold-muted: #a16207;
-  --theme-gold-bg: rgba(212, 175, 55, 0.1);
-  --theme-gold-border: rgba(212, 175, 55, 0.3);
+  --theme-gold-bg: rgba(180, 150, 80, 0.1);
+  --theme-gold-border: rgba(180, 150, 80, 0.3);
+  --theme-gold-text: #92400e;
+  --theme-gold-gradient: linear-gradient(135deg, #d4af37 0%, #b8962e 50%, #d4af37 100%);
   
-  --header-bg: rgba(255, 255, 255, 0.9);
-  --page-bg: #fafafa;
+  /* 紫色系（塔罗） */
+  --theme-purple: #6366f1;
+  --theme-purple-muted: #818cf8;
+  --theme-purple-bg: rgba(99, 102, 241, 0.08);
+  --theme-purple-border: rgba(99, 102, 241, 0.2);
+  --theme-purple-text: #4f46e5;
+  --theme-purple-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #818cf8 100%);
+  
+  --header-bg: rgba(248, 249, 250, 0.95);
+  --page-bg: #F8F9FA;
 }
 
 .dark {
-  --background: oklch(0.12 0 0);
+  --background: oklch(0.1 0 0);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.18 0 0);
+  --card: oklch(0.16 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.18 0 0);
+  --popover: oklch(0.16 0 0);
   --popover-foreground: oklch(0.98 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -153,23 +166,36 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   
-  /* 深色模式主题变量 */
-  --theme-bg: #0a0a0a;
-  --theme-card: rgba(26, 26, 26, 0.6);
-  --theme-card-hover: rgba(38, 38, 38, 0.8);
-  --theme-border: rgba(212, 175, 55, 0.25);
-  --theme-text: #f5f5f5;
-  --theme-text-secondary: #a3a3a3;
-  --theme-text-muted: #737373;
+  /* 深色模式主题变量 - 深石墨色 */
+  --theme-bg: #121214;
+  --theme-bg-secondary: #18181b;
+  --theme-card: rgba(24, 24, 27, 0.7);
+  --theme-card-hover: rgba(39, 39, 42, 0.8);
+  --theme-border: rgba(212, 175, 55, 0.2);
+  --theme-text: #f4f4f5;
+  --theme-text-secondary: #a1a1aa;
+  --theme-text-muted: #71717a;
   --theme-accent: #d4af37;
   --theme-accent-hover: #e5c04b;
+  
+  /* 金色系（周易） */
   --theme-gold: #fbbf24;
   --theme-gold-muted: #f59e0b;
-  --theme-gold-bg: rgba(212, 175, 55, 0.15);
-  --theme-gold-border: rgba(212, 175, 55, 0.3);
+  --theme-gold-bg: rgba(212, 175, 55, 0.12);
+  --theme-gold-border: rgba(212, 175, 55, 0.25);
+  --theme-gold-text: #fbbf24;
+  --theme-gold-gradient: linear-gradient(135deg, #f4c542 0%, #d4af37 50%, #f4c542 100%);
   
-  --header-bg: rgba(10, 10, 10, 0.9);
-  --page-bg: #0a0a0a;
+  /* 紫色系（塔罗） */
+  --theme-purple: #a78bfa;
+  --theme-purple-muted: #c4b5fd;
+  --theme-purple-bg: rgba(139, 92, 246, 0.12);
+  --theme-purple-border: rgba(139, 92, 246, 0.25);
+  --theme-purple-text: #a78bfa;
+  --theme-purple-gradient: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #c4b5fd 100%);
+  
+  --header-bg: rgba(18, 18, 20, 0.95);
+  --page-bg: #121214;
 }
 
 @layer base {
