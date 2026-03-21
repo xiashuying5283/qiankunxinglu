@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
   Wand2, Sun, Calendar, Zap, ArrowRight,
-  Users, Shield, Key, ChevronLeft, ChevronRight
+  Users, Shield, Key
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
@@ -63,21 +63,16 @@ export default function Home() {
   // 轮播状态
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // 自动轮播
+  // 自动切换（10秒间隔）
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % recommendedFeatures.length);
-    }, 4000);
+    }, 10000);
     return () => clearInterval(timer);
   }, []);
 
-  // 手动切换
-  const goToPrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + recommendedFeatures.length) % recommendedFeatures.length);
-  };
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % recommendedFeatures.length);
-  };
+  // 当前推荐
+  const currentFeature = recommendedFeatures[currentIndex];
 
   // 高频核心功能 - 首屏C位
   const coreFeatures = [
@@ -245,70 +240,21 @@ export default function Home() {
             融合周易六十四卦、塔罗牌、测字、梅花易数等传统智慧
           </p>
           
-          {/* 轮播推荐入口 */}
-          <div className="relative max-w-lg mx-auto mb-2">
-            <div className="overflow-hidden rounded-full">
-              <div 
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-              >
-                {recommendedFeatures.map((feature, index) => (
-                  <Link 
-                    href={feature.href} 
-                    key={index}
-                    className="min-w-full"
-                  >
-                    <div className={`inline-flex items-center justify-center gap-3 w-full
-                      bg-gradient-to-r ${feature.color.replace('from-', 'from-').replace('to-', 'to-')}/20 
-                      border border-white/20 rounded-full px-6 py-3 cursor-pointer
-                      hover:opacity-80 transition-all group`}
-                    >
-                      <span className="text-white/90">{feature.icon}</span>
-                      <span className="text-white font-medium">{feature.title}</span>
-                      <span className="text-white/60 text-sm hidden sm:inline">· {feature.description}</span>
-                      <ArrowRight className="w-4 h-4 text-white/60 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            {/* 左右切换按钮 */}
-            <button 
-              onClick={goToPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 
-                w-8 h-8 flex items-center justify-center rounded-full
-                bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="上一个"
+          {/* 自动刷新推荐入口 */}
+          <Link href={currentFeature.href} className="block max-w-lg mx-auto mb-2">
+            <div 
+              key={currentIndex}
+              className={`inline-flex items-center justify-center gap-3 w-full
+                bg-gradient-to-r ${currentFeature.color}/20 
+                border border-white/20 rounded-full px-6 py-3 cursor-pointer
+                hover:opacity-80 transition-all group animate-fadeIn`}
             >
-              <ChevronLeft className="w-4 h-4 text-white/70" />
-            </button>
-            <button 
-              onClick={goToNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 
-                w-8 h-8 flex items-center justify-center rounded-full
-                bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="下一个"
-            >
-              <ChevronRight className="w-4 h-4 text-white/70" />
-            </button>
-            
-            {/* 指示器 */}
-            <div className="flex justify-center gap-1.5 mt-3">
-              {recommendedFeatures.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex 
-                      ? 'bg-white w-4' 
-                      : 'bg-white/30 hover:bg-white/50'
-                  }`}
-                  aria-label={`跳转到第${index + 1}个推荐`}
-                />
-              ))}
+              <span className="text-white/90">{currentFeature.icon}</span>
+              <span className="text-white font-medium">{currentFeature.title}</span>
+              <span className="text-white/60 text-sm hidden sm:inline">· {currentFeature.description}</span>
+              <ArrowRight className="w-4 h-4 text-white/60 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* 高频核心功能 - 大卡片 */}
