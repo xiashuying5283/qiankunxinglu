@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="filename" content="divination_platform.html">
+    <title>乾坤星路 - 理术合一学习平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        yijing: {
+                            gold: '#B68D40', // 亮色背景下的沉稳金色
+                            bg: '#FDFCF8'   // 宣纸色
+                        },
+                        divine: {
+                            purple: '#6366F1',
+                            soft: '#EEF2FF'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-main: #F8F9FA;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: #1A1A1A;
+            width: 1440px;
+            margin: 0 auto;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        /* 亮色背景下的装饰元素 */
+        .decor-circle {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+        .light-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .light-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(182, 141, 64, 0.3);
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        .section-split {
+            position: absolute;
+            left: 50%;
+            top: 15%;
+            bottom: 15%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, #E5E7EB, transparent);
+        }
+        /* 自定义选择动画 */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #B68D40;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+    <!-- 背景装饰图层 -->
+    <div class="decor-circle w-[600px] h-[600px] bg-yijing-gold top-[-200px] left-[-100px]"></div>
+    <div class="decor-circle w-[500px] h-[500px] bg-divine-purple bottom-[-100px] right-[-100px]"></div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-12 py-6 bg-white/70 backdrop-blur-md border-b border-black/5 max-w-[1440px] mx-auto">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-yijing-gold flex items-center justify-center rounded-sm rotate-45">
+                    <span class="text-white font-serif -rotate-45 font-bold">乾</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-serif font-black tracking-widest text-slate-800">乾坤星路</h1>
+                    <p class="text-[9px] uppercase tracking-[0.3em] text-slate-400">Wisdom & Divination</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-12">
+                <div class="flex gap-10 text-[13px] font-bold tracking-widest text-slate-500">
+                    <a href="#" class="nav-link text-yijing-gold">学 · 易经课堂</a>
+                    <a href="#" class="nav-link">测 · 术数占断</a>
+                    <a href="#" class="nav-link">物 · 易友雅集</a>
+                </div>
+                <div class="flex items-center gap-6">
+                    <button class="text-slate-400 hover:text-slate-800"><i data-lucide="search" class="w-5 h-5"></i></button>
+                    <button class="px-6 py-2 bg-slate-900 text-white text-[12px] font-bold rounded-full hover:bg-yijing-gold transition-colors duration-300">
+                        开启修行
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <main class="relative pt-48 px-16 max-w-[1440px] mx-auto pb-32">
+        <div class="section-split"></div>
+
+        <div class="grid grid-cols-2 gap-24">
+            <!-- 左侧：研习区 -->
+            <div class="space-y-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="px-3 py-1 bg-yijing-gold/10 text-yijing-gold text-[10px] font-black tracking-widest rounded">LEARNING</span>
+                        <div class="h-[1px] w-12 bg-yijing-gold/30"></div>
+                    </div>
+                    <h2 class="text-6xl font-serif font-black text-slate-900 leading-tight mb-6">
+                        研习<span class="text-yijing-gold/60 italic font-light ml-4">The Theory</span>
+                    </h2>
+                    <p class="text-slate-500 text-lg max-w-md leading-relaxed">
+                        系统性学习周易哲学，从基础卦象到高阶理数，构建深厚的传统文化根基。
+                    </p>
+                </div>
+
+                <div class="grid gap-6">
+                    <div class="light-card p-8 rounded-2xl group flex justify-between items-center cursor-pointer">
+                        <div class="flex gap-6 items-center">
+                            <div class="w-14 h-14 bg-yijing-gold/5 flex items-center justify-center rounded-2xl group-hover:bg-yijing-gold group-hover:text-white transition-colors">
+                                <i data-lucide="book-open"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-1">六十四卦全解</h4>
+                                <p class="text-xs text-slate-400">包含卦辞、爻辞及现代深度译注</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+
+                    <div class="light-card p-8 rounded-2xl group flex justify-between items-center cursor-pointer">
+                        <div class="flex gap-6 items-center">
+                            <div class="w-14 h-14 bg-yijing-gold/5 flex items-center justify-center rounded-2xl group-hover:bg-yijing-gold group-hover:text-white transition-colors">
+                                <i data-lucide="video"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-1">国学大师课堂</h4>
+                                <p class="text-xs text-slate-400">视频讲解易经在生活中的应用</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：占断区 -->
+            <div class="space-y-12 text-right flex flex-col items-end">
+                <div>
+                    <div class="flex items-center gap-3 mb-6 justify-end">
+                        <div class="h-[1px] w-12 bg-divine-purple/30"></div>
+                        <span class="px-3 py-1 bg-divine-purple/10 text-divine-purple text-[10px] font-black tracking-widest rounded">DIVINATION</span>
+                    </div>
+                    <h2 class="text-6xl font-serif font-black text-slate-900 leading-tight mb-6">
+                        占断<span class="text-divine-purple/60 italic font-light ml-4">The Practice</span>
+                    </h2>
+                    <p class="text-slate-500 text-lg max-w-md leading-relaxed">
+                        运用古老算法与塔罗能量，为现代人的生活抉择提供概率参考与心理启示。
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 w-full text-left">
+                    <div class="light-card p-8 rounded-2xl hover:border-divine-purple/40">
+                        <div class="w-12 h-12 bg-divine-soft text-divine-purple flex items-center justify-center rounded-xl mb-6">
+                            <i data-lucide="scan-line"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-2">梅花易数</h4>
+                        <p class="text-[11px] text-slate-400 leading-normal">即时起卦，洞悉眼前事物的成败吉凶。</p>
+                        <button class="mt-6 text-[11px] font-black text-divine-purple uppercase tracking-widest border-b border-divine-purple/20 pb-1">立即开启</button>
+                    </div>
+
+                    <div class="light-card p-8 rounded-2xl hover:border-divine-purple/40">
+                        <div class="w-12 h-12 bg-divine-soft text-divine-purple flex items-center justify-center rounded-xl mb-6">
+                            <i data-lucide="layers"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-2">塔罗牌阵</h4>
+                        <p class="text-[11px] text-slate-400 leading-normal">深度解读情感、事业与个人内在潜意识。</p>
+                        <button class="mt-6 text-[11px] font-black text-divine-purple uppercase tracking-widest border-b border-divine-purple/20 pb-1">立即开启</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中部推荐：最新活动 -->
+        <div class="mt-40 bg-white rounded-[40px] p-16 shadow-2xl shadow-slate-200/50 border border-black/5 relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-[0.03] pointer-events-none p-8">
+                <i data-lucide="sun" class="w-64 h-64"></i>
+            </div>
+            <div class="relative z-10 flex items-center justify-between">
+                <div class="max-w-xl">
+                    <h3 class="text-3xl font-serif font-bold mb-4">今日易理：天行健，君子以自强不息</h3>
+                    <p class="text-slate-400 leading-loose mb-8">
+                        今日甲辰龙年、戊辰月、庚子日。宜研读《乾》卦，感受纯阳刚健之气，在职场与学业中保持积极向上的心态。
+                    </p>
+                    <div class="flex gap-4">
+                        <button class="px-8 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold">查看详细运势</button>
+                        <button class="px-8 py-3 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">今日同修</button>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-24 h-32 bg-yijing-gold/5 rounded-2xl flex items-center justify-center">
+                        <span class="vertical-text text-yijing-gold font-serif font-bold opacity-30">文化传承</span>
+                    </div>
+                    <div class="w-24 h-32 bg-divine-purple/5 rounded-2xl flex items-center justify-center">
+                        <span class="vertical-text text-divine-purple font-serif font-bold opacity-30">现代科学</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-100 py-20 px-16">
+        <div class="max-w-[1440px] mx-auto grid grid-cols-4 gap-12">
+            <div class="col-span-1">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
+                        <span class="text-white text-[10px]">乾</span>
+                    </div>
+                    <span class="font-serif font-black tracking-widest text-slate-800">乾坤星路</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    致力于将中国传统易学智慧与现代心理学、算法科技相结合，打造理术合一的新型学习与决策平台。
+                </p>
+            </div>
+            <div class="space-y-4">
+                <h5 class="text-sm font-bold text-slate-800">研习目录</h5>
+                <ul class="text-xs text-slate-500 space-y-2">
+                    <li><a href="#" class="hover:text-yijing-gold">周易正义</a></li>
+                    <li><a href="#" class="hover:text-yijing-gold">河图洛书</a></li>
+                    <li><a href="#" class="hover:text-yijing-gold">名家讲座</a></li>
+                </ul>
+            </div>
+            <div class="space-y-4">
+                <h5 class="text-sm font-bold text-slate-800">占断工具</h5>
+                <ul class="text-xs text-slate-500 space-y-2">
+                    <li><a href="#" class="hover:text-divine-purple">大衍凑筮</a></li>
+                    <li><a href="#" class="hover:text-divine-purple">梅花易数</a></li>
+                    <li><a href="#" class="hover:text-divine-purple">韦特塔罗</a></li>
+                </ul>
+            </div>
+            <div class="space-y-4 text-right">
+                <h5 class="text-sm font-bold text-slate-800">关注我们</h5>
+                <div class="flex gap-4 justify-end">
+                    <div class="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                    </div>
+                    <div class="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                        <i data-lucide="twitter" class="w-4 h-4"></i>
+                    </div>
+                    <div class="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // 简单的交互反馈
+            document.querySelectorAll('.light-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    // 可以在这里增加音效或更复杂的微动效
+                });
+            });
+        });
+    </script>
+</body>
+</html>
