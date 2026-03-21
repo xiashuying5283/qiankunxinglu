@@ -18,6 +18,8 @@ async function fetchGlossaryData() {
     throw error;
   }
   
+  console.log(`[Glossary] Fetched ${data?.length || 0} terms from database`);
+  
   // 转换字段名
   return (data || []).map(item => ({
     id: item.id,
@@ -37,14 +39,16 @@ async function fetchGlossaryData() {
  * GET /api/glossary
  * 
  * Query params:
- * - category: 分类筛选 (iching, bazi, general)
+ * - category: 分类筛选 (iching, bazi, qimen, general)
  * - term: 搜索单个词条
+ * - nocache: 跳过缓存（可选）
  */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const term = searchParams.get('term');
+    const nocache = searchParams.get('nocache');
     
     // 如果搜索单个词条，直接查询
     if (term) {
@@ -73,8 +77,10 @@ export async function GET(request: Request) {
       });
     }
     
-    // 获取全部数据（带缓存）
-    const allData = await withCache(CACHE_KEY, fetchGlossaryData, CACHE_TTL);
+    // 获取全部数据（带缓存，除非指定 nocache）
+    const allData = nocache 
+      ? await fetchGlossaryData()
+      : await withCache(CACHE_KEY, fetchGlossaryData, CACHE_TTL);
     
     // 按分类筛选
     const data = category 
