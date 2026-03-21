@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
     }
     
+    // 调试信息
+    console.log('[Admin API] userId:', userId);
+    console.log('[Admin API] ADMIN_USER_IDS:', ADMIN_USER_IDS);
+    console.log('[Admin API] isAdmin:', ADMIN_USER_IDS.includes(userId));
+    
     if (!(await isAdmin(userId))) {
       return NextResponse.json({ error: '无权限访问' }, { status: 403 });
     }
@@ -43,8 +48,10 @@ export async function GET(request: NextRequest) {
     let credentials;
     if (status === 'pending') {
       credentials = await getPendingCredentials();
+      console.log('[Admin API] pending credentials count:', credentials.length);
     } else {
       credentials = await getAllCredentials();
+      console.log('[Admin API] all credentials count:', credentials.length);
     }
     
     // 隐藏敏感信息
