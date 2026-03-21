@@ -15,7 +15,7 @@ import Link from 'next/link';
 interface GlossaryTermProps {
   term: string;
   children: React.ReactNode;
-  category?: 'iching' | 'bazi' | 'general';
+  category?: 'iching' | 'bazi' | 'qimen' | 'general';
 }
 
 interface GlossaryData {
@@ -84,6 +84,7 @@ export function GlossaryTerm({ term, children, category }: GlossaryTermProps) {
     const labels: Record<string, string> = {
       iching: '周易',
       bazi: '八字',
+      qimen: '奇门遁甲',
       general: '通用',
     };
     return labels[cat] || cat;
@@ -93,6 +94,7 @@ export function GlossaryTerm({ term, children, category }: GlossaryTermProps) {
     const colors: Record<string, string> = {
       iching: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
       bazi: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+      qimen: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
       general: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
     };
     return colors[cat] || colors.general;

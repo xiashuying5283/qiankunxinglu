@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { clearCache } from '@/lib/cache';
 
 // 基础周易科普词条数据
 const GLOSSARY_DATA = [
@@ -637,49 +638,50 @@ export async function POST() {
     if (checkError) {
       // 表不存在，需要通过 db upgrade 创建
       console.log('Glossary table check:', checkError.message);
+      return NextResponse.json({ 
+        error: '表不存在，请先运行数据库迁移',
+        details: checkError.message
+      }, { status: 500 });
     }
     
-    // 检查是否已有数据
-    const { data: existing } = await client
+    // 获取已有术语列表
+    const { data: existingTerms } = await client
       .from('glossary')
-      .select('id')
-      .limit(1);
+      .select('term');
     
-    if (existing && existing.length > 0) {
-      // 数据已存在，尝试更新参考文献
-      let updated = 0;
-      for (const item of GLOSSARY_DATA) {
-        if (item.refs && item.refs.length > 0) {
-          try {
-            const { error: updateError } = await client
-              .from('glossary')
-              .update({ refs: item.refs })
-              .eq('term', item.term);
-            if (!updateError) updated++;
-          } catch {
-            // refs 列可能不存在，跳过
-          }
-        }
-      }
+    const existingTermSet = new Set((existingTerms || []).map(t => t.term));
+    
+    // 筛选出需要新增的术语
+    const newTerms = GLOSSARY_DATA.filter(item => !existingTermSet.has(item.term));
+    
+    // 无论是否有新术语，都清除缓存，确保数据最新
+    clearCache('glossary_data');
+    
+    if (newTerms.length === 0) {
       return NextResponse.json({ 
-        message: '数据已存在，参考文献已更新',
-        count: existing.length,
-        updated
+        message: '所有术语已存在，无需更新',
+        existing: existingTermSet.size,
+        cacheCleared: true
       });
     }
     
-    // 插入数据
+    // 插入新术语
     const { error } = await client
       .from('glossary')
-      .insert(GLOSSARY_DATA);
+      .insert(newTerms);
     
     if (error) {
       throw error;
     }
     
+    // 清除缓存，确保新数据能被获取
+    clearCache('glossary_data');
+    
     return NextResponse.json({ 
-      message: '初始化成功',
-      count: GLOSSARY_DATA.length 
+      message: '新增术语成功',
+      newCount: newTerms.length,
+      newTerms: newTerms.map(t => t.term),
+      existing: existingTermSet.size
     });
   } catch (error) {
     console.error('初始化科普词条失败:', error);
