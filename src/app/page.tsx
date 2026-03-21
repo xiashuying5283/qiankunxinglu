@@ -38,10 +38,10 @@ export default function Home() {
       highlight: false,
     },
     {
-      title: '塔罗牌意',
-      description: '78张牌完整解读',
-      icon: <Moon className="w-5 h-5" />,
-      href: '/learn-tarot',
+      title: '梅花易数',
+      description: '以数明理，万物皆卦',
+      icon: <Star className="w-5 h-5" />,
+      href: '/plum-blossom',
       highlight: false,
     },
   ];
@@ -51,11 +51,9 @@ export default function Home() {
     { title: '周易起卦', description: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
     { title: '奇门遁甲', description: '帝王之学', icon: <Compass className="w-5 h-5" />, href: '/qimen' },
     { title: '测字', description: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
-    { title: '梅花易数', description: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
     { title: '观音灵签', description: '求签问卦', icon: <Wand2 className="w-5 h-5" />, href: '/fortune-stick' },
     { title: '生辰八字', description: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
     { title: '姻缘匹配', description: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
-    { title: '塔罗占卜', description: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
     { title: '周公解梦', description: '梦境解析', icon: <Sparkles className="w-5 h-5" />, href: '/dream' },
     { title: '每日运势', description: '今日宜忌', icon: <Zap className="w-5 h-5" />, href: '/daily-fortune' },
   ];
@@ -150,12 +148,12 @@ export default function Home() {
                   <ChevronRight className="w-5 h-5 text-[var(--theme-gold)] ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
-              <Link href="/learn-tarot" className="group w-full sm:w-auto">
+              <Link href="/tarot-realm" className="group w-full sm:w-auto">
                 <div className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-[var(--theme-purple-bg)] to-purple-600/10 border border-[var(--theme-purple-border)] hover:border-[var(--theme-purple)]/50 transition-all">
-                  <div className="text-3xl">☆</div>
+                  <div className="text-3xl">✧</div>
                   <div className="text-left">
-                    <div className="text-[var(--theme-purple-text)] font-medium">塔罗牌意</div>
-                    <div className="text-[var(--theme-text-muted)] text-sm">78张牌解读</div>
+                    <div className="text-[var(--theme-purple-text)] font-medium">塔罗秘境</div>
+                    <div className="text-[var(--theme-text-muted)] text-sm">西方神秘学</div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[var(--theme-purple)] ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
