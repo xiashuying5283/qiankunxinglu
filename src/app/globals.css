@@ -67,73 +67,9 @@
     'Times New Roman', Times, serif;
 }
 
+/* 深色主题作为默认 - 深石墨色 */
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  
-  /* 浅色模式主题变量 - 宣纸质感 */
-  --theme-bg: #F8F9FA;
-  --theme-bg-secondary: #f3f4f6;
-  --theme-card: #ffffff;
-  --theme-card-hover: #f5f5f5;
-  --theme-border: rgba(180, 150, 80, 0.25);
-  --theme-text: #1a1a1a;
-  --theme-text-secondary: #4a4a4a;
-  --theme-text-muted: #6b6b6b;
-  --theme-accent: #b8962e;
-  --theme-accent-hover: #9a7a24;
-  
-  /* 金色系（周易） */
-  --theme-gold: #92400e;
-  --theme-gold-muted: #a16207;
-  --theme-gold-bg: rgba(180, 150, 80, 0.1);
-  --theme-gold-border: rgba(180, 150, 80, 0.3);
-  --theme-gold-text: #92400e;
-  --theme-gold-gradient: linear-gradient(135deg, #d4af37 0%, #b8962e 50%, #d4af37 100%);
-  
-  /* 紫色系（塔罗） */
-  --theme-purple: #6366f1;
-  --theme-purple-muted: #818cf8;
-  --theme-purple-bg: rgba(99, 102, 241, 0.08);
-  --theme-purple-border: rgba(99, 102, 241, 0.2);
-  --theme-purple-text: #4f46e5;
-  --theme-purple-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #818cf8 100%);
-  
-  --header-bg: rgba(248, 249, 250, 0.95);
-  --page-bg: #F8F9FA;
-}
-
-.dark {
   --background: oklch(0.1 0 0);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.16 0 0);
@@ -198,6 +134,77 @@
   --page-bg: #121214;
 }
 
+/* 浅色主题 - 宣纸质感 */
+.light {
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* 浅色模式主题变量 - 宣纸质感 */
+  --theme-bg: #F8F9FA;
+  --theme-bg-secondary: #f3f4f6;
+  --theme-card: #ffffff;
+  --theme-card-hover: #f5f5f5;
+  --theme-border: rgba(180, 150, 80, 0.25);
+  --theme-text: #1a1a1a;
+  --theme-text-secondary: #4a4a4a;
+  --theme-text-muted: #6b6b6b;
+  --theme-accent: #b8962e;
+  --theme-accent-hover: #9a7a24;
+  
+  /* 金色系（周易） */
+  --theme-gold: #92400e;
+  --theme-gold-muted: #a16207;
+  --theme-gold-bg: rgba(180, 150, 80, 0.1);
+  --theme-gold-border: rgba(180, 150, 80, 0.3);
+  --theme-gold-text: #92400e;
+  --theme-gold-gradient: linear-gradient(135deg, #d4af37 0%, #b8962e 50%, #d4af37 100%);
+  
+  /* 紫色系（塔罗） */
+  --theme-purple: #6366f1;
+  --theme-purple-muted: #818cf8;
+  --theme-purple-bg: rgba(99, 102, 241, 0.08);
+  --theme-purple-border: rgba(99, 102, 241, 0.2);
+  --theme-purple-text: #4f46e5;
+  --theme-purple-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #818cf8 100%);
+  
+  --header-bg: rgba(248, 249, 250, 0.95);
+  --page-bg: #F8F9FA;
+}
+
+/* 保留 .dark 类以兼容现有代码 */
+.dark {
+  /* 深色主题变量已在 :root 中定义 */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -255,21 +262,21 @@ body {
   background: transparent;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+:root:not(.light) .scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 9999px;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+:root:not(.light) .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-:root:not(.dark) .scrollbar-thin::-webkit-scrollbar-thumb {
+.light .scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 9999px;
 }
 
-:root:not(.dark) .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+.light .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.35);
 }
 

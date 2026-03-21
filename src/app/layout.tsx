@@ -1,9 +1,28 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Inspector } from 'react-dev-inspector';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { PreloadProvider } from '@/components/PreloadProvider';
 import './globals.css';
+
+// 阻塞脚本：在页面渲染前设置主题，避免闪烁
+// 深色是默认（无类），浅色需要 .light 类
+const themeInitScript = `
+(function() {
+  try {
+    const stored = localStorage.getItem('qiankun-theme');
+    if (stored === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      // 深色主题是默认，添加 .dark 类以保持兼容
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
 
 export const metadata: Metadata = {
   title: {
@@ -75,6 +94,13 @@ export default function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+      </head>
       <body className={`antialiased`}>
         <ThemeProvider>
           <PreloadProvider>

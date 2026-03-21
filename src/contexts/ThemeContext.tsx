@@ -19,21 +19,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // 读取当前已设置的主题（由 theme-init 脚本设置）
+    const root = document.documentElement;
+    const currentTheme = root.classList.contains('light') ? 'light' : 'dark';
+    setThemeState(currentTheme);
     setMounted(true);
-    // 读取存储的主题偏好
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored && (stored === 'dark' || stored === 'light')) {
-      setThemeState(stored);
-    }
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     
     // 更新 document 的 class
+    // 深色主题是默认（无类），浅色主题需要 .light 类
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    
+    if (theme === 'light') {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+      root.classList.add('dark');
+    }
     
     // 存储主题偏好
     localStorage.setItem(STORAGE_KEY, theme);
@@ -46,15 +52,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
   };
-
-  // 避免服务端渲染不一致
-  if (!mounted) {
-    return (
-      <ThemeContext.Provider value={{ theme: 'dark', toggleTheme: () => {}, setTheme: () => {} }}>
-        {children}
-      </ThemeContext.Provider>
-    );
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
