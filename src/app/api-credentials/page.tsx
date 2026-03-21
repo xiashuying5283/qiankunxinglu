@@ -384,7 +384,7 @@ export default function ApiCredentialsPage() {
           <CardContent className="text-sm text-purple-200/80 space-y-3">
             <p><strong>签名算法：</strong>HMAC-SHA256</p>
             <p><strong>签名字符串格式：</strong><code className="bg-black/30 px-1 rounded">METHOD + "\n" + URL + "\n" + TIMESTAMP</code></p>
-            <p><strong>有效期：</strong>签名时间戳前后 {300 / 60} 分钟内有效</p>
+            <p><strong>有效期：</strong>签名时间戳前后 {900 / 60} 分钟内有效</p>
             <div className="bg-black/30 p-3 rounded-lg mt-4">
               <p className="text-purple-300 mb-2">调用示例（Python）：</p>
               <pre className="text-xs text-purple-100 overflow-x-auto whitespace-pre-wrap">{`import hmac

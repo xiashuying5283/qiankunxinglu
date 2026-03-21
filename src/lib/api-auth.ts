@@ -15,7 +15,7 @@ export const AUTH_CONFIG = {
   accessKeyPrefix: 'ak_',
   secretKeyPrefix: 'sk_',
   keyLength: 24,
-  signatureExpireSeconds: 300, // 签名有效期 5 分钟
+  signatureExpireSeconds: 900, // 签名有效期 15 分钟
   maxCredentialsPerUser: 5,
 };
 
