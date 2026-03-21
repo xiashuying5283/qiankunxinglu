@@ -49,27 +49,68 @@ export interface ApiKeyData {
 }
 
 /**
+ * 判断请求是否来自开发环境
+ * 通过检查 origin 或 referer 来判断
+ */
+function isDevelopmentRequest(request: Request): boolean {
+  const origin = request.headers.get('origin');
+  const referer = request.headers.get('referer');
+  
+  // 检查是否来自 localhost
+  if (origin?.includes('localhost') || referer?.includes('localhost')) {
+    return true;
+  }
+  
+  // 检查是否来自沙箱开发域名（.dev.coze.site）
+  const devDomainPattern = /\.dev\.coze\.site$/;
+  if (origin && devDomainPattern.test(new URL(origin).hostname)) {
+    return true;
+  }
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      if (devDomainPattern.test(refererUrl.hostname)) {
+        return true;
+      }
+    } catch {
+      // URL 解析失败，忽略
+    }
+  }
+  
+  return false;
+}
+
+/**
  * 从请求中获取登录用户 ID
  * 用于前端页面的登录态鉴权
+ * 
+ * 开发环境支持模拟用户（通过 x-dev-user-id header）
  */
 export async function getSessionUserId(request: Request): Promise<string | null> {
-  // 开发环境允许模拟用户
-  if (process.env.COZE_PROJECT_ENV === 'DEV') {
-    const devUser = request.headers.get('x-dev-user-id');
-    if (devUser) return devUser;
-    return 'dev-user';
+  // 开发环境支持模拟用户
+  if (isDevelopmentRequest(request)) {
+    const devUserId = request.headers.get('x-dev-user-id');
+    if (devUserId) {
+      return devUserId;
+    }
+    // 开发环境默认返回开发用户
+    return 'dev-user-001';
   }
   
   const client = getSupabaseClient();
   
   // 从 cookie 获取 access token
   const cookieHeader = request.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [key, ...v] = c.trim().split('=');
-      return [key, v.join('=')];
-    })
-  );
+  
+  // 解析 cookie
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(';').forEach(c => {
+    const trimmed = c.trim();
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex > 0) {
+      cookies[trimmed.slice(0, eqIndex)] = trimmed.slice(eqIndex + 1);
+    }
+  });
   
   // 查找 access token（Supabase 的 cookie 名称）
   const accessToken = cookies['sb-access-token'] || cookies['access_token'];

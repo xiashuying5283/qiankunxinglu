@@ -48,33 +48,9 @@ export async function GET(
 
 /**
  * 从请求中获取用户 ID
+ * 复用 api-auth 的鉴权逻辑
  */
 async function getUserId(request: NextRequest): Promise<string | null> {
-  if (process.env.COZE_PROJECT_ENV === 'DEV') {
-    const devUser = request.headers.get('x-dev-user-id');
-    if (devUser) return devUser;
-    return 'dev-user';
-  }
-  
-  const client = getSupabaseClient();
-  const cookieHeader = request.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [key, ...v] = c.trim().split('=');
-      return [key, v.join('=')];
-    })
-  );
-  
-  const accessToken = cookies['sb-access-token'] || cookies['access_token'];
-  
-  if (accessToken) {
-    try {
-      const { data: { user } } = await client.auth.getUser(accessToken);
-      if (user) return user.id;
-    } catch {
-      // Token 无效
-    }
-  }
-  
-  return null;
+  const { getSessionUserId } = await import('@/lib/api-auth');
+  return getSessionUserId(request);
 }

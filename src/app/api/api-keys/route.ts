@@ -115,42 +115,10 @@ export async function DELETE(request: NextRequest) {
 
 /**
  * 从请求中获取用户 ID
- * 支持两种方式：
- * 1. 从 Authorization header 中的 session token
- * 2. 从 cookie 中的 session
+ * 复用 api-auth 的鉴权逻辑
  */
 async function getUserId(request: NextRequest): Promise<string | null> {
-  // 开发环境允许模拟用户
-  if (process.env.COZE_PROJECT_ENV === 'DEV') {
-    const devUser = request.headers.get('x-dev-user-id');
-    if (devUser) return devUser;
-    return 'dev-user';
-  }
-  
-  // 从 cookie 获取 session
-  const client = getSupabaseClient();
-  
-  // 尝试从 cookie 获取 access token
-  const cookieHeader = request.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [key, ...v] = c.trim().split('=');
-      return [key, v.join('=')];
-    })
-  );
-  
-  // 查找 access token（Supabase 的 cookie 名称）
-  const accessToken = cookies['sb-access-token'] || cookies['access_token'];
-  
-  if (accessToken) {
-    try {
-      // 验证 token 并获取用户
-      const { data: { user } } = await client.auth.getUser(accessToken);
-      if (user) return user.id;
-    } catch {
-      // Token 无效
-    }
-  }
-  
-  return null;
+  // 直接使用 api-auth 的 session 鉴权
+  const { getSessionUserId } = await import('@/lib/api-auth');
+  return getSessionUserId(request);
 }
