@@ -226,12 +226,17 @@ export const apiCredentials = pgTable("api_credentials", {
 	secretKey: text("secret_key").notNull(),
 	secretKeyHash: varchar("secret_key_hash", { length: 100 }).notNull(),
 	name: varchar({ length: 100 }),
+	status: varchar({ length: 20 }).default('pending').notNull(), // pending, approved, rejected
+	reason: text(), // 申请理由或拒绝原因
 	isActive: boolean("is_active").default(true).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: 'string' }),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+	reviewedBy: varchar("reviewed_by", { length: 36 }),
 }, (table) => [
 	index("api_credentials_user_id_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
 	index("api_credentials_access_key_idx").using("btree", table.accessKey.asc().nullsLast().op("text_ops")),
+	index("api_credentials_status_idx").using("btree", table.status.asc().nullsLast().op("text_ops")),
 	unique("api_credentials_access_key_unique").on(table.accessKey),
 ]);
 

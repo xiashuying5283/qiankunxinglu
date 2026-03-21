@@ -38,9 +38,12 @@ export async function GET(request: NextRequest) {
       id: cred.id,
       access_key: cred.access_key,
       name: cred.name,
+      status: cred.status, // pending, approved, rejected
+      reason: cred.reason, // 申请理由或拒绝原因
       is_active: cred.is_active && !cred.revoked_at,
       created_at: cred.created_at,
       revoked_at: cred.revoked_at,
+      reviewed_at: cred.reviewed_at,
     }));
     
     return NextResponse.json({ credentials: safeCredentials });
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest) {
 /**
  * 创建新凭证
  * POST /api/credentials
- * Body: { name?: string }
+ * Body: { name?: string, reason?: string }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -64,9 +67,9 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json().catch(() => ({}));
-    const { name } = body;
+    const { name, reason } = body;
     
-    const result = await createCredential(userId, name);
+    const result = await createCredential(userId, name, reason);
     
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
       success: true,
       accessKey: result.accessKey,
       secretKey: result.secretKey, // 只显示一次
-      message: '请立即保存 SecretKey，关闭后将无法再次查看'
+      message: '请立即保存 SecretKey，关闭后将无法再次查看。凭证需要管理员审批后才能使用。'
     });
   } catch (error) {
     console.error('Create credential error:', error);

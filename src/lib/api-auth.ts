@@ -42,9 +42,13 @@ export interface ApiCredential {
   access_key: string;
   secret_key_hash: string;
   name: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
   is_active: boolean;
   created_at: string;
   revoked_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
 }
 
 /**
@@ -303,6 +307,15 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
     
     const cred = credential as ApiCredential;
     
+    // 检查审批状态
+    if (cred.status === 'pending') {
+      return { success: false, error: '凭证待审批中，请等待管理员审核', statusCode: 403 };
+    }
+    
+    if (cred.status === 'rejected') {
+      return { success: false, error: '凭证申请已被拒绝', statusCode: 403 };
+    }
+    
     // 检查是否激活
     if (!cred.is_active || cred.revoked_at) {
       return { success: false, error: '凭证已被禁用或撤销', statusCode: 403 };
@@ -399,11 +412,12 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
 }
 
 /**
- * 创建 API 凭证
+ * 创建 API 凭证（需审批）
  */
 export async function createCredential(
   userId: string,
-  name?: string
+  name?: string,
+  reason?: string
 ): Promise<{ success: boolean; accessKey?: string; secretKey?: string; error?: string }> {
   const client = getSupabaseClient();
   
@@ -440,22 +454,28 @@ export async function createCredential(
   const { accessKey, secretKey } = generateCredential();
   const secretKeyHash = hashSecretKey(secretKey);
   
-  // 存储（同时存储 secretKey 用于签名验证，以及 hash 用于验证）
+  // 存储（状态为 pending，需管理员审批）
   const { error: insertError } = await client.from('api_credentials').insert({
     user_id: userId,
     access_key: accessKey,
-    secret_key: secretKey, // 存储原始 secretKey
-    secret_key_hash: secretKeyHash, // 存储 hash
+    secret_key: secretKey,
+    secret_key_hash: secretKeyHash,
     name: name || null,
+    reason: reason || null,
+    status: 'pending',
     is_active: true,
   });
   
   if (insertError) {
     console.error('Failed to create credential:', insertError);
-    return { success: false, error: '创建凭证失败' };
+    return { success: false, error: '创建凭证申请失败' };
   }
   
-  return { success: true, accessKey, secretKey };
+  return { 
+    success: true, 
+    accessKey, 
+    secretKey,
+  };
 }
 
 /**
@@ -491,7 +511,7 @@ export async function getUserCredentials(userId: string): Promise<ApiCredential[
   
   const { data, error } = await client
     .from('api_credentials')
-    .select('id, user_id, access_key, secret_key_hash, name, is_active, created_at, revoked_at')
+    .select('id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   
@@ -501,4 +521,86 @@ export async function getUserCredentials(userId: string): Promise<ApiCredential[
   }
   
   return (data || []) as ApiCredential[];
+}
+
+/**
+ * 获取所有待审批的凭证（管理员用）
+ */
+export async function getPendingCredentials(): Promise<Array<ApiCredential & { user_email?: string; user_name?: string }>> {
+  const client = getSupabaseClient();
+  
+  const { data, error } = await client
+    .from('api_credentials')
+    .select(`
+      id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at,
+      users!api_credentials_user_id_fkey (email, name)
+    `)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+  
+  if (error) {
+    console.error('Failed to get pending credentials:', error);
+    return [];
+  }
+  
+  return (data || []).map((item: any) => ({
+    ...item,
+    user_email: item.users?.email,
+    user_name: item.users?.name,
+  }));
+}
+
+/**
+ * 获取所有凭证（管理员用）
+ */
+export async function getAllCredentials(): Promise<Array<ApiCredential & { user_email?: string; user_name?: string }>> {
+  const client = getSupabaseClient();
+  
+  const { data, error } = await client
+    .from('api_credentials')
+    .select(`
+      id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at, reviewed_by,
+      users!api_credentials_user_id_fkey (email, name)
+    `)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Failed to get all credentials:', error);
+    return [];
+  }
+  
+  return (data || []).map((item: any) => ({
+    ...item,
+    user_email: item.users?.email,
+    user_name: item.users?.name,
+  }));
+}
+
+/**
+ * 审批凭证（管理员用）
+ */
+export async function reviewCredential(
+  credentialId: string,
+  adminUserId: string,
+  approved: boolean,
+  rejectReason?: string
+): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabaseClient();
+  
+  const { error } = await client
+    .from('api_credentials')
+    .update({
+      status: approved ? 'approved' : 'rejected',
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminUserId,
+      reason: approved ? null : (rejectReason || '审批未通过'),
+    })
+    .eq('id', credentialId);
+  
+  if (error) {
+    console.error('Failed to review credential:', error);
+    return { success: false, error: '审批失败' };
+  }
+  
+  return { success: true };
 }
