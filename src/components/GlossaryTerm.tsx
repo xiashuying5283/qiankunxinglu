@@ -116,8 +116,8 @@ export function GlossaryTerm({ term, children, category }: GlossaryTermProps) {
       </span>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary" />
               {term}
@@ -143,7 +143,7 @@ export function GlossaryTerm({ term, children, category }: GlossaryTermProps) {
           )}
 
           {data && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto pr-2 -mr-2 flex-1 min-h-0">
               {/* 简短解释 */}
               <div className="text-lg font-medium">{data.shortDesc}</div>
 
