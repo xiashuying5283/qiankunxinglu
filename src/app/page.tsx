@@ -1,19 +1,84 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
   Wand2, Sun, Calendar, Zap, ArrowRight,
-  Users, Shield, Key
+  Users, Shield, Key, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
 
 export default function Home() {
+  // 轮播推荐功能
+  const recommendedFeatures = [
+    {
+      title: '30秒速测今日运势',
+      description: '新手首选，快速了解今日运势',
+      icon: <Zap className="w-5 h-5" />,
+      href: '/daily-fortune',
+      color: 'from-sky-500 to-blue-500',
+    },
+    {
+      title: '周易占卜',
+      description: '经典起卦，解当下困惑',
+      icon: <BookOpen className="w-5 h-5" />,
+      href: '/iching',
+      color: 'from-amber-500 to-orange-500',
+    },
+    {
+      title: '塔罗占卜',
+      description: '热门推荐，探前路方向',
+      icon: <Moon className="w-5 h-5" />,
+      href: '/tarot',
+      color: 'from-purple-500 to-indigo-500',
+    },
+    {
+      title: '奇门遁甲',
+      description: '帝王之学，预测之巅',
+      icon: <Compass className="w-5 h-5" />,
+      href: '/qimen',
+      color: 'from-amber-500 to-yellow-500',
+    },
+    {
+      title: '观音灵签',
+      description: '虔诚抽签，指点迷津',
+      icon: <Wand2 className="w-5 h-5" />,
+      href: '/fortune-stick',
+      color: 'from-yellow-500 to-amber-500',
+    },
+    {
+      title: '姻缘匹配',
+      description: '测算你们的缘分指数',
+      icon: <Heart className="w-5 h-5" />,
+      href: '/match',
+      color: 'from-rose-500 to-red-500',
+    },
+  ];
+
+  // 轮播状态
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // 自动轮播
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % recommendedFeatures.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 手动切换
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + recommendedFeatures.length) % recommendedFeatures.length);
+  };
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % recommendedFeatures.length);
+  };
+
   // 高频核心功能 - 首屏C位
   const coreFeatures = [
     {
@@ -180,16 +245,70 @@ export default function Home() {
             融合周易六十四卦、塔罗牌、测字、梅花易数等传统智慧
           </p>
           
-          {/* 新手引导 - 快速入口 */}
-          <Link href="/daily-fortune">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-sky-500/20 to-blue-500/20 
-              border border-sky-400/30 rounded-full px-6 py-3 cursor-pointer
-              hover:from-sky-500/30 hover:to-blue-500/30 transition-all group">
-              <Zap className="w-5 h-5 text-sky-300" />
-              <span className="text-sky-100">新手首选：30秒速测今日运势</span>
-              <ArrowRight className="w-4 h-4 text-sky-300 group-hover:translate-x-1 transition-transform" />
+          {/* 轮播推荐入口 */}
+          <div className="relative max-w-lg mx-auto mb-2">
+            <div className="overflow-hidden rounded-full">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {recommendedFeatures.map((feature, index) => (
+                  <Link 
+                    href={feature.href} 
+                    key={index}
+                    className="min-w-full"
+                  >
+                    <div className={`inline-flex items-center justify-center gap-3 w-full
+                      bg-gradient-to-r ${feature.color.replace('from-', 'from-').replace('to-', 'to-')}/20 
+                      border border-white/20 rounded-full px-6 py-3 cursor-pointer
+                      hover:opacity-80 transition-all group`}
+                    >
+                      <span className="text-white/90">{feature.icon}</span>
+                      <span className="text-white font-medium">{feature.title}</span>
+                      <span className="text-white/60 text-sm hidden sm:inline">· {feature.description}</span>
+                      <ArrowRight className="w-4 h-4 text-white/60 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </Link>
+            
+            {/* 左右切换按钮 */}
+            <button 
+              onClick={goToPrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 
+                w-8 h-8 flex items-center justify-center rounded-full
+                bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="上一个"
+            >
+              <ChevronLeft className="w-4 h-4 text-white/70" />
+            </button>
+            <button 
+              onClick={goToNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 
+                w-8 h-8 flex items-center justify-center rounded-full
+                bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="下一个"
+            >
+              <ChevronRight className="w-4 h-4 text-white/70" />
+            </button>
+            
+            {/* 指示器 */}
+            <div className="flex justify-center gap-1.5 mt-3">
+              {recommendedFeatures.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentIndex 
+                      ? 'bg-white w-4' 
+                      : 'bg-white/30 hover:bg-white/50'
+                  }`}
+                  aria-label={`跳转到第${index + 1}个推荐`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* 高频核心功能 - 大卡片 */}
