@@ -218,6 +218,23 @@ export const users = pgTable("users", {
 	unique("users_session_id_unique").on(table.sessionId),
 ]);
 
+// API 凭证表（HMAC 签名认证）
+export const apiCredentials = pgTable("api_credentials", {
+	id: varchar({ length: 36 }).default(gen_random_uuid()).primaryKey().notNull(),
+	userId: varchar("user_id", { length: 36 }).notNull(),
+	accessKey: varchar("access_key", { length: 50 }).notNull(),
+	secretKey: text("secret_key").notNull(),
+	secretKeyHash: varchar("secret_key_hash", { length: 100 }).notNull(),
+	name: varchar({ length: 100 }),
+	isActive: boolean("is_active").default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	index("api_credentials_user_id_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+	index("api_credentials_access_key_idx").using("btree", table.accessKey.asc().nullsLast().op("text_ops")),
+	unique("api_credentials_access_key_unique").on(table.accessKey),
+]);
+
 // 古籍阅读系统表
 
 // 书籍表
