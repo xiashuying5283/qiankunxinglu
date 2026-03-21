@@ -57,6 +57,13 @@ export default function Home() {
   // 其他占卜功能
   const otherFeatures = [
     {
+      title: '奇门遁甲',
+      description: '帝王之学，预测之巅',
+      icon: <Compass className="w-6 h-6" />,
+      href: '/qimen',
+      color: 'from-amber-500 to-yellow-500',
+    },
+    {
       title: '测字算卦',
       description: '一字断事，解心中疑虑',
       icon: <PenTool className="w-6 h-6" />,
