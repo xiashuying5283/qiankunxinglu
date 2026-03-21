@@ -532,10 +532,7 @@ export async function getPendingCredentials(): Promise<Array<ApiCredential & { u
   
   const { data, error } = await client
     .from('api_credentials')
-    .select(`
-      id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at,
-      users!api_credentials_user_id_fkey (email, name)
-    `)
+    .select('id, user_id, access_key, name, status, reason, is_active, created_at, revoked_at, reviewed_at')
     .eq('status', 'pending')
     .order('created_at', { ascending: true });
   
@@ -544,10 +541,25 @@ export async function getPendingCredentials(): Promise<Array<ApiCredential & { u
     return [];
   }
   
-  return (data || []).map((item: any) => ({
+  console.log('[getPendingCredentials] Found', data?.length || 0, 'pending credentials');
+  
+  if (!data || data.length === 0) {
+    return [];
+  }
+  
+  // 单独查询用户信息
+  const userIds = [...new Set(data.map(item => item.user_id))];
+  const { data: users } = await client
+    .from('users')
+    .select('id, email, name')
+    .in('id', userIds);
+  
+  const userMap = new Map((users || []).map(u => [u.id, u]));
+  
+  return data.map((item: any) => ({
     ...item,
-    user_email: item.users?.email,
-    user_name: item.users?.name,
+    user_email: userMap.get(item.user_id)?.email,
+    user_name: userMap.get(item.user_id)?.name,
   }));
 }
 
@@ -559,10 +571,7 @@ export async function getAllCredentials(): Promise<Array<ApiCredential & { user_
   
   const { data, error } = await client
     .from('api_credentials')
-    .select(`
-      id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at, reviewed_by,
-      users!api_credentials_user_id_fkey (email, name)
-    `)
+    .select('id, user_id, access_key, name, status, reason, is_active, created_at, revoked_at, reviewed_at, reviewed_by')
     .order('created_at', { ascending: false });
   
   if (error) {
@@ -570,10 +579,25 @@ export async function getAllCredentials(): Promise<Array<ApiCredential & { user_
     return [];
   }
   
-  return (data || []).map((item: any) => ({
+  console.log('[getAllCredentials] Found', data?.length || 0, 'credentials');
+  
+  if (!data || data.length === 0) {
+    return [];
+  }
+  
+  // 单独查询用户信息
+  const userIds = [...new Set(data.map(item => item.user_id))];
+  const { data: users } = await client
+    .from('users')
+    .select('id, email, name')
+    .in('id', userIds);
+  
+  const userMap = new Map((users || []).map(u => [u.id, u]));
+  
+  return data.map((item: any) => ({
     ...item,
-    user_email: item.users?.email,
-    user_name: item.users?.name,
+    user_email: userMap.get(item.user_id)?.email,
+    user_name: userMap.get(item.user_id)?.name,
   }));
 }
 
