@@ -296,16 +296,16 @@ export default function QimenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-amber-500/10">
+      <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-amber-500/10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
               <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 group-hover:border-amber-400 transition-colors" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 group-hover:bg-amber-400 transition-colors" />
             </div>
-            <span className="text-xl font-bold text-amber-500 group-hover:text-amber-400 transition-colors">
+            <span className="text-xl font-bold text-amber-100 group-hover:text-amber-50 transition-colors">
               乾坤星路
             </span>
           </Link>
@@ -321,22 +321,22 @@ export default function QimenPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Compass className="w-10 h-10 text-amber-500 mr-3" />
-            <h1 className="text-4xl font-bold text-amber-500">奇门遁甲</h1>
+            <h1 className="text-4xl font-bold text-amber-100">奇门遁甲</h1>
             <Compass className="w-10 h-10 text-amber-500 ml-3" />
           </div>
-          <p className="text-muted-foreground">帝王之学 · 运筹帷幄</p>
+          <p className="text-gray-400">帝王之学 · 运筹帷幄</p>
         </div>
 
         <div className="max-w-5xl mx-auto">
           {/* 验证区域 */}
           {!isVerified && (
-            <Card className="bg-card/50 border-amber-500/20">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-amber-500 flex items-center justify-center gap-2">
+                <CardTitle className="text-2xl text-amber-100 flex items-center justify-center gap-2">
                   <Sparkles className="w-6 h-6" />
                   奇门遁甲排盘
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-gray-500">
                   请先完成验证，开启奇门遁甲之旅
                 </CardDescription>
               </CardHeader>
@@ -350,10 +350,10 @@ export default function QimenPage() {
 
           {/* 加载中 */}
           {isLoading && (
-            <Card className="bg-card/50 border-amber-500/20">
+            <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
               <CardContent className="py-12 flex flex-col items-center">
                 <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4" />
-                <p className="text-muted-foreground">正在排盘中...</p>
+                <p className="text-gray-400">正在排盘中...</p>
               </CardContent>
             </Card>
           )}
@@ -365,15 +365,15 @@ export default function QimenPage() {
               <Card className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-amber-500/20">
                 <CardContent className="py-6">
                   <div className="text-center mb-4">
-                    <p className="text-foreground text-lg">{result.dateStr}</p>
-                    <p className="text-muted-foreground mt-1">{result.lunarDateStr}</p>
+                    <p className="text-gray-200 text-lg">{result.dateStr}</p>
+                    <p className="text-gray-400 mt-1">{result.lunarDateStr}</p>
                   </div>
                   
                   <div className="flex items-center justify-center gap-3 flex-wrap mb-4">
-                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-foreground font-medium">{result.ganZhiYear}年</span>
-                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-foreground font-medium">{result.ganZhiMonth}月</span>
-                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-foreground font-medium">{result.ganZhiDay}日</span>
-                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-foreground font-medium">{result.ganZhiHour}时</span>
+                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{result.ganZhiYear}年</span>
+                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{result.ganZhiMonth}月</span>
+                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{result.ganZhiDay}日</span>
+                    <span className="bg-amber-900/40 border border-amber-500/30 px-3 py-1.5 rounded text-gray-200 font-medium">{result.ganZhiHour}时</span>
                   </div>
                   
                   <div className="text-center">
@@ -385,9 +385,9 @@ export default function QimenPage() {
               </Card>
 
               {/* 九宫图 */}
-              <Card className="bg-card/50 border-amber-500/20">
+              <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
                 <CardHeader>
-                  <CardTitle className="text-xl text-amber-500 flex items-center gap-2">
+                  <CardTitle className="text-xl text-amber-100 flex items-center gap-2">
                     <Compass className="w-5 h-5" />
                     九宫布局
                   </CardTitle>
@@ -400,23 +400,23 @@ export default function QimenPage() {
                         <div
                           key={pos.name}
                           className={`aspect-square border border-amber-500/20 rounded-lg p-2 ${
-                            pos.name === '中宫' ? 'bg-amber-900/20' : 'bg-background'
+                            pos.name === '中宫' ? 'bg-amber-900/20' : 'bg-[#0a0a0a]'
                           }`}
                         >
                           <div className="text-center">
-                            <div className="text-xs text-muted-foreground mb-1">{pos.direction}</div>
+                            <div className="text-xs text-gray-500 mb-1">{pos.direction}</div>
                             <div className="text-sm font-bold text-amber-500 mb-1">{pos.name}</div>
                             {palaceData && (
                               <>
                                 <div className={`text-xs ${
                                   palaceData.star.property === '吉' ? 'text-green-400' : 
-                                  palaceData.star.property === '凶' ? 'text-red-400' : 'text-muted-foreground'
+                                  palaceData.star.property === '凶' ? 'text-red-400' : 'text-gray-400'
                                 }`}>
                                   ★{palaceData.star.name}
                                 </div>
                                 <div className={`text-xs ${
                                   palaceData.door.property === '吉' ? 'text-green-400' : 
-                                  palaceData.door.property === '凶' ? 'text-red-400' : 'text-muted-foreground'
+                                  palaceData.door.property === '凶' ? 'text-red-400' : 'text-gray-400'
                                 }`}>
                                   门:{palaceData.door.name}
                                 </div>
@@ -425,7 +425,7 @@ export default function QimenPage() {
                                 }`}>
                                   神:{palaceData.god.name}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-gray-500">
                                   {palaceData.stems.join(' ')}
                                 </div>
                               </>
@@ -440,22 +440,22 @@ export default function QimenPage() {
 
               {/* 详细解读 */}
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 bg-card border border-amber-500/20">
-                  <TabsTrigger value="result" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500 text-muted-foreground">
+                <TabsList className="grid w-full grid-cols-3 bg-[#1a1a1a] border border-amber-500/20">
+                  <TabsTrigger value="result" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-100 text-gray-400">
                     综合解读
                   </TabsTrigger>
-                  <TabsTrigger value="stars" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500 text-muted-foreground">
+                  <TabsTrigger value="stars" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-100 text-gray-400">
                     九星详解
                   </TabsTrigger>
-                  <TabsTrigger value="doors" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500 text-muted-foreground">
+                  <TabsTrigger value="doors" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-100 text-gray-400">
                     八门详解
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="result">
-                  <Card className="bg-card/50 border-amber-500/20">
+                  <Card className="bg-[#1a1a1a]/50 border-amber-500/20">
                     <CardContent className="py-6">
-                      <pre className="whitespace-pre-wrap text-muted-foreground leading-relaxed font-sans">
+                      <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed font-sans">
                         {result.interpretation}
                       </pre>
                     </CardContent>
@@ -465,10 +465,10 @@ export default function QimenPage() {
                 <TabsContent value="stars">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {NINE_STARS.map((star) => (
-                      <Card key={star.name} className="bg-card/50 border-amber-500/20">
+                      <Card key={star.name} className="bg-[#1a1a1a]/50 border-amber-500/20">
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg text-amber-500">{star.name}</CardTitle>
+                            <CardTitle className="text-lg text-amber-100">{star.name}</CardTitle>
                             <Badge className={
                               star.property === '吉' ? 'bg-green-500/20 text-green-300' :
                               star.property === '凶' ? 'bg-red-500/20 text-red-300' :
@@ -479,8 +479,8 @@ export default function QimenPage() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground">{star.meaning}</p>
-                          <p className="text-xs text-muted-foreground mt-2">五行：{star.element}</p>
+                          <p className="text-sm text-gray-400">{star.meaning}</p>
+                          <p className="text-xs text-gray-500 mt-2">五行：{star.element}</p>
                         </CardContent>
                       </Card>
                     ))}
@@ -490,10 +490,10 @@ export default function QimenPage() {
                 <TabsContent value="doors">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {EIGHT_DOORS.map((door) => (
-                      <Card key={door.name} className="bg-card/50 border-amber-500/20">
+                      <Card key={door.name} className="bg-[#1a1a1a]/50 border-amber-500/20">
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg text-amber-500">{door.name}</CardTitle>
+                            <CardTitle className="text-lg text-amber-100">{door.name}</CardTitle>
                             <Badge className={
                               door.property === '吉' ? 'bg-green-500/20 text-green-300' :
                               door.property === '凶' ? 'bg-red-500/20 text-red-300' :
@@ -504,8 +504,8 @@ export default function QimenPage() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground">{door.meaning}</p>
-                          <p className="text-xs text-muted-foreground mt-2">五行：{door.element}</p>
+                          <p className="text-sm text-gray-400">{door.meaning}</p>
+                          <p className="text-xs text-gray-500 mt-2">五行：{door.element}</p>
                         </CardContent>
                       </Card>
                     ))}
@@ -528,14 +528,14 @@ export default function QimenPage() {
           )}
 
           {/* 奇门遁甲简介 */}
-          <Card className="bg-card/50 border-amber-500/20 mt-6">
+          <Card className="bg-[#1a1a1a]/50 border-amber-500/20 mt-6">
             <CardHeader>
-              <CardTitle className="text-xl text-amber-500 flex items-center gap-2">
+              <CardTitle className="text-xl text-amber-100 flex items-center gap-2">
                 <BookOpen className="w-5 h-5" />
                 奇门遁甲简介
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-muted-foreground leading-relaxed">
+            <CardContent className="text-gray-300 leading-relaxed">
               <p className="mb-4">
                 奇门遁甲是中国古代最高层次的预测学，被誉为"帝王之学"。它融合了天文、地理、历法、阴阳五行学说，
                 是中国古代术数中最为高深的学问之一。
@@ -550,7 +550,7 @@ export default function QimenPage() {
                 推演天地人三才的变化，用于择时、择方、决策等。
               </p>
               <div className="bg-amber-900/20 rounded-lg p-4 mt-4">
-                <p className="text-sm">
+                <p className="text-sm text-gray-300">
                   <Info className="w-4 h-4 inline mr-1" />
                   本页面仅供民俗文化学习参考，不构成任何决策依据。
                 </p>
