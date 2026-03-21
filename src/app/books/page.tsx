@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBooks } from '@/lib/books-service';
+import { encodeId } from '@/lib/id-obfuscation';
 
 // 动态渲染，每次请求都查数据库
 export const dynamic = 'force-dynamic';
@@ -79,7 +80,7 @@ export default async function BooksPage() {
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     {categoryBooks.map((book) => (
-                      <Link key={book.id} href={`/books/${book.id}`}>
+                      <Link key={book.id} href={`/books/${encodeId(book.id)}`}>
                         <Card className="bg-white/80 border-amber-200 hover:bg-white hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer group h-full">
                           <CardHeader>
                             <div className="flex items-start justify-between">
