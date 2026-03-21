@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 // 占卜类型
 type DivinationType = 'iching' | 'tarot';
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return new Response(
@@ -353,7 +353,7 @@ ${index + 1}. ${card.name}（${card.isReversed ? '逆位' : '正位'}）${positi
   } catch (error) {
     console.error('Divination interpretation error:', error);
     // 记录失败日志
-    await authResult.logUsage(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
+    await authResult.logUsage?.(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
     return new Response(
       JSON.stringify({ error: '解读失败，请稍后重试' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

@@ -9,7 +9,6 @@ export interface User {
   name?: string;
   avatar?: string;
   isGuest: boolean;
-  sessionId?: string;
   provider?: string; // oauth 提供商: google, github
 }
 
@@ -20,7 +19,6 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
-  loginAsGuest: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -39,27 +37,6 @@ const DEV_USER: User = {
 
 // 是否为开发环境
 const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
-
-// 获取或创建游客 sessionId
-function getGuestSessionId(): string {
-  if (typeof window === 'undefined') return '';
-  
-  const storageKey = 'guest_session_id';
-  let sessionId = localStorage.getItem(storageKey);
-  
-  if (!sessionId) {
-    sessionId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem(storageKey, sessionId);
-  }
-  
-  return sessionId;
-}
-
-// 清除游客 sessionId
-function clearGuestSessionId() {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('guest_session_id');
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -103,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setUser(data.user);
-        clearGuestSessionId();
         return { success: true };
       }
       
@@ -127,7 +103,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setUser(data.user);
-        clearGuestSessionId();
         return { success: true };
       }
       
@@ -135,31 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: '登录失败，请稍后重试' };
-    }
-  }, []);
-
-  // 游客登录
-  const loginAsGuest = useCallback(async () => {
-    try {
-      const sessionId = getGuestSessionId();
-      
-      const response = await fetch('/api/auth/guest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setUser(data.user);
-        return { success: true };
-      }
-      
-      return { success: false, error: data.error || '游客登录失败' };
-    } catch (error) {
-      console.error('Guest login error:', error);
-      return { success: false, error: '游客登录失败，请稍后重试' };
     }
   }, []);
 
@@ -174,7 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
-      clearGuestSessionId();
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -186,7 +135,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoggedIn: !!user,
     login,
     register,
-    loginAsGuest,
     logout,
     refreshUser,
   };

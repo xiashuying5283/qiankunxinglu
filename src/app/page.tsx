@@ -135,10 +135,10 @@ export default function Home() {
       badge: '新',
     },
     {
-      title: 'API Key 管理',
-      description: '管理 API 密钥，调用占卜接口',
+      title: 'API 凭证',
+      description: '管理 API 凭证，用于外部调用',
       icon: <Key className="w-6 h-6" />,
-      href: '/api-keys',
+      href: '/api-credentials',
       color: 'from-slate-500 to-gray-500',
       badge: '开发者',
     },

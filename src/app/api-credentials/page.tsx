@@ -6,42 +6,37 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowLeft, Key, Plus, Trash2, Copy, Check, Eye, EyeOff, 
-  Clock, BarChart3, AlertCircle, CheckCircle, Loader2
+  Clock, AlertCircle, CheckCircle, Loader2
 } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface ApiKey {
+interface Credential {
   id: string;
-  prefix: string;
+  access_key: string;
   name: string | null;
   is_active: boolean;
-  rate_limit_per_day: number;
-  last_used_at: string | null;
-  expires_at: string | null;
   created_at: string;
   revoked_at: string | null;
-  revoked_reason: string | null;
 }
 
-interface NewKeyResult {
-  key: string;
+interface NewCredentialResult {
+  accessKey: string;
+  secretKey: string;
   message: string;
 }
 
-export default function ApiKeysPage() {
-  const { isLoggedIn, isLoading: authLoading } = useAuth();
-  const [keys, setKeys] = useState<ApiKey[]>([]);
+export default function ApiCredentialsPage() {
+  const { isLoggedIn, isLoading: authLoading, user } = useAuth();
+  const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [newKeyDialogOpen, setNewKeyDialogOpen] = useState(false);
-  const [newKeyName, setNewKeyName] = useState('');
-  const [newKeyRateLimit, setNewKeyRateLimit] = useState(100);
-  const [newKeyResult, setNewKeyResult] = useState<NewKeyResult | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [showKey, setShowKey] = useState(false);
+  const [newCredName, setNewCredName] = useState('');
+  const [newCredResult, setNewCredResult] = useState<NewCredentialResult | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [showSecret, setShowSecret] = useState(false);
 
-  // 加载 API Keys
+  // 加载凭证
   useEffect(() => {
     if (!authLoading && !isLoggedIn) {
       setShowLoginDialog(true);
@@ -50,93 +45,97 @@ export default function ApiKeysPage() {
     }
     
     if (isLoggedIn) {
-      fetchKeys();
+      fetchCredentials();
     }
   }, [isLoggedIn, authLoading]);
 
-  const fetchKeys = async () => {
+  const fetchCredentials = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/api-keys');
+      const res = await fetch('/api/credentials');
       const data = await res.json();
-      setKeys(data.keys || []);
+      if (data.credentials) {
+        setCredentials(data.credentials);
+      } else if (data.error) {
+        console.error(data.error);
+      }
     } catch (error) {
-      console.error('Failed to fetch API keys:', error);
+      console.error('Failed to fetch credentials:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createKey = async () => {
+  const createCredential = async () => {
     try {
-      const res = await fetch('/api/api-keys', {
+      const res = await fetch('/api/credentials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newKeyName || undefined,
-          rate_limit_per_day: newKeyRateLimit
-        })
+        body: JSON.stringify({ name: newCredName || undefined }),
       });
       
       const data = await res.json();
       
       if (data.success) {
-        setNewKeyResult({ key: data.key, message: data.message });
-        setNewKeyName('');
-        setNewKeyRateLimit(100);
-        fetchKeys();
+        setNewCredResult({
+          accessKey: data.accessKey,
+          secretKey: data.secretKey,
+          message: data.message,
+        });
+        setNewCredName('');
+        fetchCredentials();
       } else {
         alert(data.error || '创建失败');
       }
     } catch (error) {
-      console.error('Failed to create API key:', error);
+      console.error('Failed to create credential:', error);
       alert('创建失败');
     }
   };
 
-  const revokeKey = async (keyId: string) => {
-    if (!confirm('确定要撤销此 API Key 吗？撤销后无法恢复。')) {
+  const revokeCredential = async (credentialId: string) => {
+    if (!confirm('确定要撤销此凭证吗？撤销后无法恢复。')) {
       return;
     }
     
     try {
-      const res = await fetch('/api/api-keys', {
+      const res = await fetch('/api/credentials', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key_id: keyId })
+        body: JSON.stringify({ credential_id: credentialId }),
       });
       
       const data = await res.json();
       
       if (data.success) {
-        fetchKeys();
+        fetchCredentials();
       } else {
         alert(data.error || '撤销失败');
       }
     } catch (error) {
-      console.error('Failed to revoke API key:', error);
+      console.error('Failed to revoke credential:', error);
       alert('撤销失败');
     }
   };
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
     }
   };
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '从未';
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -162,8 +161,31 @@ export default function ApiKeysPage() {
           open={showLoginDialog}
           onOpenChange={setShowLoginDialog}
           title="请先登录"
-          description="登录后才能管理 API Key"
+          description="登录后才能管理 API 凭证"
         />
+      </div>
+    );
+  }
+
+  // 游客
+  if (user?.isGuest) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 max-w-md">
+          <CardHeader>
+            <CardTitle className="text-purple-100">游客无法使用此功能</CardTitle>
+            <CardDescription className="text-purple-200">
+              请注册账户后才能创建 API 凭证
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/">
+              <Button variant="outline" className="w-full">
+                返回首页
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -185,48 +207,70 @@ export default function ApiKeysPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Key className="w-10 h-10 text-purple-300 mr-3" />
-            <h1 className="text-4xl font-bold text-purple-100">API Key 管理</h1>
+            <h1 className="text-4xl font-bold text-purple-100">API 凭证管理</h1>
           </div>
-          <p className="text-purple-200/80">管理您的 API 密钥，用于调用占卜 API</p>
+          <p className="text-purple-200/80">创建凭证用于外部 API 调用</p>
         </div>
 
-        {/* 新建 Key 结果弹窗 */}
-        {newKeyResult && (
+        {/* 新建凭证结果弹窗 */}
+        {newCredResult && (
           <Card className="bg-green-900/40 border-green-400/30 mb-6 max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle className="text-green-100 flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                API Key 创建成功
+                凭证创建成功
               </CardTitle>
               <CardDescription className="text-green-200">
-                {newKeyResult.message}
+                {newCredResult.message}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2 bg-black/30 p-3 rounded-lg">
-                <code className="flex-1 text-green-100 font-mono text-sm break-all">
-                  {showKey ? newKeyResult.key : '••••••••••••••••••••••••••••••••'}
-                </code>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setShowKey(!showKey)}
-                  className="text-green-200 hover:text-green-100"
-                >
-                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => copyToClipboard(newKeyResult.key)}
-                  className="text-green-200 hover:text-green-100"
-                >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm text-green-200 mb-1">AccessKey（公开标识）</label>
+                <div className="flex items-center gap-2 bg-black/30 p-3 rounded-lg">
+                  <code className="flex-1 text-green-100 font-mono text-sm break-all">
+                    {newCredResult.accessKey}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(newCredResult.accessKey, 'access')}
+                    className="text-green-200 hover:text-green-100"
+                  >
+                    {copied === 'access' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-green-200 mb-1">SecretKey（私密密钥，请妥善保管）</label>
+                <div className="flex items-center gap-2 bg-black/30 p-3 rounded-lg">
+                  <code className="flex-1 text-green-100 font-mono text-sm break-all">
+                    {showSecret ? newCredResult.secretKey : '••••••••••••••••••••••••••••••••'}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowSecret(!showSecret)}
+                    className="text-green-200 hover:text-green-100"
+                  >
+                    {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(newCredResult.secretKey, 'secret')}
+                    className="text-green-200 hover:text-green-100"
+                  >
+                    {copied === 'secret' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
               <Button
                 className="mt-4"
-                onClick={() => setNewKeyResult(null)}
+                onClick={() => {
+                  setNewCredResult(null);
+                  setShowSecret(false);
+                }}
               >
                 我已保存，关闭
               </Button>
@@ -234,12 +278,12 @@ export default function ApiKeysPage() {
           </Card>
         )}
 
-        {/* 创建新 Key */}
+        {/* 创建新凭证 */}
         <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 mb-6 max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="text-purple-100 flex items-center gap-2">
               <Plus className="w-5 h-5" />
-              创建新的 API Key
+              创建新凭证
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -247,65 +291,54 @@ export default function ApiKeysPage() {
               <label className="block text-sm text-purple-200 mb-2">名称（可选）</label>
               <input
                 type="text"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
+                value={newCredName}
+                onChange={(e) => setNewCredName(e.target.value)}
                 placeholder="例如：生产环境"
                 className="w-full bg-white/10 border border-purple-300/30 rounded-lg px-4 py-2 text-purple-100 placeholder:text-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
               />
-            </div>
-            <div>
-              <label className="block text-sm text-purple-200 mb-2">每日调用限制</label>
-              <input
-                type="number"
-                value={newKeyRateLimit}
-                onChange={(e) => setNewKeyRateLimit(parseInt(e.target.value) || 100)}
-                min="1"
-                max="10000"
-                className="w-full bg-white/10 border border-purple-300/30 rounded-lg px-4 py-2 text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
-              />
-              <p className="text-xs text-purple-300/60 mt-1">每个用户最多可创建 5 个 Key</p>
+              <p className="text-xs text-purple-300/60 mt-1">每个用户最多可创建 5 个凭证</p>
             </div>
             <Button
-              onClick={createKey}
+              onClick={createCredential}
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
-              创建 API Key
+              创建凭证
             </Button>
           </CardContent>
         </Card>
 
-        {/* API Key 列表 */}
+        {/* 凭证列表 */}
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-lg font-medium text-purple-100 mb-4">我的 API Keys</h2>
+          <h2 className="text-lg font-medium text-purple-100 mb-4">我的凭证</h2>
           
-          {keys.length === 0 ? (
+          {credentials.length === 0 ? (
             <Card className="bg-white/5 backdrop-blur-md border-purple-300/20">
               <CardContent className="py-8 text-center">
                 <Key className="w-12 h-12 text-purple-400/50 mx-auto mb-4" />
-                <p className="text-purple-200/60">暂无 API Key，请创建一个</p>
+                <p className="text-purple-200/60">暂无凭证，请创建一个</p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
-              {keys.map((key) => (
+              {credentials.map((cred) => (
                 <Card 
-                  key={key.id} 
+                  key={cred.id} 
                   className={`bg-white/10 backdrop-blur-md border-purple-300/30 ${
-                    !key.is_active || key.revoked_at ? 'opacity-60' : ''
+                    !cred.is_active || cred.revoked_at ? 'opacity-60' : ''
                   }`}
                 >
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <code className="text-purple-100 font-mono">{key.prefix}</code>
-                          {key.name && (
+                          <code className="text-purple-100 font-mono text-sm">{cred.access_key}</code>
+                          {cred.name && (
                             <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded">
-                              {key.name}
+                              {cred.name}
                             </span>
                           )}
-                          {!key.is_active || key.revoked_at ? (
+                          {!cred.is_active || cred.revoked_at ? (
                             <span className="text-xs bg-red-500/30 text-red-200 px-2 py-0.5 rounded">
                               已撤销
                             </span>
@@ -315,33 +348,18 @@ export default function ApiKeysPage() {
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-purple-300/70 space-y-1">
-                          <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1">
-                              <BarChart3 className="w-3 h-3" />
-                              {key.rate_limit_per_day} 次/天
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              创建于 {formatDate(key.created_at)}
-                            </span>
-                          </div>
-                          {key.last_used_at && (
-                            <div>最后使用: {formatDate(key.last_used_at)}</div>
-                          )}
-                          {key.expires_at && (
-                            <div>过期时间: {formatDate(key.expires_at)}</div>
-                          )}
-                          {key.revoked_reason && (
-                            <div className="text-red-300">撤销原因: {key.revoked_reason}</div>
-                          )}
+                        <div className="text-sm text-purple-300/70">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            创建于 {formatDate(cred.created_at)}
+                          </span>
                         </div>
                       </div>
-                      {!key.revoked_at && key.is_active && (
+                      {!cred.revoked_at && cred.is_active && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => revokeKey(key.id)}
+                          onClick={() => revokeCredential(cred.id)}
                           className="text-red-300 hover:text-red-100 hover:bg-red-500/20"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -364,16 +382,38 @@ export default function ApiKeysPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-purple-200/80 space-y-3">
-            <p><strong>API Key 格式：</strong><code className="bg-black/30 px-1 rounded">sk_div_xxx...</code></p>
-            <p><strong>调用方式：</strong>在请求头添加 <code className="bg-black/30 px-1 rounded">Authorization: Bearer YOUR_API_KEY</code></p>
-            <p><strong>速率限制：</strong>每个 Key 每天有固定的调用次数限制，超限后需等待第二天重置</p>
-            <p><strong>安全提示：</strong>请妥善保管 API Key，不要在客户端代码中暴露</p>
+            <p><strong>签名算法：</strong>HMAC-SHA256</p>
+            <p><strong>签名字符串格式：</strong><code className="bg-black/30 px-1 rounded">METHOD + "\n" + URL + "\n" + TIMESTAMP</code></p>
+            <p><strong>有效期：</strong>签名时间戳前后 {300 / 60} 分钟内有效</p>
             <div className="bg-black/30 p-3 rounded-lg mt-4">
-              <p className="text-purple-300 mb-2">示例请求：</p>
-              <code className="text-xs text-purple-100">
-                curl -X GET "https://your-domain.com/api/hexagrams" \<br/>
-                &nbsp;&nbsp;-H "Authorization: Bearer sk_div_xxx..."
-              </code>
+              <p className="text-purple-300 mb-2">调用示例（Python）：</p>
+              <pre className="text-xs text-purple-100 overflow-x-auto whitespace-pre-wrap">{`import hmac
+import hashlib
+import time
+import requests
+
+access_key = "ak_xxx"
+secret_key = "sk_xxx"
+url = "/api/hexagrams"
+timestamp = int(time.time())
+
+# 生成签名
+string_to_sign = f"GET\\n{url}\\n{timestamp}"
+signature = hmac.new(
+    secret_key.encode(), 
+    string_to_sign.encode(), 
+    hashlib.sha256
+).hexdigest()
+
+# 发送请求
+response = requests.get(
+    f"https://your-domain.com{url}",
+    headers={
+        "X-Access-Key": access_key,
+        "X-Timestamp": str(timestamp),
+        "X-Signature": signature,
+    }
+)`}</pre>
             </div>
           </CardContent>
         </Card>

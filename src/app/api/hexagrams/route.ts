@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 /**
  * 将数据库 snake_case 字段转换为 camelCase
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return NextResponse.json(
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ hexagrams, trigrams });
   } catch (error) {
     console.error('获取卦象失败:', error);
-    await authResult.logUsage(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
+    await authResult.logUsage?.(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: '获取失败' }, { status: 500 });
   }
 }

@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return new Response(

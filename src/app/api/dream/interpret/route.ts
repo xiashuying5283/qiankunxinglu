@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 // 系统提示词
 const SYSTEM_PROMPT = `你是一位专业的周公解梦大师，精通中国传统解梦文化和现代心理学。你的任务是根据用户描述的梦境，给出专业、细致、有温度的解析。
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return new Response(

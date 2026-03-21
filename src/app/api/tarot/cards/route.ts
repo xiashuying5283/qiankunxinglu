@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { allTarotCards } from '@/lib/divination-data';
 import { withCache } from '@/lib/cache';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 // 缓存键
 const CACHE_KEY = 'tarot_cards_data';
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return NextResponse.json(
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ cards });
   } catch (error) {
     console.error('获取塔罗牌数据失败:', error);
-    await authResult.logUsage(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
+    await authResult.logUsage?.(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: '获取失败' }, { status: 500 });
   }
 }

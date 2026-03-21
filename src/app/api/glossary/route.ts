@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { withCache } from '@/lib/cache';
-import { verifyApiKey } from '@/lib/api-auth';
+import { verifyAuth } from '@/lib/api-auth';
 
 const CACHE_KEY = 'glossary_data';
 const CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
   const startTime = Date.now();
   
   // API Key 鉴权
-  const authResult = await verifyApiKey(request);
+  const authResult = await verifyAuth(request);
   
   if (!authResult.success) {
     return NextResponse.json(
