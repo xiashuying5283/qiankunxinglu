@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-  // 占卜工具
+  // 占卜工具（9个，3x3布局）
   const divinationTools = [
     { title: '周易起卦', desc: '古法演卦', icon: <BookOpen className="w-5 h-5" />, href: '/iching' },
     { title: '塔罗占卜', desc: '牌阵解读', icon: <Moon className="w-5 h-5" />, href: '/tarot' },
@@ -23,6 +23,9 @@ export default function Home() {
     { title: '测字算卦', desc: '一字断事', icon: <PenTool className="w-5 h-5" />, href: '/char-divination' },
     { title: '周公解梦', desc: '梦境解析', icon: <Sparkles className="w-5 h-5" />, href: '/dream' },
     { title: '生辰八字', desc: '命盘推算', icon: <Calendar className="w-5 h-5" />, href: '/bazi' },
+    { title: '奇门遁甲', desc: '帝王之学', icon: <Compass className="w-5 h-5" />, href: '/qimen' },
+    { title: '姻缘匹配', desc: '缘分测算', icon: <Heart className="w-5 h-5" />, href: '/match' },
+    { title: '每日运势', desc: '今日宜忌', icon: <Zap className="w-5 h-5" />, href: '/daily-fortune' },
   ];
 
   // 学习资源
@@ -33,13 +36,6 @@ export default function Home() {
     { title: '术语词典', desc: '快速查询', icon: <Search className="w-5 h-5" />, href: '/glossary' },
     { title: '八字入门', desc: '命理基础', icon: <GraduationCap className="w-5 h-5" />, href: '/learn' },
     { title: '梅花易数', desc: '以数明理', icon: <Star className="w-5 h-5" />, href: '/plum-blossom' },
-  ];
-
-  // 更多工具
-  const moreTools = [
-    { title: '奇门遁甲', icon: <Compass className="w-4 h-4" />, href: '/qimen' },
-    { title: '姻缘匹配', icon: <Heart className="w-4 h-4" />, href: '/match' },
-    { title: '每日运势', icon: <Zap className="w-4 h-4" />, href: '/daily-fortune' },
   ];
 
   return (
@@ -120,20 +116,18 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* 工具网格 */}
-                  <div className="grid grid-cols-2 gap-3 mb-5">
+                  {/* 工具网格 - 3列布局 */}
+                  <div className="grid grid-cols-3 gap-2.5 mb-5">
                     {divinationTools.map((tool, index) => (
                       <Link href={tool.href} key={index}>
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-bg-secondary)]/50 border border-[var(--theme-gold-border)]/30 hover:border-[var(--theme-gold)]/50 hover:bg-[var(--theme-gold-bg)]/30 transition-all group/item">
-                          <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[var(--theme-gold-bg)] flex items-center justify-center text-[var(--theme-gold)]">
+                        <div className="flex flex-col items-center p-3 rounded-xl bg-[var(--theme-bg-secondary)]/50 border border-[var(--theme-gold-border)]/30 hover:border-[var(--theme-gold)]/50 hover:bg-[var(--theme-gold-bg)]/30 transition-all group/item text-center">
+                          <div className="w-8 h-8 rounded-lg bg-[var(--theme-gold-bg)] flex items-center justify-center text-[var(--theme-gold)] mb-2">
                             {tool.icon}
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium text-[var(--theme-text)] group-hover/item:text-[var(--theme-gold)] transition-colors truncate">
-                              {tool.title}
-                            </div>
-                            <div className="text-xs text-[var(--theme-text-muted)] truncate">{tool.desc}</div>
+                          <div className="text-sm font-medium text-[var(--theme-text)] group-hover/item:text-[var(--theme-gold)] transition-colors">
+                            {tool.title}
                           </div>
+                          <div className="text-xs text-[var(--theme-text-muted)]">{tool.desc}</div>
                         </div>
                       </Link>
                     ))}
@@ -202,24 +196,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 快捷入口 - 每日运势等 */}
-        <section className="container mx-auto px-4 pb-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              {moreTools.map((tool, index) => (
-                <Link href={tool.href} key={index}>
-                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--theme-card)] border border-[var(--theme-border)] hover:border-[var(--theme-gold)]/40 hover:bg-[var(--theme-gold-bg)]/30 transition-all">
-                    <div className="text-[var(--theme-gold)]">{tool.icon}</div>
-                    <span className="text-sm text-[var(--theme-text)]">{tool.title}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* 特色说明 */}
-        <section className="container mx-auto px-4 pb-20">
+        <section className="container mx-auto px-4 pt-4 pb-20">
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center p-6">
