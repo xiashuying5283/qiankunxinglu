@@ -124,9 +124,11 @@ export default function QiMenDunJiaPage() {
               {/* 九星 */}
               {palace.nineStar && (
                 <div className="col-span-3 text-center py-1">
-                  <span className={`font-bold ${getNineStarColor(palace.nineStar.luck)}`}>
-                    {palace.nineStar.name}
-                  </span>
+                  <GlossaryTerm term={palace.nineStar.name}>
+                    <span className={`font-bold ${getNineStarColor(palace.nineStar.luck)}`}>
+                      {palace.nineStar.name}
+                    </span>
+                  </GlossaryTerm>
                   <span className="text-amber-300/60 ml-1">({palace.nineStar.luck})</span>
                 </div>
               )}
@@ -134,9 +136,11 @@ export default function QiMenDunJiaPage() {
               {/* 八门 */}
               {palace.eightDoor && (
                 <div className="text-center py-1 bg-amber-700/30 rounded">
-                  <span className={`font-bold ${getEightDoorColor(palace.eightDoor.luck)}`}>
-                    {palace.eightDoor.name}
-                  </span>
+                  <GlossaryTerm term={palace.eightDoor.name}>
+                    <span className={`font-bold ${getEightDoorColor(palace.eightDoor.luck)}`}>
+                      {palace.eightDoor.name}
+                    </span>
+                  </GlossaryTerm>
                 </div>
               )}
               
@@ -149,9 +153,11 @@ export default function QiMenDunJiaPage() {
               {/* 八神 */}
               {palace.eightGod && (
                 <div className="text-center py-1 bg-amber-600/30 rounded">
-                  <span className={`font-bold ${getEightGodColor(palace.eightGod.nature)}`}>
-                    {palace.eightGod.name}
-                  </span>
+                  <GlossaryTerm term={palace.eightGod.name}>
+                    <span className={`font-bold ${getEightGodColor(palace.eightGod.nature)}`}>
+                      {palace.eightGod.name}
+                    </span>
+                  </GlossaryTerm>
                 </div>
               )}
               
@@ -160,7 +166,9 @@ export default function QiMenDunJiaPage() {
                 <div className="col-span-3 mt-2 pt-2 border-t border-amber-400/20 space-y-1">
                   {palace.nineStar && (
                     <div className="text-amber-200">
-                      九星：{palace.nineStar.name}（{palace.nineStar.wuXing}）
+                      <GlossaryTerm term="九星">九星</GlossaryTerm>：
+                      <GlossaryTerm term={palace.nineStar.name}>{palace.nineStar.name}</GlossaryTerm>
+                      （{palace.nineStar.wuXing}）
                       <span className={`ml-1 ${getNineStarColor(palace.nineStar.luck)}`}>
                         {palace.nineStar.luck}
                       </span>
@@ -168,7 +176,9 @@ export default function QiMenDunJiaPage() {
                   )}
                   {palace.eightDoor && (
                     <div className="text-amber-200">
-                      八门：{palace.eightDoor.name}（{palace.eightDoor.wuXing}）
+                      <GlossaryTerm term="八门">八门</GlossaryTerm>：
+                      <GlossaryTerm term={palace.eightDoor.name}>{palace.eightDoor.name}</GlossaryTerm>
+                      （{palace.eightDoor.wuXing}）
                       <span className={`ml-1 ${getEightDoorColor(palace.eightDoor.luck)}`}>
                         {palace.eightDoor.luck}
                       </span>
@@ -176,14 +186,16 @@ export default function QiMenDunJiaPage() {
                   )}
                   {palace.eightGod && (
                     <div className="text-amber-200">
-                      八神：{palace.eightGod.name}
+                      <GlossaryTerm term="八神">八神</GlossaryTerm>：
+                      <GlossaryTerm term={palace.eightGod.name}>{palace.eightGod.name}</GlossaryTerm>
                       <span className={`ml-1 ${getEightGodColor(palace.eightGod.nature)}`}>
                         {palace.eightGod.nature}
                       </span>
                     </div>
                   )}
                   <div className="text-amber-200">
-                    天盘：{palace.tianPan} · 地盘：{palace.diPan}
+                    <GlossaryTerm term="天盘">天盘</GlossaryTerm>：{palace.tianPan} · 
+                    <GlossaryTerm term="地盘">地盘</GlossaryTerm>：{palace.diPan}
                   </div>
                 </div>
               )}
@@ -349,17 +361,23 @@ export default function QiMenDunJiaPage() {
                 <CardContent>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="bg-amber-900/40 rounded-lg p-3">
-                      <div className="text-xs text-amber-300/60 mb-1">旬首</div>
+                      <div className="text-xs text-amber-300/60 mb-1">
+                        <GlossaryTerm term="旬首">旬首</GlossaryTerm>
+                      </div>
                       <div className="text-2xl font-bold text-amber-100">{board.xunShou}</div>
                       <div className="text-xs text-amber-200/60 mt-1">时辰旬首六仪</div>
                     </div>
                     <div className="bg-amber-900/40 rounded-lg p-3">
-                      <div className="text-xs text-amber-300/60 mb-1">值符</div>
+                      <div className="text-xs text-amber-300/60 mb-1">
+                        <GlossaryTerm term="值符">值符</GlossaryTerm>
+                      </div>
                       <div className="text-2xl font-bold text-green-400">{board.zhiFu}</div>
                       <div className="text-xs text-amber-200/60 mt-1">当前值班九星</div>
                     </div>
                     <div className="bg-amber-900/40 rounded-lg p-3">
-                      <div className="text-xs text-amber-300/60 mb-1">值使</div>
+                      <div className="text-xs text-amber-300/60 mb-1">
+                        <GlossaryTerm term="值使">值使</GlossaryTerm>
+                      </div>
                       <div className="text-2xl font-bold text-blue-400">{board.zhiShi}</div>
                       <div className="text-xs text-amber-200/60 mt-1">当前值班八门</div>
                     </div>
@@ -375,7 +393,7 @@ export default function QiMenDunJiaPage() {
                     奇门盘
                   </CardTitle>
                   <CardDescription className="text-amber-200/60">
-                    点击各宫查看详细信息，天盘为三奇六仪，地盘为基础，九星八门为用神
+                    点击各宫查看详细信息，<GlossaryTerm term="天盘">天盘</GlossaryTerm>为<GlossaryTerm term="三奇六仪">三奇六仪</GlossaryTerm>，<GlossaryTerm term="地盘">地盘</GlossaryTerm>为基础，<GlossaryTerm term="九星">九星</GlossaryTerm><GlossaryTerm term="八门">八门</GlossaryTerm>为用神
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -449,53 +467,6 @@ export default function QiMenDunJiaPage() {
                 <CardContent>
                   <div className="bg-amber-950/50 rounded-lg p-4 text-amber-200 whitespace-pre-line leading-relaxed">
                     {board.advice}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 知识科普 */}
-              <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
-                <CardHeader>
-                  <CardTitle className="text-xl text-amber-100">奇门遁甲知识</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-amber-900/40 rounded-lg p-4">
-                      <h4 className="text-amber-100 font-bold mb-2">
-                        <GlossaryTerm term="三奇">三奇</GlossaryTerm>
-                      </h4>
-                      <p className="text-amber-200/80 text-sm">
-                        乙为日奇、丙为月奇、丁为星奇，合称三奇。
-                        三奇所临之宫，百事皆宜，逢凶化吉。
-                      </p>
-                    </div>
-                    <div className="bg-amber-900/40 rounded-lg p-4">
-                      <h4 className="text-amber-100 font-bold mb-2">
-                        <GlossaryTerm term="六仪">六仪</GlossaryTerm>
-                      </h4>
-                      <p className="text-amber-200/80 text-sm">
-                        戊己庚辛壬癸为六仪，用于纪时和定局。
-                        其中庚为仇敌，辛为罪人，需避之。
-                      </p>
-                    </div>
-                    <div className="bg-amber-900/40 rounded-lg p-4">
-                      <h4 className="text-amber-100 font-bold mb-2">
-                        <GlossaryTerm term="八门">八门</GlossaryTerm>
-                      </h4>
-                      <p className="text-amber-200/80 text-sm">
-                        休、生、开为三吉门；伤、杜、景为平门；死、惊为凶门。
-                        吉门所临宜进取，凶门所临宜守静。
-                      </p>
-                    </div>
-                    <div className="bg-amber-900/40 rounded-lg p-4">
-                      <h4 className="text-amber-100 font-bold mb-2">
-                        <GlossaryTerm term="九星">九星</GlossaryTerm>
-                      </h4>
-                      <p className="text-amber-200/80 text-sm">
-                        天辅、天禽、天心为大吉；天冲、天任为小吉；
-                        天蓬、天芮为大凶；天柱、天英为小凶。
-                      </p>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
