@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { verifyApiKey } from '@/lib/api-auth';
 
 // 占卜类型
 type DivinationType = 'iching' | 'tarot';
@@ -165,8 +166,28 @@ const TAROT_SYSTEM_PROMPT = `你是一位经验丰富的塔罗解读师，精通
 /**
  * 占卜AI解读API（流式输出）
  * POST /api/divination/interpret
+ * 
+ * 需要 API Key 鉴权
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyApiKey(request);
+  
+  if (!authResult.success) {
+    return new Response(
+      JSON.stringify({ 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      }),
+      { 
+        status: authResult.statusCode || 401, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { type, ...data } = body as DivinationData;
@@ -331,6 +352,8 @@ ${index + 1}. ${card.name}（${card.isReversed ? '逆位' : '正位'}）${positi
 
   } catch (error) {
     console.error('Divination interpretation error:', error);
+    // 记录失败日志
+    await authResult.logUsage(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
     return new Response(
       JSON.stringify({ error: '解读失败，请稍后重试' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

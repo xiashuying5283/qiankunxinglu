@@ -1,7 +1,26 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { verifyApiKey } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyApiKey(request);
+  
+  if (!authResult.success) {
+    return new Response(
+      JSON.stringify({ 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      }),
+      { 
+        status: authResult.statusCode || 401, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { name1, name2, bazi1, bazi2, score, level, shengxiaoMatch, baziMatch } = body;

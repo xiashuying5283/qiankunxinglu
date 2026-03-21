@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
   Wand2, Sun, Calendar, Zap, ArrowRight,
-  Users, Shield
+  Users, Shield, Key
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
@@ -133,6 +133,14 @@ export default function Home() {
       href: '/learn-tarot',
       color: 'from-violet-500 to-purple-500',
       badge: '新',
+    },
+    {
+      title: 'API Key 管理',
+      description: '管理 API 密钥，调用占卜接口',
+      icon: <Key className="w-6 h-6" />,
+      href: '/api-keys',
+      color: 'from-slate-500 to-gray-500',
+      badge: '开发者',
     },
   ];
 

@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { verifyApiKey } from '@/lib/api-auth';
 
 // GET /api/books - 获取书籍列表
+// 需要 API Key 鉴权
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyApiKey(request);
+  
+  if (!authResult.success) {
+    return NextResponse.json(
+      { 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      },
+      { status: authResult.statusCode || 401 }
+    );
+  }
+  
   try {
     const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
