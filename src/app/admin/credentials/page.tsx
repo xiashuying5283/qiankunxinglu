@@ -152,7 +152,7 @@ export default function AdminCredentialsPage() {
 
   // 凭证卡片
   const CredentialCard = ({ credential, showActions = false }: { credential: Credential; showActions?: boolean }) => (
-    <Card key={credential.id} className="bg-card border-border">
+    <Card key={credential.id} className={`bg-card border-border ${credential.revoked_at ? 'opacity-60' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
@@ -160,6 +160,11 @@ export default function AdminCredentialsPage() {
               <Key className="w-4 h-4 text-muted-foreground" />
               <code className="text-sm bg-muted px-2 py-0.5 rounded">{credential.access_key}</code>
               <StatusBadge status={credential.status} />
+              {credential.revoked_at && (
+                <Badge variant="outline" className="bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/30">
+                  已撤销
+                </Badge>
+              )}
             </div>
             
             {credential.name && (

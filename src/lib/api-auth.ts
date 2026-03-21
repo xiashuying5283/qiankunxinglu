@@ -513,6 +513,7 @@ export async function getUserCredentials(userId: string): Promise<ApiCredential[
     .from('api_credentials')
     .select('id, user_id, access_key, secret_key_hash, name, status, reason, is_active, created_at, revoked_at, reviewed_at')
     .eq('user_id', userId)
+    .is('revoked_at', null) // 不显示已撤销的凭证
     .order('created_at', { ascending: false });
   
   if (error) {
