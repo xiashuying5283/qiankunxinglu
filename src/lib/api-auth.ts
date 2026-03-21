@@ -534,6 +534,7 @@ export async function getPendingCredentials(): Promise<Array<ApiCredential & { u
     .from('api_credentials')
     .select('id, user_id, access_key, name, status, reason, is_active, created_at, revoked_at, reviewed_at')
     .eq('status', 'pending')
+    .is('revoked_at', null) // 过滤已撤销的凭证
     .order('created_at', { ascending: true });
   
   if (error) {
