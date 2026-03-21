@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     '易经学习',
   ],
   authors: [{ name: '占卜问卦' }],
-  generator: 'Coze Code',
+  generator: 'Next.js',
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
@@ -69,7 +69,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
+  const isDev = process.env.NODE_ENV === 'development';
 
   return (
     <html lang="zh-CN">

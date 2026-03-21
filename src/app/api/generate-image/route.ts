@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { generateImage } from '@/lib/llm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,27 +9,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new ImageGenerationClient(config, customHeaders);
+    const response = await generateImage(prompt, { size });
 
-    const response = await client.generate({
-      prompt,
-      size: size || '2K',
-      watermark: false,
-    });
-
-    const helper = client.getResponseHelper(response);
-
-    if (helper.success && helper.imageUrls.length > 0) {
+    if (response.success && response.imageUrl) {
       return NextResponse.json({ 
         success: true, 
-        imageUrl: helper.imageUrls[0] 
+        imageUrl: response.imageUrl 
       });
     } else {
       return NextResponse.json({ 
         success: false, 
-        error: helper.errorMessages.join(', ') || 'Generation failed' 
+        error: response.error || 'Generation failed' 
       }, { status: 500 });
     }
   } catch (error) {

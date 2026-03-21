@@ -28,7 +28,7 @@ export interface OAuthUserInfo {
 
 // 获取域名
 const getBaseUrl = (): string => {
-  return process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+  return process.env.APP_URL || 'http://localhost:5000';
 };
 
 // Google OAuth 配置

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { streamLLM } from '@/lib/llm';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 系统提示词
@@ -51,14 +51,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 提取请求头
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
     const messages = [
-      { role: 'system' as const, content: SYSTEM_PROMPT },
-      { role: 'user' as const, content: `请解析我做的这个梦：${dreamContent}` }
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: `请解析我做的这个梦：${dreamContent}` }
     ];
 
     // 创建流式响应
@@ -68,16 +63,10 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const llmStream = client.stream(messages, {
-            model: 'doubao-seed-1-6-251015',
-            temperature: 0.7,
-          });
-
-          for await (const chunk of llmStream) {
+          for await (const chunk of streamLLM(messages, { temperature: 0.7 })) {
             if (chunk.content) {
-              const text = chunk.content.toString();
-              fullContent += text;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
+              fullContent += chunk.content;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`));
             }
           }
 

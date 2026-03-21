@@ -1,29 +1,37 @@
-# projects
+# 乾坤星路
 
-这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，由扣子编程 CLI 创建。
+基于 [Next.js](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) + [Supabase](https://supabase.com) 的全栈应用。
 
 ## 快速开始
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+### 配置环境变量
+
+复制 `.env.local.example` 为 `.env.local`，填入实际配置值。
 
 ### 启动开发服务器
 
 ```bash
-coze dev
+pnpm dev
 ```
 
 启动后，在浏览器中打开 [http://localhost:5000](http://localhost:5000) 查看应用。
 
-开发服务器支持热更新，修改代码后页面会自动刷新。
-
 ### 构建生产版本
 
 ```bash
-coze build
+pnpm build
 ```
 
 ### 启动生产服务器
 
 ```bash
-coze start
+pnpm start
 ```
 
 ## 项目结构

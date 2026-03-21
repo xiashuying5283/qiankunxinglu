@@ -38,7 +38,7 @@ const DEV_USER: User = {
 };
 
 // 是否为开发环境
-const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
+const isDev = process.env.NODE_ENV === 'development';
 
 // 获取或创建游客 sessionId
 function getGuestSessionId(): string {

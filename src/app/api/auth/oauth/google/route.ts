@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const state = generateOAuthState();
 
     // 生成授权 URL
-    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+    const baseUrl = process.env.APP_URL || 'http://localhost:5000';
     const redirectUri = `${baseUrl}/api/auth/oauth/google/callback`;
     
     console.log('[Google OAuth] Initiating login:', {
@@ -75,6 +75,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Google OAuth error:', error);
-    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
+    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.APP_URL || 'http://localhost:5000'));
   }
 }

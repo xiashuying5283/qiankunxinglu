@@ -11,7 +11,7 @@ function generateResetToken(): string {
 
 // 获取基础 URL
 function getBaseUrl(): string {
-  return process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+  return process.env.APP_URL || 'http://localhost:5000';
 }
 
 /**
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     // 检查邮件服务是否已配置
     const mailConfigured = isMailConfigured();
-    const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
+    const isDev = process.env.NODE_ENV === 'development';
 
     if (mailConfigured) {
       // 发送邮件
