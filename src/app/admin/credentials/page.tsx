@@ -49,6 +49,7 @@ export default function AdminCredentialsPage() {
   const [pendingCredentials, setPendingCredentials] = useState<Credential[]>([]);
   const [allCredentials, setAllCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedCredentialId, setSelectedCredentialId] = useState<string | null>(null);
 
@@ -56,13 +57,24 @@ export default function AdminCredentialsPage() {
   const fetchCredentials = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // 获取待审批凭证
       const pendingRes = await fetch('/api/admin/credentials?status=pending');
       const pendingData = await pendingRes.json();
-      if (pendingRes.ok) {
-        setPendingCredentials(pendingData.credentials || []);
+      
+      if (!pendingRes.ok) {
+        if (pendingRes.status === 401) {
+          setError('请先登录');
+        } else if (pendingRes.status === 403) {
+          setError('无权限访问，请联系管理员配置 ADMIN_USER_IDS 环境变量');
+        } else {
+          setError(pendingData.error || '获取失败');
+        }
+        return;
       }
+      
+      setPendingCredentials(pendingData.credentials || []);
       
       // 获取所有凭证
       const allRes = await fetch('/api/admin/credentials');
@@ -72,7 +84,7 @@ export default function AdminCredentialsPage() {
       }
     } catch (error) {
       console.error('Fetch credentials error:', error);
-      toast.error('获取凭证列表失败');
+      setError('获取凭证列表失败');
     } finally {
       setLoading(false);
     }
@@ -262,30 +274,39 @@ export default function AdminCredentialsPage() {
         </CardHeader>
       </Card>
       
-      <Tabs defaultValue="pending" className="space-y-4">
-        <TabsList className="bg-muted">
-          <TabsTrigger value="pending" className="data-[state=active]:bg-background">
-            待审批 ({pendingCredentials.length})
-          </TabsTrigger>
-          <TabsTrigger value="all" className="data-[state=active]:bg-background">
-            全部凭证 ({allCredentials.length})
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="pending" className="space-y-4">
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">加载中...</div>
-          ) : pendingCredentials.length === 0 ? (
-            <Card className="bg-card border-border">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                暂无待审批的凭证
-              </CardContent>
-            </Card>
-          ) : (
-            pendingCredentials.map((credential) => (
-              <CredentialCard key={credential.id} credential={credential} showActions />
-            ))
-          )}
+      {error && (
+        <Card className="bg-red-500/10 border-red-500/30 mb-6">
+          <CardContent className="py-4">
+            <p className="text-red-600 dark:text-red-400">{error}</p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {!error && (
+        <Tabs defaultValue="pending" className="space-y-4">
+          <TabsList className="bg-muted">
+            <TabsTrigger value="pending" className="data-[state=active]:bg-background">
+              待审批 ({pendingCredentials.length})
+            </TabsTrigger>
+            <TabsTrigger value="all" className="data-[state=active]:bg-background">
+              全部凭证 ({allCredentials.length})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pending" className="space-y-4">
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">加载中...</div>
+            ) : pendingCredentials.length === 0 ? (
+              <Card className="bg-card border-border">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  暂无待审批的凭证
+                </CardContent>
+              </Card>
+            ) : (
+              pendingCredentials.map((credential) => (
+                <CredentialCard key={credential.id} credential={credential} showActions />
+              ))
+            )}
         </TabsContent>
         
         <TabsContent value="all" className="space-y-4">
@@ -304,6 +325,7 @@ export default function AdminCredentialsPage() {
           )}
         </TabsContent>
       </Tabs>
+      )}
     </div>
   );
 }
