@@ -60,6 +60,13 @@ export interface EightGodInfo {
   nature: string;      // 性质（吉/凶）
 }
 
+/** 格局信息 */
+export interface GeJuInfo {
+  name: string;
+  type: '吉' | '凶' | '中';
+  description: string;
+}
+
 /** 奇门遁甲盘 */
 export interface QiMenDunJiaBoard {
   // 时间信息
@@ -93,7 +100,7 @@ export interface QiMenDunJiaBoard {
   hourZhiPosition: PalacePosition;
   
   // 格局判断
-  geJu: string[];      // 格局（如青龙返首、飞鸟跌穴等）
+  geJu: GeJuInfo[];    // 格局（如青龙返首、飞鸟跌穴等）
   
   // 建议
   advice: string;
@@ -468,46 +475,182 @@ function arrangeEightGod(
 
 /**
  * 判断格局
+ * 奇门遁甲格局分为吉格、凶格和平格
  */
 function judgeGeJu(
   tianPan: Map<PalacePosition, SanQiLiuYi>,
   diPan: Map<PalacePosition, SanQiLiuYi>,
   nineStarMap: Map<PalacePosition, NineStarInfo>,
+  doorMap: Map<PalacePosition, EightDoorInfo>,
   xunShou: string
-): string[] {
-  const geJu: string[] = [];
+): GeJuInfo[] {
+  const geJu: GeJuInfo[] = [];
+  const seen = new Set<string>();
   
   // 遍历各宫判断格局
   for (const [pos, tianQi] of tianPan.entries()) {
     const diQi = diPan.get(pos);
+    const star = nineStarMap.get(pos);
+    const door = doorMap.get(pos);
     
     if (!diQi) continue;
     
-    // 青龙返首：天盘乙奇+地盘甲午（辛）
+    // ========== 吉格 ==========
+    
+    // 青龙返首：天盘乙奇+地盘辛（甲午辛）
     if (tianQi === '乙' && diQi === '辛') {
-      geJu.push('青龙返首');
+      const name = '青龙返首';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '吉', description: '乙奇加辛，百事皆宜，大吉之格' });
+        seen.add(name);
+      }
     }
     
-    // 飞鸟跌穴：天盘丙奇+地盘甲子（戊）
+    // 飞鸟跌穴：天盘丙奇+地盘戊（甲子戊）
     if (tianQi === '丙' && diQi === '戊') {
-      geJu.push('飞鸟跌穴');
+      const name = '飞鸟跌穴';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '吉', description: '丙奇加戊，百事皆宜，大吉之格' });
+        seen.add(name);
+      }
     }
     
-    // 玉女守门：天盘丁奇+地盘甲戌（己）
+    // 玉女守门：天盘丁奇+地盘己（甲戌己）
     if (tianQi === '丁' && diQi === '己') {
-      geJu.push('玉女守门');
+      const name = '玉女守门';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '吉', description: '丁奇加己，百事皆宜，大吉之格' });
+        seen.add(name);
+      }
+    }
+    
+    // 三奇临吉星
+    if (sanQi.includes(tianQi) && star) {
+      if (star.luck === '大吉' || star.luck === '小吉') {
+        const name = `${tianQi}奇临${star.name}`;
+        if (!seen.has(name)) {
+          geJu.push({ name, type: '吉', description: `${tianQi}奇临吉星${star.name}，主吉利` });
+          seen.add(name);
+        }
+      }
     }
     
     // 三奇临吉门
-    const star = nineStarMap.get(pos);
-    if (sanQi.includes(tianQi) && star) {
-      if (star.name === '天心' || star.name === '天任' || star.name === '天辅') {
-        geJu.push(`${tianQi}奇临${star.name}`);
+    if (sanQi.includes(tianQi) && door && door.luck === '吉') {
+      const name = `${tianQi}奇临${door.name}`;
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '吉', description: `${tianQi}奇临吉门${door.name}，主吉利` });
+        seen.add(name);
+      }
+    }
+    
+    // ========== 凶格 ==========
+    
+    // 青龙逃走：天盘乙奇+地盘辛，但乙入墓或受克
+    // 简化：乙+辛在某些情况下为凶
+    
+    // 白虎猖狂：天盘庚+地盘丙
+    if (tianQi === '庚' && diQi === '丙') {
+      const name = '白虎猖狂';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '庚加丙，主破财、伤灾、争斗' });
+        seen.add(name);
+      }
+    }
+    
+    // 腾蛇夭矫：天盘癸+地盘丁
+    if (tianQi === '癸' && diQi === '丁') {
+      const name = '腾蛇夭矫';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '癸加丁，主怪异、惊恐、虚惊' });
+        seen.add(name);
+      }
+    }
+    
+    // 朱雀投江：天盘丁+地盘壬
+    if (tianQi === '丁' && diQi === '壬') {
+      const name = '朱雀投江';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '丁加壬，主文书差错、口舌是非' });
+        seen.add(name);
+      }
+    }
+    
+    // 太白入荧：天盘庚+地盘丙（与白虎猖狂相同条件，但不同解释）
+    if (tianQi === '庚' && diQi === '丙') {
+      const name = '太白入荧';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '庚加丙，主盗贼、失财' });
+        seen.add(name);
+      }
+    }
+    
+    // 荧入太白：天盘丙+地盘庚
+    if (tianQi === '丙' && diQi === '庚') {
+      const name = '荧入太白';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '丙加庚，主争斗、破财' });
+        seen.add(name);
+      }
+    }
+    
+    // 大格：天盘庚+地盘庚
+    if (tianQi === '庚' && diQi === '庚') {
+      const name = '大格';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '庚加庚，主争斗、阻碍重重' });
+        seen.add(name);
+      }
+    }
+    
+    // 小格：天盘庚+地盘其他
+    if (tianQi === '庚' && diQi !== '庚' && diQi !== '丙') {
+      const name = '小格';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '庚加他干，主阻滞、不顺' });
+        seen.add(name);
+      }
+    }
+    
+    // 刑格：天盘六仪与地盘相刑
+    // 简化处理
+    
+    // 击刑：天盘甲子戊加地盘甲午辛
+    if (tianQi === '戊' && diQi === '辛') {
+      const name = '击刑';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '戊加辛，子午相冲，主刑伤' });
+        seen.add(name);
+      }
+    }
+    
+    // 三奇入墓
+    if (tianQi === '乙' && (pos === 6 || pos === 7)) { // 乙墓在未申（乾兑宫）
+      const name = '乙奇入墓';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '乙奇入墓，主无力、受阻' });
+        seen.add(name);
+      }
+    }
+    
+    if (tianQi === '丙' && pos === 6) { // 丙墓在戌（乾宫）
+      const name = '丙奇入墓';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '丙奇入墓，主无力、受阻' });
+        seen.add(name);
+      }
+    }
+    
+    if (tianQi === '丁' && pos === 8) { // 丁墓在丑（艮宫）
+      const name = '丁奇入墓';
+      if (!seen.has(name)) {
+        geJu.push({ name, type: '凶', description: '丁奇入墓，主无力、受阻' });
+        seen.add(name);
       }
     }
   }
   
-  return [...new Set(geJu)]; // 去重
+  return geJu;
 }
 
 /**
@@ -516,7 +659,7 @@ function judgeGeJu(
 function generateAdvice(
   dunType: '阳遁' | '阴遁',
   juShu: number,
-  geJu: string[],
+  geJu: GeJuInfo[],
   nineStarMap: Map<PalacePosition, NineStarInfo>,
   doorMap: Map<PalacePosition, EightDoorInfo>
 ): string {
@@ -543,8 +686,14 @@ function generateAdvice(
   advices.push(juShuAdvice[juShu] || '');
   
   // 根据格局给建议
-  if (geJu.length > 0) {
-    advices.push(`格局显示：${geJu.join('、')}，此为吉兆。`);
+  const goodGeJu = geJu.filter(g => g.type === '吉');
+  const badGeJu = geJu.filter(g => g.type === '凶');
+  
+  if (goodGeJu.length > 0) {
+    advices.push(`吉格：${goodGeJu.map(g => g.name).join('、')}，主事业顺遂、贵人相助。`);
+  }
+  if (badGeJu.length > 0) {
+    advices.push(`凶格：${badGeJu.map(g => g.name).join('、')}，宜谨慎行事、趋吉避凶。`);
   }
   
   // 检查吉门吉星位置
@@ -651,7 +800,7 @@ export function calculateQiMenDunJia(date: Date = new Date()): QiMenDunJiaBoard 
   }
   
   // 判断格局
-  const geJu = judgeGeJu(tianPan, diPan, nineStarMap, xunShou);
+  const geJu = judgeGeJu(tianPan, diPan, nineStarMap, doorMap, xunShou);
   
   // 构建九宫数据
   const palaces: Palace[] = [];

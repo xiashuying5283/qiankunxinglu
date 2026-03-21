@@ -401,9 +401,9 @@ export default function QiMenDunJiaPage() {
 
               {/* 格局判断 */}
               {board.geJu.length > 0 && (
-                <Card className="bg-gradient-to-r from-green-900/40 to-amber-900/40 border-green-400/30">
+                <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
                   <CardHeader>
-                    <CardTitle className="text-lg text-green-100 flex items-center">
+                    <CardTitle className="text-lg text-amber-100 flex items-center">
                       <Sparkles className="w-5 h-5 mr-2" />
                       格局判断
                     </CardTitle>
@@ -413,15 +413,30 @@ export default function QiMenDunJiaPage() {
                       {board.geJu.map((ge, i) => (
                         <span
                           key={i}
-                          className="bg-green-800/40 text-green-200 px-3 py-1 rounded-full text-sm"
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            ge.type === '吉' 
+                              ? 'bg-green-800/40 text-green-200 border border-green-500/30' 
+                              : ge.type === '凶'
+                              ? 'bg-red-800/40 text-red-200 border border-red-500/30'
+                              : 'bg-amber-800/40 text-amber-200 border border-amber-500/30'
+                          }`}
+                          title={ge.description}
                         >
-                          {ge}
+                          {ge.name}
+                          <span className="ml-1 opacity-60 text-xs">
+                            {ge.type === '吉' ? '吉' : ge.type === '凶' ? '凶' : '平'}
+                          </span>
                         </span>
                       ))}
                     </div>
-                    <p className="text-green-200/60 text-sm mt-2">
-                      以上格局为吉格，主事业顺遂、贵人相助
-                    </p>
+                    <div className="mt-3 text-sm text-amber-200/60">
+                      {board.geJu.some(g => g.type === '吉') && (
+                        <p className="text-green-300/80">• 绿色为吉格，主事业顺遂、贵人相助</p>
+                      )}
+                      {board.geJu.some(g => g.type === '凶') && (
+                        <p className="text-red-300/80">• 红色为凶格，宜谨慎行事、趋吉避凶</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )}
