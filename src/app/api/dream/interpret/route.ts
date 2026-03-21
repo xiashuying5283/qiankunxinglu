@@ -61,6 +61,19 @@ export async function POST(request: NextRequest) {
     );
   }
   
+  // 检查游客限制
+  if (authResult.isGuest && authResult.guestLimitReached) {
+    return new Response(
+      JSON.stringify({ 
+        error: `游客每日仅限 10 次大模型解析，今日已用完。注册账户后可无限使用。`,
+        code: 'GUEST_LIMIT_REACHED',
+        guestUsageCount: authResult.guestUsageCount,
+        guestLimit: 10,
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { dreamContent, sessionId, saveRecord } = body;
@@ -70,6 +83,12 @@ export async function POST(request: NextRequest) {
         JSON.stringify({ error: '请输入梦境内容' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+
+    // 如果是游客，增加使用次数
+    if (authResult.isGuest && authResult.userId) {
+      const { incrementGuestUsage } = await import('@/lib/api-auth');
+      await incrementGuestUsage(authResult.userId);
     }
 
     // 提取请求头

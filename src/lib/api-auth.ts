@@ -17,6 +17,7 @@ export const AUTH_CONFIG = {
   keyLength: 24,
   signatureExpireSeconds: 900, // 签名有效期 15 分钟
   maxCredentialsPerUser: 5,
+  guestDailyLimit: 10, // 游客每日大模型调用次数限制
 };
 
 // 鉴权结果类型
@@ -27,6 +28,9 @@ export interface AuthResult {
   userId?: string;
   credentialId?: string;
   authType?: 'hmac' | 'session';
+  isGuest?: boolean; // 是否为游客
+  guestUsageCount?: number; // 游客今日已使用次数
+  guestLimitReached?: boolean; // 游客是否已达上限
   // 兼容旧接口，实际不做任何操作
   logUsage?: (statusCode: number, responseTimeMs: number, error?: string) => Promise<void>;
 }
@@ -41,6 +45,79 @@ export interface ApiCredential {
   is_active: boolean;
   created_at: string;
   revoked_at: string | null;
+}
+
+/**
+ * 检查游客今日使用次数
+ */
+export async function checkGuestUsage(userId: string): Promise<{ count: number; limitReached: boolean }> {
+  const client = getSupabaseClient();
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  
+  const { data, error } = await client
+    .from('guest_usage')
+    .select('count')
+    .eq('user_id', userId)
+    .eq('usage_date', today)
+    .single();
+  
+  if (error || !data) {
+    return { count: 0, limitReached: false };
+  }
+  
+  const count = data.count || 0;
+  return {
+    count,
+    limitReached: count >= AUTH_CONFIG.guestDailyLimit,
+  };
+}
+
+/**
+ * 增加游客使用次数
+ */
+export async function incrementGuestUsage(userId: string): Promise<void> {
+  const client = getSupabaseClient();
+  const today = new Date().toISOString().slice(0, 10);
+  
+  // 尝试更新
+  const { data: existing } = await client
+    .from('guest_usage')
+    .select('id, count')
+    .eq('user_id', userId)
+    .eq('usage_date', today)
+    .single();
+  
+  if (existing) {
+    // 更新计数
+    await client
+      .from('guest_usage')
+      .update({ count: (existing.count || 0) + 1 })
+      .eq('id', existing.id);
+  } else {
+    // 插入新记录
+    await client
+      .from('guest_usage')
+      .insert({
+        user_id: userId,
+        usage_date: today,
+        count: 1,
+      });
+  }
+}
+
+/**
+ * 检查用户是否为游客
+ */
+export async function checkIsGuest(userId: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  
+  const { data: user } = await client
+    .from('users')
+    .select('is_guest')
+    .eq('id', userId)
+    .single();
+  
+  return user?.is_guest || false;
 }
 
 /**
@@ -286,11 +363,30 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
   // 2. 检查登录态（前端页面）
   const sessionUserId = await getSessionUserId(request);
   if (sessionUserId) {
+    // 检查是否为游客
+    const isGuest = await checkIsGuest(sessionUserId);
+    
+    if (isGuest) {
+      // 检查游客使用次数
+      const { count, limitReached } = await checkGuestUsage(sessionUserId);
+      
+      return {
+        success: true,
+        userId: sessionUserId,
+        authType: 'session',
+        isGuest: true,
+        guestUsageCount: count,
+        guestLimitReached: limitReached,
+        logUsage: async () => {},
+      };
+    }
+    
     return {
       success: true,
       userId: sessionUserId,
       authType: 'session',
-      logUsage: async () => {}, // 登录态不记录使用日志
+      isGuest: false,
+      logUsage: async () => {},
     };
   }
   

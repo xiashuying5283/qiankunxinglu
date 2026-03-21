@@ -235,6 +235,17 @@ export const apiCredentials = pgTable("api_credentials", {
 	unique("api_credentials_access_key_unique").on(table.accessKey),
 ]);
 
+// 游客使用次数记录表
+export const guestUsage = pgTable("guest_usage", {
+	id: serial().notNull(),
+	userId: varchar("user_id", { length: 36 }).notNull(),
+	usageDate: varchar("usage_date", { length: 10 }).notNull(), // YYYY-MM-DD
+	count: integer().default(1).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("guest_usage_user_date_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.usageDate.asc().nullsLast().op("text_ops")),
+]);
+
 // 古籍阅读系统表
 
 // 书籍表
