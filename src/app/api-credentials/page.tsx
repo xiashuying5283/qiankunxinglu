@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   ArrowLeft, Key, Plus, Trash2, Copy, Check, Eye, EyeOff, 
-  Clock, AlertCircle, CheckCircle, Loader2
+  Clock, AlertCircle, CheckCircle, Loader2, XCircle
 } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,9 +17,12 @@ interface Credential {
   id: string;
   access_key: string;
   name: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
   is_active: boolean;
   created_at: string;
   revoked_at: string | null;
+  reviewed_at: string | null;
 }
 
 interface NewCredentialResult {
@@ -32,6 +37,7 @@ export default function ApiCredentialsPage() {
   const [loading, setLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [newCredName, setNewCredName] = useState('');
+  const [newCredReason, setNewCredReason] = useState('');
   const [newCredResult, setNewCredResult] = useState<NewCredentialResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [showSecret, setShowSecret] = useState(false);
@@ -71,7 +77,10 @@ export default function ApiCredentialsPage() {
       const res = await fetch('/api/credentials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newCredName || undefined }),
+        body: JSON.stringify({ 
+          name: newCredName || undefined,
+          reason: newCredReason || undefined,
+        }),
       });
       
       const data = await res.json();
@@ -83,6 +92,7 @@ export default function ApiCredentialsPage() {
           message: data.message,
         });
         setNewCredName('');
+        setNewCredReason('');
         fetchCredentials();
       } else {
         alert(data.error || '创建失败');
@@ -137,6 +147,20 @@ export default function ApiCredentialsPage() {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // 状态徽章
+  const StatusBadge = ({ status }: { status: string }) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30"><Clock className="w-3 h-3 mr-1" />待审批</Badge>;
+      case 'approved':
+        return <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" />已批准</Badge>;
+      case 'rejected':
+        return <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />已拒绝</Badge>;
+      default:
+        return null;
+    }
   };
 
   // 加载中
@@ -209,7 +233,7 @@ export default function ApiCredentialsPage() {
             <Key className="w-10 h-10 text-purple-300 mr-3" />
             <h1 className="text-4xl font-bold text-purple-100">API 凭证管理</h1>
           </div>
-          <p className="text-purple-200/80">创建凭证用于外部 API 调用</p>
+          <p className="text-purple-200/80">创建凭证用于外部 API 调用（需管理员审批）</p>
         </div>
 
         {/* 新建凭证结果弹窗 */}
@@ -220,7 +244,7 @@ export default function ApiCredentialsPage() {
                 <CheckCircle className="w-5 h-5" />
                 凭证创建成功
               </CardTitle>
-              <CardDescription className="text-green-200">
+              <CardDescription className="text-yellow-200 font-medium">
                 {newCredResult.message}
               </CardDescription>
             </CardHeader>
@@ -265,6 +289,11 @@ export default function ApiCredentialsPage() {
                   </Button>
                 </div>
               </div>
+              <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-3 mt-4">
+                <p className="text-yellow-200 text-sm">
+                  <strong>注意：</strong>凭证已提交审批申请，管理员审批通过后才能使用。请先保存 AccessKey 和 SecretKey。
+                </p>
+              </div>
               <Button
                 className="mt-4"
                 onClick={() => {
@@ -296,7 +325,16 @@ export default function ApiCredentialsPage() {
                 placeholder="例如：生产环境"
                 className="w-full bg-white/10 border border-purple-300/30 rounded-lg px-4 py-2 text-purple-100 placeholder:text-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
               />
-              <p className="text-xs text-purple-300/60 mt-1">每个用户最多可创建 5 个凭证</p>
+            </div>
+            <div>
+              <label className="block text-sm text-purple-200 mb-2">申请理由（可选）</label>
+              <Textarea
+                value={newCredReason}
+                onChange={(e) => setNewCredReason(e.target.value)}
+                placeholder="请说明申请 API 凭证的用途..."
+                className="bg-white/10 border-purple-300/30 text-purple-100 placeholder:text-purple-300/50 min-h-[80px]"
+              />
+              <p className="text-xs text-purple-300/60 mt-1">每个用户最多可创建 5 个凭证，创建后需管理员审批</p>
             </div>
             <Button
               onClick={createCredential}
@@ -325,37 +363,49 @@ export default function ApiCredentialsPage() {
                 <Card 
                   key={cred.id} 
                   className={`bg-white/10 backdrop-blur-md border-purple-300/30 ${
-                    !cred.is_active || cred.revoked_at ? 'opacity-60' : ''
+                    cred.status === 'rejected' || cred.revoked_at ? 'opacity-60' : ''
                   }`}
                 >
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <code className="text-purple-100 font-mono text-sm">{cred.access_key}</code>
-                          {cred.name && (
-                            <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded">
-                              {cred.name}
-                            </span>
-                          )}
-                          {!cred.is_active || cred.revoked_at ? (
-                            <span className="text-xs bg-red-500/30 text-red-200 px-2 py-0.5 rounded">
+                          <StatusBadge status={cred.status} />
+                          {cred.revoked_at && (
+                            <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30">
                               已撤销
-                            </span>
-                          ) : (
-                            <span className="text-xs bg-green-500/30 text-green-200 px-2 py-0.5 rounded">
-                              活跃
-                            </span>
+                            </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-purple-300/70">
-                          <span className="flex items-center gap-1">
+                        
+                        {cred.name && (
+                          <div className="text-sm text-purple-200/80 mb-1">
+                            名称：{cred.name}
+                          </div>
+                        )}
+                        
+                        <div className="text-sm text-purple-300/70 space-y-1">
+                          <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             创建于 {formatDate(cred.created_at)}
-                          </span>
+                          </div>
+                          {cred.reviewed_at && (
+                            <div className="flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" />
+                              审批于 {formatDate(cred.reviewed_at)}
+                            </div>
+                          )}
                         </div>
+                        
+                        {cred.status === 'rejected' && cred.reason && (
+                          <div className="mt-2 p-2 bg-red-500/10 border border-red-400/30 rounded text-sm text-red-300">
+                            拒绝原因：{cred.reason}
+                          </div>
+                        )}
                       </div>
-                      {!cred.revoked_at && cred.is_active && (
+                      
+                      {!cred.revoked_at && cred.status !== 'rejected' && (
                         <Button
                           size="sm"
                           variant="ghost"
@@ -382,6 +432,7 @@ export default function ApiCredentialsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-purple-200/80 space-y-3">
+            <p><strong>审批流程：</strong>创建凭证后需等待管理员审批，审批通过后才能使用</p>
             <p><strong>签名算法：</strong>HMAC-SHA256</p>
             <p><strong>签名字符串格式：</strong><code className="bg-black/30 px-1 rounded">METHOD + "\n" + URL + "\n" + TIMESTAMP</code></p>
             <p><strong>有效期：</strong>签名时间戳前后 {900 / 60} 分钟内有效</p>
