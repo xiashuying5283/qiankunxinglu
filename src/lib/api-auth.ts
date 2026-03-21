@@ -97,9 +97,7 @@ export async function getSessionUserId(request: Request): Promise<string | null>
     return 'dev-user-001';
   }
   
-  const client = getSupabaseClient();
-  
-  // 从 cookie 获取 access token
+  // 从 cookie 获取 auth token
   const cookieHeader = request.headers.get('cookie') || '';
   
   // 解析 cookie
@@ -112,15 +110,22 @@ export async function getSessionUserId(request: Request): Promise<string | null>
     }
   });
   
-  // 查找 access token（Supabase 的 cookie 名称）
-  const accessToken = cookies['sb-access-token'] || cookies['access_token'];
+  // 查找 auth token（应用使用 auth_token cookie）
+  const authToken = cookies['auth_token'];
   
-  if (accessToken) {
+  if (authToken) {
     try {
-      const { data: { user } } = await client.auth.getUser(accessToken);
-      if (user) return user.id;
+      // 使用应用的 JWT 验证（与 lib/auth.ts 保持一致）
+      const { jwtVerify } = await import('jose');
+      const secret = process.env.JWT_SECRET || 'divination-app-secret-key-2024';
+      const secretKey = new TextEncoder().encode(secret);
+      
+      const { payload } = await jwtVerify(authToken, secretKey);
+      if (payload && typeof payload === 'object' && 'id' in payload) {
+        return payload.id as string;
+      }
     } catch {
-      // Token 无效
+      // Token 无效或过期
     }
   }
   
