@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
     // 生成 state 参数
     const state = generateOAuthState();
 
-    // 生成授权 URL
-    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000';
+    // 从请求中获取域名（优先使用环境变量，其次从请求头获取）
+    const requestUrl = new URL(request.url);
+    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
     const redirectUri = `${baseUrl}/api/auth/oauth/github/callback`;
     
     console.log('[GitHub OAuth] Initiating login:', {
