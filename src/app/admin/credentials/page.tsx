@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,9 @@ import {
   User, 
   Calendar,
   Mail,
-  FileText
+  FileText,
+  ArrowLeft,
+  ShieldX
 } from 'lucide-react';
 
 interface Credential {
@@ -265,6 +268,16 @@ export default function AdminCredentialsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
+      {/* 顶部导航 */}
+      <div className="mb-6">
+        <Link href="/">
+          <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回首页
+          </Button>
+        </Link>
+      </div>
+      
       <Card className="bg-card border-border mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -275,9 +288,14 @@ export default function AdminCredentialsPage() {
       </Card>
       
       {error && (
-        <Card className="bg-red-500/10 border-red-500/30 mb-6">
-          <CardContent className="py-4">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
+        <Card className="bg-destructive/10 border-destructive/30">
+          <CardContent className="py-8 flex flex-col items-center">
+            <ShieldX className="w-16 h-16 text-destructive mb-4" />
+            <p className="text-destructive text-lg font-medium mb-2">访问受限</p>
+            <p className="text-muted-foreground text-center mb-4">{error}</p>
+            <Link href="/">
+              <Button variant="outline">返回首页</Button>
+            </Link>
           </CardContent>
         </Card>
       )}

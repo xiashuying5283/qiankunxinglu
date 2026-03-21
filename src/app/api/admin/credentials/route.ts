@@ -7,21 +7,15 @@ import {
 } from '@/lib/api-auth';
 
 // 管理员用户ID列表（从环境变量获取）
-// 如果未配置，则所有登录用户都可以访问（开发环境）
+// 必须配置此环境变量才能使用管理员功能
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
-const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
 
 /**
  * 检查是否为管理员
  */
 async function isAdmin(userId: string): Promise<boolean> {
-  // 开发环境：所有用户都是管理员
-  if (isDev) {
-    return true;
-  }
-  // 生产环境：需要配置 ADMIN_USER_IDS
   if (ADMIN_USER_IDS.length === 0) {
-    console.warn('ADMIN_USER_IDS not configured');
+    console.warn('ADMIN_USER_IDS not configured - admin access denied');
     return false;
   }
   return ADMIN_USER_IDS.includes(userId);
