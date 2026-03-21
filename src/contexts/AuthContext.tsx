@@ -19,6 +19,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  loginAsGuest: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -113,6 +114,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // 游客登录
+  const loginAsGuest = useCallback(async () => {
+    try {
+      const sessionId = typeof window !== 'undefined' 
+        ? localStorage.getItem('guest_session_id') || undefined
+        : undefined;
+      
+      const response = await fetch('/api/auth/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setUser(data.user);
+        // 保存 sessionId 到 localStorage
+        if (typeof window !== 'undefined' && data.user.sessionId) {
+          localStorage.setItem('guest_session_id', data.user.sessionId);
+        }
+        return { success: true };
+      }
+      
+      return { success: false, error: data.error || '游客登录失败' };
+    } catch (error) {
+      console.error('Guest login error:', error);
+      return { success: false, error: '游客登录失败，请稍后重试' };
+    }
+  }, []);
+
   // 登出
   const logout = useCallback(async () => {
     // 开发环境不允许登出
@@ -135,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoggedIn: !!user,
     login,
     register,
+    loginAsGuest,
     logout,
     refreshUser,
   };

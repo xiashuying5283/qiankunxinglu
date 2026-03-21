@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, User, Mail, Lock, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Loader2, User, Mail, Lock, UserCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
 import { SliderCaptcha } from '@/components/ui/slider-captcha';
 
 // GitHub SVG 图标
@@ -52,7 +52,7 @@ export function LoginDialog({
   description = '登录后可以保存您的占卜记录，随时查看历史',
   onLoginSuccess,
 }: LoginDialogProps) {
-  const { login, register } = useAuth();
+  const { login, register, loginAsGuest } = useAuth();
 
   // 表单状态
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -61,6 +61,7 @@ export function LoginDialog({
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
   
   // 上次 OAuth 登录的账号信息
   const [lastOAuthAccount, setLastOAuthAccount] = useState<LastOAuthAccount | null>(null);
@@ -68,7 +69,7 @@ export function LoginDialog({
   // 验证码状态
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'oauth'>('login');
+  const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'guest' | 'oauth'>('login');
 
   // OAuth 状态
   const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ github: false });
@@ -115,6 +116,9 @@ export function LoginDialog({
         break;
       case 'register':
         await executeRegister();
+        break;
+      case 'guest':
+        await executeGuestLogin();
         break;
       case 'oauth':
         if (pendingOAuthProvider) {
@@ -164,6 +168,21 @@ export function LoginDialog({
     }
   };
 
+  // 执行游客登录
+  const executeGuestLogin = async () => {
+    setIsGuestLoading(true);
+    const result = await loginAsGuest();
+    setIsGuestLoading(false);
+
+    if (result.success) {
+      onOpenChange(false);
+      resetForm();
+      onLoginSuccess?.();
+    } else {
+      setError(result.error || '游客登录失败');
+    }
+  };
+
   // 触发 OAuth 登录
   const triggerOAuthLogin = (provider: 'github') => {
     window.location.href = `/api/auth/oauth/${provider}`;
@@ -182,6 +201,13 @@ export function LoginDialog({
     e.preventDefault();
     setError('');
     setPendingAction('register');
+    setShowCaptcha(true);
+  };
+
+  // 处理游客登录（显示验证码）
+  const handleGuestLogin = () => {
+    setError('');
+    setPendingAction('guest');
     setShowCaptcha(true);
   };
 
@@ -299,13 +325,14 @@ export function LoginDialog({
               </div>
             )}
             
-            {/* 邮箱登录/注册确认 */}
+            {/* 邮箱登录/注册/游客登录确认 */}
             {pendingAction !== 'oauth' && (
               <div className="space-y-4">
                 <div className="p-4 rounded-lg bg-muted/50 border">
                   <p className="text-sm text-muted-foreground text-center">
                     {pendingAction === 'login' && '即将使用邮箱密码登录'}
                     {pendingAction === 'register' && '即将创建新账号'}
+                    {pendingAction === 'guest' && '即将以游客身份登录'}
                   </p>
                 </div>
                 
@@ -320,9 +347,9 @@ export function LoginDialog({
                   <Button 
                     className="flex-1"
                     onClick={executePendingAction}
-                    disabled={isLoading}
+                    disabled={isLoading || isGuestLoading}
                   >
-                    {isLoading ? (
+                    {(isLoading || isGuestLoading) ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         处理中...
@@ -481,6 +508,39 @@ export function LoginDialog({
                 </Button>
               </>
             )}
+
+            {/* 游客登录 */}
+            <div className="relative mt-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">或者</span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleGuestLogin}
+              disabled={isGuestLoading}
+            >
+              {isGuestLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  登录中...
+                </>
+              ) : (
+                <>
+                  <UserCircle2 className="mr-2 h-4 w-4" />
+                  游客登录
+                </>
+              )}
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              游客无法创建 API 凭证
+            </p>
           </>
         )}
       </DialogContent>
