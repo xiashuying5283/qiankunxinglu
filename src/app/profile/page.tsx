@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame, GameStatsPanel } from '@/components/game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   User, Mail, Coins, Star, TrendingUp, Calendar, Award, 
-  CheckCircle2, Lock, Crown, Sparkles, ArrowLeft, History
+  CheckCircle2, Lock, Crown, Sparkles, ArrowLeft, History,
+  Camera, Save, X, Edit2, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -93,9 +96,29 @@ const providerNames: Record<string, string> = {
 };
 
 export default function ProfilePage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, refreshUser } = useAuth();
   const { gameState, loading: gameLoading, showSignIn } = useGame();
   const router = useRouter();
+
+  // 编辑状态
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  
+  // 文件上传相关
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // 初始化编辑表单
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || '');
+      setEditAvatar(user.avatar || '');
+    }
+  }, [user]);
 
   // 如果未登录，显示登录提示
   if (!authLoading && !user) {
@@ -108,8 +131,8 @@ export default function ProfilePage() {
             <p className="text-slate-400 mb-6">登录后可查看您的修行进度</p>
             <Link href="/">
               <Button className="bg-amber-600 hover:bg-amber-500">
-              返回首页
-            </Button>
+                返回首页
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -119,6 +142,94 @@ export default function ProfilePage() {
 
   const currentLevel = gameState?.level.level || 1;
   const currentExp = gameState?.level.totalExperience || 0;
+
+  // 处理头像文件上传
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      setSaveError('请选择图片文件');
+      return;
+    }
+
+    // 验证文件大小（最大 2MB）
+    if (file.size > 2 * 1024 * 1024) {
+      setSaveError('图片大小不能超过 2MB');
+      return;
+    }
+
+    setIsUploading(true);
+    setSaveError('');
+
+    try {
+      // 转换为 Base64 Data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setEditAvatar(dataUrl);
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        setSaveError('读取图片失败');
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setSaveError('上传失败，请稍后重试');
+      setIsUploading(false);
+    }
+  };
+
+  // 保存编辑
+  const handleSave = async () => {
+    if (!editName.trim()) {
+      setSaveError('昵称不能为空');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError('');
+    setSaveSuccess(false);
+
+    try {
+      const response = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName.trim(),
+          avatar: editAvatar || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSaveSuccess(true);
+        setIsEditing(false);
+        // 刷新用户信息
+        await refreshUser();
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setSaveError(data.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      setSaveError('保存失败，请稍后重试');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 取消编辑
+  const handleCancel = () => {
+    setEditName(user?.name || '');
+    setEditAvatar(user?.avatar || '');
+    setIsEditing(false);
+    setSaveError('');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -141,48 +252,176 @@ export default function ProfilePage() {
           <p className="text-slate-400">探索易学之路，步步精进</p>
         </div>
 
+        {/* 成功提示 */}
+        {saveSuccess && (
+          <div className="mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400 text-center">
+            保存成功
+          </div>
+        )}
+
         {/* 用户基本信息 */}
         <Card className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-slate-600 mb-6">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-6">
-              {/* 头像 */}
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name || '用户'}
-                  className="h-20 w-20 rounded-full object-cover ring-4 ring-amber-500/30"
-                />
-              ) : (
-                <div className="h-20 w-20 rounded-full bg-amber-500/20 flex items-center justify-center ring-4 ring-amber-500/30">
-                  <User className="h-10 w-10 text-amber-500" />
+            {isEditing ? (
+              // 编辑模式
+              <div className="space-y-6">
+                {/* 头像编辑 */}
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    {editAvatar ? (
+                      <img
+                        src={editAvatar}
+                        alt="头像预览"
+                        className="h-24 w-24 rounded-full object-cover ring-4 ring-amber-500/30"
+                      />
+                    ) : (
+                      <div className="h-24 w-24 rounded-full bg-amber-500/20 flex items-center justify-center ring-4 ring-amber-500/30">
+                        <User className="h-12 w-12 text-amber-500" />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="absolute bottom-0 right-0 p-2 bg-amber-500 rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      ) : (
+                        <Camera className="w-4 h-4 text-white" />
+                      )}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-400">点击相机图标更换头像</p>
                 </div>
-              )}
-              
-              {/* 用户信息 */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-bold text-white">{user?.name || '用户'}</h2>
-                  {gameState && (
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r ${LEVEL_SYSTEM[currentLevel - 1].color} text-white`}>
-                      {LEVEL_SYSTEM[currentLevel - 1].icon} {gameState.level.title}
-                    </span>
+
+                {/* 昵称编辑 */}
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-slate-300">昵称</Label>
+                  <Input
+                    id="name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="请输入昵称"
+                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500"
+                    maxLength={50}
+                  />
+                  <p className="text-xs text-slate-500">{editName.length}/50</p>
+                </div>
+
+                {/* 头像URL编辑（可选） */}
+                <div className="space-y-2">
+                  <Label htmlFor="avatar" className="text-slate-300">
+                    头像链接 <span className="text-slate-500">(可选)</span>
+                  </Label>
+                  <Input
+                    id="avatar"
+                    value={editAvatar && !editAvatar.startsWith('data:') ? editAvatar : ''}
+                    onChange={(e) => setEditAvatar(e.target.value)}
+                    placeholder="https://example.com/avatar.png"
+                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500"
+                  />
+                  <p className="text-xs text-slate-500">可以直接粘贴图片链接，或使用上方按钮上传</p>
+                </div>
+
+                {/* 错误提示 */}
+                {saveError && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                    {saveError}
+                  </div>
+                )}
+
+                {/* 操作按钮 */}
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={isSaving}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    取消
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isSaving || isUploading}
+                    className="bg-amber-600 hover:bg-amber-500"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        保存中...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        保存
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // 显示模式
+              <div className="flex items-center gap-6">
+                {/* 头像 */}
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || '用户'}
+                    className="h-20 w-20 rounded-full object-cover ring-4 ring-amber-500/30"
+                  />
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-amber-500/20 flex items-center justify-center ring-4 ring-amber-500/30">
+                    <User className="h-10 w-10 text-amber-500" />
+                  </div>
+                )}
+                
+                {/* 用户信息 */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-2xl font-bold text-white">{user?.name || '用户'}</h2>
+                    {gameState && (
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r ${LEVEL_SYSTEM[currentLevel - 1].color} text-white`}>
+                        {LEVEL_SYSTEM[currentLevel - 1].icon} {gameState.level.title}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {user?.email && (
+                    <p className="text-slate-400 flex items-center mb-1">
+                      <Mail className="h-4 w-4 mr-2" />
+                      {user.email}
+                    </p>
+                  )}
+                  
+                  {user?.provider && (
+                    <p className="text-slate-500 text-sm">
+                      {providerNames[user.provider] || user.provider} 账号
+                    </p>
                   )}
                 </div>
-                
-                {user?.email && (
-                  <p className="text-slate-400 flex items-center mb-1">
-                    <Mail className="h-4 w-4 mr-2" />
-                    {user.email}
-                  </p>
-                )}
-                
-                {user?.provider && (
-                  <p className="text-slate-500 text-sm">
-                    {providerNames[user.provider] || user.provider} 账号
-                  </p>
+
+                {/* 编辑按钮 */}
+                {!user?.isGuest && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    编辑资料
+                  </Button>
                 )}
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
