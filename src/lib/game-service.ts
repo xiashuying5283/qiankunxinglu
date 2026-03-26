@@ -151,10 +151,37 @@ export function getLevelProgress(experience: number, level: number): number {
 
 class GameService {
   
+  /** 表是否已初始化 */
+  private tablesInitialized = false;
+
+  /**
+   * 检查表是否存在
+   */
+  private async checkTablesExist(): Promise<boolean> {
+    if (this.tablesInitialized) return true;
+    
+    const supabase = getSupabaseClient();
+    const { error } = await supabase
+      .from('user_currency')
+      .select('id')
+      .limit(1);
+    
+    if (error && error.message?.includes('Could not find')) {
+      console.error('游戏化系统表不存在，请执行 scripts/init-game-db.sql');
+      return false;
+    }
+    
+    this.tablesInitialized = true;
+    return true;
+  }
+
   /**
    * 确保用户货币记录存在
    */
-  private async ensureCurrencyRecord(userId: string): Promise<void> {
+  private async ensureCurrencyRecord(userId: string): Promise<boolean> {
+    const tablesExist = await this.checkTablesExist();
+    if (!tablesExist) return false;
+    
     const supabase = getSupabaseClient();
     
     const { data, error } = await supabase
@@ -165,7 +192,7 @@ class GameService {
     
     if (error && error.code === 'PGRST116') {
       // 记录不存在，创建新记录
-      await supabase
+      const { error: insertError } = await supabase
         .from('user_currency')
         .insert({
           user_id: userId,
@@ -174,13 +201,23 @@ class GameService {
           total_gua_coins: 0,
           total_spirit_stones: 0,
         });
+      
+      if (insertError) {
+        console.error('创建货币记录失败:', insertError);
+        return false;
+      }
     }
+    
+    return true;
   }
 
   /**
    * 确保用户等级记录存在
    */
-  private async ensureLevelRecord(userId: string): Promise<void> {
+  private async ensureLevelRecord(userId: string): Promise<boolean> {
+    const tablesExist = await this.checkTablesExist();
+    if (!tablesExist) return false;
+    
     const supabase = getSupabaseClient();
     
     const { data, error } = await supabase
@@ -191,7 +228,7 @@ class GameService {
     
     if (error && error.code === 'PGRST116') {
       // 记录不存在，创建新记录
-      await supabase
+      const { error: insertError } = await supabase
         .from('user_levels')
         .insert({
           user_id: userId,
@@ -203,7 +240,14 @@ class GameService {
           read_knowledge_count: 0,
           share_count: 0,
         });
+      
+      if (insertError) {
+        console.error('创建等级记录失败:', insertError);
+        return false;
+      }
     }
+    
+    return true;
   }
 
   // ==================== 货币相关 ====================
@@ -212,7 +256,10 @@ class GameService {
    * 获取用户货币信息
    */
   async getCurrency(userId: string): Promise<UserCurrency> {
-    await this.ensureCurrencyRecord(userId);
+    const success = await this.ensureCurrencyRecord(userId);
+    if (!success) {
+      return { guaCoins: 0, spiritStones: 0, totalGuaCoins: 0, totalSpiritStones: 0 };
+    }
     
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
@@ -348,7 +395,21 @@ class GameService {
    * 获取用户等级信息
    */
   async getLevel(userId: string): Promise<UserLevel> {
-    await this.ensureLevelRecord(userId);
+    const success = await this.ensureLevelRecord(userId);
+    if (!success) {
+      return {
+        level: 1,
+        experience: 0,
+        totalExperience: 0,
+        divinationCount: 0,
+        signInDays: 0,
+        readKnowledgeCount: 0,
+        shareCount: 0,
+        title: '入门弟子',
+        nextLevelExp: 100,
+        progress: 0,
+      };
+    }
     
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
@@ -442,6 +503,9 @@ class GameService {
    * 检查今日是否已签到
    */
   async hasSignedInToday(userId: string): Promise<boolean> {
+    const tablesExist = await this.checkTablesExist();
+    if (!tablesExist) return false;
+    
     const today = new Date().toISOString().split('T')[0];
     
     const supabase = getSupabaseClient();
@@ -464,6 +528,16 @@ class GameService {
     totalDays: number;
     todayRewards: number;
   }> {
+    const tablesExist = await this.checkTablesExist();
+    if (!tablesExist) {
+      return {
+        hasSignedIn: false,
+        continuousDays: 0,
+        totalDays: 0,
+        todayRewards: SIGN_IN_REWARDS.daily,
+      };
+    }
+    
     const hasSignedIn = await this.hasSignedInToday(userId);
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -524,6 +598,19 @@ class GameService {
    * 执行签到
    */
   async signIn(userId: string): Promise<SignInResult> {
+    // 检查表是否存在
+    const tablesExist = await this.checkTablesExist();
+    if (!tablesExist) {
+      return {
+        success: false,
+        alreadySignedIn: false,
+        guaCoinsEarned: 0,
+        continuousDays: 0,
+        totalSignInDays: 0,
+        bonusAwarded: false,
+      };
+    }
+    
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     
@@ -564,7 +651,7 @@ class GameService {
     let bonusDescription: string | undefined;
     
     // 检查里程碑奖励
-    await this.ensureLevelRecord(userId);
+    const levelSuccess = await this.ensureLevelRecord(userId);
     const { data: levelData } = await supabase
       .from('user_levels')
       .select('sign_in_days')
@@ -582,7 +669,7 @@ class GameService {
     }
     
     // 创建签到记录
-    await supabase
+    const { error: insertError } = await supabase
       .from('sign_in_records')
       .insert({
         user_id: userId,
@@ -592,6 +679,18 @@ class GameService {
         bonus_awarded: bonusAwarded,
         bonus_type: bonusType,
       });
+    
+    if (insertError) {
+      console.error('创建签到记录失败:', insertError);
+      return {
+        success: false,
+        alreadySignedIn: false,
+        guaCoinsEarned: 0,
+        continuousDays: 0,
+        totalSignInDays: 0,
+        bonusAwarded: false,
+      };
+    }
     
     // 增加卦币
     await this.addGuaCoins(userId, guaCoinsEarned, 'sign_in', today, `每日签到（连续${continuousDays}天）`);

@@ -152,9 +152,6 @@ importers:
       opencc-js:
         specifier: ^1.0.5
         version: 1.0.5
-      pg:
-        specifier: ^8.16.3
-        version: 8.17.2
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -222,6 +219,9 @@ importers:
       only-allow:
         specifier: ^1.2.2
         version: 1.2.2
+      pg:
+        specifier: ^8.17.2
+        version: 8.17.2
       react-dev-inspector:
         specifier: ^2.0.1
         version: 2.0.1(@types/react@19.2.10)(eslint@9.39.2(jiti@2.6.1))(react@19.2.3)(typescript@5.9.3)(webpack@5.104.1(esbuild@0.25.12))

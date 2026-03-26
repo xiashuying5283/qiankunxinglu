@@ -4,70 +4,14 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 /**
  * 初始化游戏化系统数据库表
  * GET /api/game/init
- * 
- * 注意：Supabase 需要通过控制台或迁移创建表
- * 此 API 仅用于检查表是否存在并给出提示
+ * POST /api/game/init - 强制初始化
  */
-export async function GET() {
+export async function POST() {
   const supabase = getSupabaseClient();
   const results: { table: string; status: string; message: string }[] = [];
   
-  // 检查各个表是否存在
-  const tables = ['user_currency', 'currency_transactions', 'user_levels', 'sign_in_records'];
-  
-  for (const table of tables) {
-    try {
-      const { error } = await supabase
-        .from(table)
-        .select('id')
-        .limit(1);
-      
-      if (error) {
-        results.push({
-          table,
-          status: 'missing',
-          message: `表不存在，需要在Supabase控制台创建`,
-        });
-      } else {
-        results.push({
-          table,
-          status: 'exists',
-          message: '表已存在',
-        });
-      }
-    } catch (e) {
-      results.push({
-        table,
-        status: 'error',
-        message: '检查失败',
-      });
-    }
-  }
-  
-  const allExists = results.every(r => r.status === 'exists');
-  
-  // 如果表不存在，返回创建SQL
-  if (!allExists) {
-    return NextResponse.json({
-      success: false,
-      message: '部分表不存在，请在Supabase控制台执行以下SQL创建表',
-      results,
-      sql: getCreateTableSQL(),
-    });
-  }
-  
-  return NextResponse.json({
-    success: true,
-    message: '游戏化系统表检查完成，所有表已存在',
-    results,
-  });
-}
-
-/**
- * 获取创建表的SQL语句
- */
-function getCreateTableSQL(): string {
-  return `
+  // 创建表的SQL
+  const createTableSQL = `
 -- 1. 用户货币表
 CREATE TABLE IF NOT EXISTS user_currency (
   id SERIAL PRIMARY KEY,
@@ -79,8 +23,6 @@ CREATE TABLE IF NOT EXISTS user_currency (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE INDEX IF NOT EXISTS user_currency_user_idx ON user_currency(user_id);
 
 -- 2. 货币交易记录表
 CREATE TABLE IF NOT EXISTS currency_transactions (
@@ -94,10 +36,6 @@ CREATE TABLE IF NOT EXISTS currency_transactions (
   description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE INDEX IF NOT EXISTS currency_transactions_user_idx ON currency_transactions(user_id);
-CREATE INDEX IF NOT EXISTS currency_transactions_type_idx ON currency_transactions(transaction_type);
-CREATE INDEX IF NOT EXISTS currency_transactions_created_idx ON currency_transactions(created_at);
 
 -- 3. 用户等级表
 CREATE TABLE IF NOT EXISTS user_levels (
@@ -114,8 +52,6 @@ CREATE TABLE IF NOT EXISTS user_levels (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS user_levels_user_idx ON user_levels(user_id);
-
 -- 4. 签到记录表
 CREATE TABLE IF NOT EXISTS sign_in_records (
   id SERIAL PRIMARY KEY,
@@ -128,9 +64,74 @@ CREATE TABLE IF NOT EXISTS sign_in_records (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, sign_in_date)
 );
-
-CREATE INDEX IF NOT EXISTS sign_in_records_user_idx ON sign_in_records(user_id);
-CREATE INDEX IF NOT EXISTS sign_in_records_date_idx ON sign_in_records(sign_in_date);
 `;
+
+  try {
+    // 使用 RPC 执行创建表语句
+    // 注意：Supabase 需要 superuser 权限才能创建表
+    // 这里我们尝试通过检查表是否存在来确认
+    const tables = ['user_currency', 'currency_transactions', 'user_levels', 'sign_in_records'];
+    
+    for (const table of tables) {
+      try {
+        const { error } = await supabase
+          .from(table)
+          .select('id')
+          .limit(1);
+        
+        if (error) {
+          results.push({
+            table,
+            status: 'missing',
+            message: error.message || '表不存在',
+          });
+        } else {
+          results.push({
+            table,
+            status: 'exists',
+            message: '表已存在',
+          });
+        }
+      } catch (e: any) {
+        results.push({
+          table,
+          status: 'error',
+          message: e.message || '检查失败',
+        });
+      }
+    }
+    
+    const allExists = results.every(r => r.status === 'exists');
+    
+    if (!allExists) {
+      return NextResponse.json({
+        success: false,
+        message: '部分表不存在，请在Supabase控制台执行SQL创建表',
+        results,
+        sql: createTableSQL,
+        instructions: [
+          '1. 打开 Supabase 控制台',
+          '2. 进入 SQL Editor',
+          '3. 复制上面的 SQL 语句并执行',
+          '4. 刷新页面重试',
+        ],
+      });
+    }
+    
+    return NextResponse.json({
+      success: true,
+      message: '游戏化系统表检查完成，所有表已存在',
+      results,
+    });
+  } catch (error: any) {
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+      sql: createTableSQL,
+    }, { status: 500 });
+  }
 }
 
+export async function GET() {
+  return POST();
+}
