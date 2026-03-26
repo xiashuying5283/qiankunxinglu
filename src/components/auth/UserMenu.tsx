@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGame, CurrencyDisplay, LevelDisplay, GameStatsPanel } from '@/components/game';
+import { useGame, CurrencyDisplay } from '@/components/game';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,13 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { User, LogOut, UserCircle2, Mail, History, RefreshCw, Coins, Star, TrendingUp, Calendar, Award } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, History, RefreshCw, Calendar, Award } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
 // 提供商显示名称
@@ -34,22 +28,10 @@ const providerColors: Record<string, string> = {
   github: 'text-gray-700 dark:text-gray-300',
 };
 
-// 等级配置
-const LEVEL_CONFIG: Record<number, { name: string; privilege: string }> = {
-  1: { name: '入门弟子', privilege: '基础占卜功能' },
-  2: { name: '六爻学徒', privilege: '每日额外1次免费占卜' },
-  3: { name: '周易卦师', privilege: '每日额外2次免费占卜' },
-  4: { name: '精通大师', privilege: '解锁专属解卦模板' },
-  5: { name: '一代宗师', privilege: '免费高级详批每月1次' },
-  6: { name: '玄学泰斗', privilege: '所有功能免费无限使用' },
-  7: { name: '天人合一', privilege: '专属称号与标识' },
-};
-
 export function UserMenu() {
   const { user, logout, isLoading } = useAuth();
   const { gameState, showSignIn } = useGame();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   if (isLoading) {
     return (
@@ -102,7 +84,7 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      {/* 货币和等级显示 */}
+      {/* 货币显示 */}
       <div className="hidden md:flex items-center gap-2">
         <CurrencyDisplay compact />
       </div>
@@ -111,7 +93,6 @@ export function UserMenu() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="relative text-white/80 hover:text-white hover:bg-white/10">
             {user.avatar ? (
-              // 显示头像
               <img
                 src={user.avatar}
                 alt={user.name || '用户'}
@@ -172,9 +153,11 @@ export function UserMenu() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowProfileDialog(true)} className="cursor-pointer">
-            <TrendingUp className="mr-2 h-4 w-4" />
-            我的修行
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/profile" className="flex items-center w-full">
+              <Award className="mr-2 h-4 w-4" />
+              我的修行
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={showSignIn} className="cursor-pointer">
             <Calendar className="mr-2 h-4 w-4" />
@@ -207,52 +190,6 @@ export function UserMenu() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      
-      {/* 用户资料对话框 */}
-      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700 text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              个人资料
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* 用户基本信息 */}
-            <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name || '用户'}
-                  className="h-16 w-16 rounded-full object-cover ring-2 ring-amber-500/30"
-                />
-              ) : (
-                <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <User className="h-8 w-8 text-amber-500" />
-                </div>
-              )}
-              <div className="flex-1">
-                <p className="text-lg font-medium">{user.name || '用户'}</p>
-                {user.email && (
-                  <p className="text-sm text-slate-400 flex items-center">
-                    <Mail className="h-3 w-3 mr-1" />
-                    {user.email}
-                  </p>
-                )}
-                {user.provider && (
-                  <p className="text-xs text-slate-500 mt-1">
-                    {providerNames[user.provider] || user.provider} 账号
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            {/* 游戏状态面板 */}
-            <GameStatsPanel />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
