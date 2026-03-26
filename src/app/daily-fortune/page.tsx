@@ -4,60 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Calendar, Clock, Compass, Sparkles, Bookmark, Moon } from 'lucide-react';
+import { ArrowLeft, Sun, Star, TrendingUp, Heart, Briefcase, Coins, Calendar, Clock, Compass, Sparkles, Bookmark, Moon, Info } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { Disclaimer } from '@/components/Disclaimer';
 import { Solar, Lunar, LunarUtil } from 'lunar-javascript';
+import { calculateZodiacFortune, getZodiacList, type ZodiacFortune, type ZodiacInfo } from '@/lib/zodiac-fortune-calculator';
 
-// 十二生肖数据
-const zodiacs = [
-  { name: '鼠', emoji: '🐭', earthlyBranch: '子' },
-  { name: '牛', emoji: '🐮', earthlyBranch: '丑' },
-  { name: '虎', emoji: '🐯', earthlyBranch: '寅' },
-  { name: '兔', emoji: '🐰', earthlyBranch: '卯' },
-  { name: '龙', emoji: '🐲', earthlyBranch: '辰' },
-  { name: '蛇', emoji: '🐍', earthlyBranch: '巳' },
-  { name: '马', emoji: '🐴', earthlyBranch: '午' },
-  { name: '羊', emoji: '🐏', earthlyBranch: '未' },
-  { name: '猴', emoji: '🐵', earthlyBranch: '申' },
-  { name: '鸡', emoji: '🐔', earthlyBranch: '酉' },
-  { name: '狗', emoji: '🐶', earthlyBranch: '戌' },
-  { name: '猪', emoji: '🐷', earthlyBranch: '亥' },
-];
+// 十二生肖数据（从计算器获取）
+const zodiacs = getZodiacList();
 
-// 运势文案库
-const fortunes = {
-  overall: ['大吉大利', '运势上佳', '平稳顺利', '小有波折', '需谨慎行事', '宜静不宜动'],
-  career: ['事业顺遂，贵人相助', '工作顺利，有升职机会', '团队合作愉快', '需注意细节', '可能有变动', '宜保守行事'],
-  love: ['桃花运旺，姻缘将至', '感情甜蜜，关系稳定', '可遇良人', '需要沟通', '感情平淡', '宜独处静心'],
-  wealth: ['财运亨通，收入可观', '偏财运佳，可小试手气', '正财稳定', '不宜投资', '注意开支', '理财为宜'],
-  health: ['精力充沛，身体康健', '精神状态佳', '注意休息', '小心感冒', '宜多运动', '注意饮食'],
-};
-
-// 幸运元素
-const luckyElements = {
-  colors: ['红色', '黄色', '蓝色', '绿色', '紫色', '白色', '金色', '粉色', '橙色'],
-  numbers: ['1', '3', '5', '6', '8', '9', '2', '4', '7'],
-  directions: ['东方', '南方', '西方', '北方', '东南', '西南', '东北', '西北'],
-};
-
-interface DailyFortune {
-  zodiac: typeof zodiacs[0];
-  overall: string;
-  overallScore: number;
-  career: string;
-  careerScore: number;
-  love: string;
-  loveScore: number;
-  wealth: string;
-  wealthScore: number;
-  health: string;
-  healthScore: number;
-  luckyColor: string;
-  luckyNumber: string;
-  luckyDirection: string;
-  advice: string;
-}
+// 使用 ZodiacFortune 类型（从计算器导入）
+type DailyFortune = ZodiacFortune;
 
 // 精确的老黄历数据
 interface HuangLi {
@@ -93,11 +50,7 @@ interface HuangLi {
   xiongSha: string[];
 }
 
-// 根据日期生成伪随机数（用于运势部分，保持一致性）
-const getSeededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-};
+// generateFortune 函数已移除，改用 calculateZodiacFortune 真实计算
 
 // 使用 lunar-javascript 生成精确老黄历
 const generateHuangLi = (date: Date): HuangLi => {
@@ -207,58 +160,15 @@ const generateHuangLi = (date: Date): HuangLi => {
   };
 };
 
-// 生成运势
-const generateFortune = (zodiac: typeof zodiacs[0], date: Date, huangLi: HuangLi): DailyFortune => {
-  const dateSeed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
-  const zodiacIndex = zodiacs.findIndex(z => z.name === zodiac.name);
-  const seed = dateSeed + zodiacIndex;
-
-  const pickRandom = (arr: string[]) => arr[Math.floor(getSeededRandom(seed * arr.length) * arr.length)];
-  const pickScore = (base: number) => Math.floor(getSeededRandom(seed * base) * 5) + 1;
-  
-  // 根据值神调整运势基础分
-  const zhiShenBonus: Record<string, number> = {
-    '青龙': 1, '明堂': 1, '金匮': 1, '天德': 1, '玉堂': 1, '司命': 1,
-    '天刑': -1, '朱雀': -1, '白虎': -1, '天牢': -1, '玄武': -1, '勾陈': -1,
-  };
-  const bonus = zhiShenBonus[huangLi.zhiShen] || 0;
-  
-  const overallScore = Math.min(5, Math.max(1, pickScore(1) + bonus));
-  
-  const adviceList = [
-    '今日宜积极进取，把握机会。',
-    '适合开展新计划，好运相伴。',
-    '保持平常心，稳中求进。',
-    '注意休息，调整状态。',
-    '宜静不宜动，谨慎行事。',
-    '多与朋友交流，会有收获。',
-    '专注于重要事务，避免分心。',
-    '保持乐观心态，好运自来。',
-  ];
-
-  return {
-    zodiac,
-    overall: pickRandom(fortunes.overall),
-    overallScore,
-    career: pickRandom(fortunes.career),
-    careerScore: Math.min(5, Math.max(1, pickScore(2) + bonus)),
-    love: pickRandom(fortunes.love),
-    loveScore: Math.min(5, Math.max(1, pickScore(3) + bonus)),
-    wealth: pickRandom(fortunes.wealth),
-    wealthScore: Math.min(5, Math.max(1, pickScore(4) + bonus)),
-    health: pickRandom(fortunes.health),
-    healthScore: pickScore(5),
-    luckyColor: pickRandom(luckyElements.colors),
-    luckyNumber: pickRandom(luckyElements.numbers),
-    luckyDirection: pickRandom(luckyElements.directions),
-    advice: pickRandom(adviceList),
-  };
+// 生成运势（使用真实计算）
+const generateFortune = (zodiac: ZodiacInfo, date: Date, huangLi: HuangLi): DailyFortune => {
+  return calculateZodiacFortune(zodiac.name, date);
 };
 
 const STORAGE_KEY = 'daily-fortune-zodiac';
 
 export default function DailyFortunePage() {
-  const [selectedZodiac, setSelectedZodiac] = useState<typeof zodiacs[0] | null>(null);
+  const [selectedZodiac, setSelectedZodiac] = useState<ZodiacInfo | null>(null);
   const [fortune, setFortune] = useState<DailyFortune | null>(null);
   const [huangLi, setHuangLi] = useState<HuangLi | null>(null);
   const [rememberZodiac, setRememberZodiac] = useState(false);
@@ -290,7 +200,7 @@ export default function DailyFortunePage() {
     }
   }, [rememberZodiac, selectedZodiac]);
 
-  const handleSelect = (zodiac: typeof zodiacs[0]) => {
+  const handleSelect = (zodiac: ZodiacInfo) => {
     setSelectedZodiac(zodiac);
     setShowZodiacSelector(false);
     const today = new Date();
@@ -679,6 +589,19 @@ export default function DailyFortunePage() {
                     <span>🌟</span> 二十八宿
                   </h4>
                   <p className="text-indigo-100/90 text-sm leading-relaxed">{huangLi.erShiBaXiu}</p>
+                </CardContent>
+              </Card>
+
+              {/* 运势分析 */}
+              <Card className="bg-cyan-900/50 backdrop-blur-md border-cyan-400/50">
+                <CardContent className="py-4">
+                  <h4 className="font-bold text-cyan-100 mb-2 flex items-center gap-2">
+                    <Info className="w-5 h-5" /> 运势分析
+                  </h4>
+                  <p className="text-cyan-100/90 text-sm leading-relaxed">{fortune.analysis}</p>
+                  <p className="text-cyan-200/60 text-xs mt-2">
+                    以上分析基于传统命理学，综合考量地支关系、五行生克、值神吉凶等因素。
+                  </p>
                 </CardContent>
               </Card>
 
