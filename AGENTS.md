@@ -55,11 +55,9 @@ src/
 - **数据表**: `sign_in_records`
   - 字段: id, user_id, sign_in_date, continuous_days, gua_coins_earned, bonus_awarded, bonus_type, created_at
 - **功能特性**:
-  - 签到对话框内置日历视图
-  - 连续签到天数和总签到天数显示
-  - 里程碑奖励（7天、30天等）
-  - 断签后重置连续天数
-  - 已签到显示绿色标记，未签到显示灰色
+  - 显示最近7天签到记录
+  - 连续签到天数显示
+  - 已签到显示绿色勾，未签到显示灰色
 
 ### 2. 用户等级系统
 

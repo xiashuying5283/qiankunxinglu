@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { 
-  Calendar, Coins, Gift, Flame, CheckCircle2, 
-  ChevronLeft, ChevronRight
+  Calendar, Coins, Gift, Flame, CheckCircle2
 } from 'lucide-react';
 
 /** 签到奖励配置 */
@@ -48,51 +47,41 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
     bonusAwarded: boolean;
     bonusDescription?: string;
   } | null>(null);
-  
-  // 日历导航
-  const [viewYear, setViewYear] = useState(new Date().getFullYear());
-  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1);
 
-  // 获取签到状态和记录
   useEffect(() => {
     if (open) {
       fetchData();
-      setViewYear(new Date().getFullYear());
-      setViewMonth(new Date().getMonth() + 1);
     }
   }, [open]);
-
-  // 获取当月记录
-  useEffect(() => {
-    if (open) {
-      fetchRecords(viewYear, viewMonth);
-    }
-  }, [viewYear, viewMonth, open]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/game/status');
-      const data = await res.json();
-      if (data.success) {
-        setStatus(data.data.signIn);
+      // 获取游戏状态
+      const statusRes = await fetch('/api/game/status');
+      const statusData = await statusRes.json();
+      if (statusData.success) {
+        setStatus(statusData.data.signIn);
+      }
+      
+      // 获取最近7天记录
+      const today = new Date();
+      const dates: string[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+      
+      const recordsRes = await fetch(`/api/game/sign-in/records?year=${today.getFullYear()}&month=${today.getMonth() + 1}`);
+      const recordsData = await recordsRes.json();
+      if (recordsData.success) {
+        setRecords(recordsData.data.records);
       }
     } catch (error) {
       console.error('获取签到状态失败:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchRecords = async (year: number, month: number) => {
-    try {
-      const res = await fetch(`/api/game/sign-in/records?year=${year}&month=${month}`);
-      const data = await res.json();
-      if (data.success) {
-        setRecords(data.data.records);
-      }
-    } catch (error) {
-      console.error('获取签到记录失败:', error);
     }
   };
 
@@ -110,7 +99,6 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
           bonusDescription: data.data.bonusDescription,
         });
         fetchData();
-        fetchRecords(viewYear, viewMonth);
         onSignInSuccess?.();
       }
     } catch (error) {
@@ -120,69 +108,29 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
     }
   };
 
-  // 生成日历数据
-  const calendarData = useMemo(() => {
-    const firstDay = new Date(viewYear, viewMonth - 1, 1);
-    const lastDay = new Date(viewYear, viewMonth, 0);
-    const daysInMonth = lastDay.getDate();
-    
-    // 获取月份第一天是星期几（0=周日，转换后0=周一）
-    let startDayOfWeek = firstDay.getDay();
-    startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-    
-    const today = new Date().toISOString().split('T')[0];
-    const days: Array<{
-      date: string;
-      day: number;
-      record?: { continuousDays: number; guaCoinsEarned: number; bonusAwarded: boolean };
-      isToday: boolean;
-      isPast: boolean;
-    }> = [];
-    
-    // 填充空白
-    for (let i = 0; i < startDayOfWeek; i++) {
-      days.push({ date: '', day: 0, isToday: false, isPast: true });
-    }
-    
-    // 填充日期
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  // 计算最近7天的数据
+  const last7Days = useMemo(() => {
+    const today = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
       days.push({
         date: dateStr,
-        day,
+        day: d.getDate(),
+        weekday: ['日', '一', '二', '三', '四', '五', '六'][d.getDay()],
         record: records[dateStr],
-        isToday: dateStr === today,
-        isPast: dateStr < today,
+        isToday: i === 0,
+        isPast: i > 0,
       });
     }
-    
     return days;
-  }, [viewYear, viewMonth, records]);
-
-  const goToPrevMonth = () => {
-    if (viewMonth === 1) {
-      setViewMonth(12);
-      setViewYear(viewYear - 1);
-    } else {
-      setViewMonth(viewMonth - 1);
-    }
-  };
-
-  const goToNextMonth = () => {
-    if (viewMonth === 12) {
-      setViewMonth(1);
-      setViewYear(viewYear + 1);
-    } else {
-      setViewMonth(viewMonth + 1);
-    }
-  };
-
-  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
-  const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+  }, [records]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-amber-900/95 to-orange-900/95 border-amber-400/30 text-amber-100">
+      <DialogContent className="sm:max-w-md bg-gradient-to-br from-amber-900/95 to-orange-900/95 border-amber-400/30 text-amber-100">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center justify-between">
             <span className="flex items-center gap-2">
@@ -192,7 +140,7 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
             {status && (
               <span className="text-sm font-normal flex items-center gap-1 text-amber-300">
                 <Flame className="w-4 h-4 text-orange-400" />
-                连续 {status.continuousDays} 天 | 累计 {status.totalDays} 天
+                连续 {status.continuousDays} 天
               </span>
             )}
           </DialogTitle>
@@ -201,7 +149,6 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
         {loading ? (
           <div className="py-8 text-center text-amber-200">加载中...</div>
         ) : signInResult ? (
-          // 签到成功界面
           <div className="py-6 text-center space-y-4">
             <div className="w-20 h-20 mx-auto bg-green-500/20 rounded-full flex items-center justify-center">
               <CheckCircle2 className="w-12 h-12 text-green-400" />
@@ -227,91 +174,44 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
               </div>
             )}
 
-            <Button
-              onClick={() => onOpenChange(false)}
-              className="mt-4 bg-amber-600 hover:bg-amber-500 text-white"
-            >
+            <Button onClick={() => onOpenChange(false)} className="mt-4 bg-amber-600 hover:bg-amber-500 text-white">
               确定
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            {/* 签到日历 */}
+            {/* 最近7天签到记录 */}
             <div className="bg-amber-950/40 rounded-lg p-4">
-              {/* 月份导航 */}
-              <div className="flex items-center justify-between mb-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={goToPrevMonth}
-                  className="h-7 w-7 text-amber-300 hover:text-amber-100 hover:bg-amber-500/20"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-bold text-amber-200">
-                  {viewYear}年 {monthNames[viewMonth - 1]}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={goToNextMonth}
-                  className="h-7 w-7 text-amber-300 hover:text-amber-100 hover:bg-amber-500/20"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              {/* 星期标题 */}
-              <div className="grid grid-cols-7 gap-1 mb-1">
-                {weekDays.map((day, i) => (
-                  <div key={day} className={`text-center text-xs py-1 ${i >= 5 ? 'text-orange-400/70' : 'text-amber-400/70'}`}>
-                    {day}
-                  </div>
-                ))}
-              </div>
-              
-              {/* 日历格子 */}
-              <div className="grid grid-cols-7 gap-1">
-                {calendarData.map((day, index) => {
-                  if (!day.date) {
-                    return <div key={index} className="h-8" />;
-                  }
-                  
+              <p className="text-sm text-amber-300 mb-3">最近7天签到</p>
+              <div className="grid grid-cols-7 gap-1.5">
+                {last7Days.map((day, index) => {
                   let bgClass = 'bg-amber-950/30';
                   let textClass = 'text-amber-400/50';
                   
                   if (day.record) {
                     bgClass = 'bg-green-500/20';
-                    textClass = 'text-green-400 font-bold';
+                    textClass = 'text-green-400';
                   } else if (day.isToday) {
                     bgClass = 'bg-amber-500/30 ring-2 ring-amber-400';
                     textClass = 'text-amber-300 font-bold';
                   } else if (day.isPast) {
-                    textClass = 'text-red-400/50';
+                    textClass = 'text-red-400/40';
                   }
                   
                   return (
-                    <div
-                      key={index}
-                      className={`h-8 rounded flex items-center justify-center text-xs relative ${bgClass}`}
-                      title={
-                        day.record
-                          ? `已签到 · +${day.record.guaCoinsEarned}卦币`
-                          : day.isToday
-                          ? '今天'
-                          : day.isPast
-                          ? '未签到'
-                          : ''
-                      }
-                    >
-                      <span className={textClass}>{day.day}</span>
-                      {day.record && <CheckCircle2 className="w-2.5 h-2.5 text-green-400 absolute bottom-0.5 right-0.5" />}
+                    <div key={index} className="text-center">
+                      <p className="text-xs text-amber-400/60 mb-1">周{day.weekday}</p>
+                      <div
+                        className={`h-9 rounded-lg flex items-center justify-center relative ${bgClass}`}
+                        title={day.record ? `已签到 +${day.record.guaCoinsEarned}卦币` : day.isToday ? '今天' : day.isPast ? '未签到' : ''}
+                      >
+                        <span className={`text-sm ${textClass}`}>{day.day}</span>
+                        {day.record && <CheckCircle2 className="w-2.5 h-2.5 text-green-400 absolute -bottom-0.5 -right-0.5" />}
+                      </div>
                     </div>
                   );
                 })}
               </div>
-              
-              {/* 图例 */}
               <div className="flex items-center justify-center gap-4 text-xs text-amber-400/60 mt-3 pt-2 border-t border-amber-400/20">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded bg-green-500/20" />
@@ -320,10 +220,6 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded bg-amber-500/30 ring-1 ring-amber-400" />
                   <span>今天</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-amber-950/50" />
-                  <span>未签到</span>
                 </div>
               </div>
             </div>
@@ -336,7 +232,6 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
               </div>
             ) : (
               <>
-                {/* 今日奖励 */}
                 <div className="bg-gradient-to-r from-amber-600/30 to-orange-600/30 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -353,7 +248,6 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
                   </div>
                 </div>
 
-                {/* 签到按钮 */}
                 <Button
                   onClick={handleSignIn}
                   disabled={signingIn}
