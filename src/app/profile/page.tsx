@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame, GameStatsPanel } from '@/components/game';
+import { SignInRecords } from '@/components/game/SignInRecords';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -426,9 +427,12 @@ export default function ProfilePage() {
         </Card>
 
         {/* 游戏统计面板 */}
-        <div className="mb-8">
+        <div className="mb-6">
           <GameStatsPanel />
         </div>
+
+        {/* 签到日历 */}
+        <SignInRecords className="mb-8" />
 
         {/* 等级体系 */}
         <Card className="bg-slate-800/50 border-slate-700">
