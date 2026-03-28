@@ -48,17 +48,18 @@ src/
 
 ### 1. 签到系统
 
-- **位置**: `src/components/game/SignInDialog.tsx`, `src/components/game/SignInRecords.tsx`
+- **位置**: `src/components/game/SignInDialog.tsx`
 - **API**: 
   - `POST /api/game/sign-in` - 执行签到
   - `GET /api/game/sign-in/records?year=YYYY&month=M` - 获取签到记录
 - **数据表**: `sign_in_records`
   - 字段: id, user_id, sign_in_date, continuous_days, gua_coins_earned, bonus_awarded, bonus_type, created_at
 - **功能特性**:
-  - 日历视图显示签到历史
-  - 连续签到天数追踪
+  - 签到对话框内置日历视图
+  - 连续签到天数和总签到天数显示
   - 里程碑奖励（7天、30天等）
   - 断签后重置连续天数
+  - 已签到显示绿色标记，未签到显示灰色
 
 ### 2. 用户等级系统
 
