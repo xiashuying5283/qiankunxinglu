@@ -4,12 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw, Share2 } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { QuestionCategorySelector, QuestionCategory } from '@/components/QuestionCategorySelector';
+import { ShareCard, TarotShareData } from '@/components/share/ShareCard';
 
 // 类型定义
 interface TarotCard {
@@ -82,6 +83,9 @@ export default function TarotPage() {
   // 登录弹窗状态
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingCards, setPendingCards] = useState<DrawnCard[] | null>(null);
+  
+  // 分享弹窗状态
+  const [showShareCard, setShowShareCard] = useState(false);
   
   // 数据状态
   const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
@@ -712,10 +716,18 @@ export default function TarotPage() {
 
               {/* 重新占卜按钮 */}
               {allRevealed && (
-                <div className="text-center">
+                <div className="text-center flex gap-4 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowShareCard(true)}
+                    className="border-purple-400/50 text-purple-200 hover:bg-purple-500/20 px-8 py-6 text-lg"
+                  >
+                    <Share2 className="w-5 h-5 mr-2" />
+                    分享结果
+                  </Button>
                   <Button
                     onClick={reset}
-                    className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white px-12 py-6 text-lg"
+                    className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white px-8 py-6 text-lg"
                   >
                     <RefreshCw className="w-5 h-5 mr-2" />
                     重新占卜
@@ -735,6 +747,24 @@ export default function TarotPage() {
         description="登录后可以获得AI大师解读，并保存您的占卜记录"
         onLoginSuccess={handleLoginSuccess}
       />
+
+      {/* 分享弹窗 */}
+      {drawnCards.length > 0 && (
+        <ShareCard
+          open={showShareCard}
+          onOpenChange={setShowShareCard}
+          data={{
+            type: 'tarot',
+            spreadName: spreadNames[spreadType],
+            cards: drawnCards.map((dc, i) => ({
+              name: dc.card.name,
+              position: spreadPositions[spreadType][i],
+              isReversed: dc.isReversed,
+              keywords: dc.card.keywords,
+            })),
+          }}
+        />
+      )}
 
       {/* 添加翻转动画CSS */}
       <style jsx global>{`

@@ -4,13 +4,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink, Share2 } from 'lucide-react';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { GlossaryTerm } from '@/components/GlossaryTerm';
 import { HexagramKnowledge } from '@/components/HexagramKnowledge';
+import { ShareCard, IChingShareData } from '@/components/share/ShareCard';
 import { 
   QuestionCategorySelector, 
   QuestionCategory, 
@@ -84,6 +85,9 @@ export default function IChingPage() {
   // 登录弹窗状态
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingDivinationResult, setPendingDivinationResult] = useState<DivinationResult | null>(null);
+  
+  // 分享弹窗状态
+  const [showShareCard, setShowShareCard] = useState(false);
   
   // 使用预加载数据服务
   const { hexagrams, trigrams, isLoading, error, refresh } = useHexagramData();
@@ -651,10 +655,18 @@ export default function IChingPage() {
               <Disclaimer variant="full" />
 
               {/* 重新占卜按钮 */}
-              <div className="text-center">
+              <div className="text-center flex gap-4 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowShareCard(true)}
+                  className="border-amber-400/50 text-amber-200 hover:bg-amber-500/20 px-8 py-6 text-lg"
+                >
+                  <Share2 className="w-5 h-5 mr-2" />
+                  分享结果
+                </Button>
                 <Button
                   onClick={reset}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-6 text-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新占卜
@@ -673,6 +685,23 @@ export default function IChingPage() {
         description="登录后可以获得AI大师解读，并保存您的占卜记录"
         onLoginSuccess={handleLoginSuccess}
       />
+
+      {/* 分享弹窗 */}
+      {result && (
+        <ShareCard
+          open={showShareCard}
+          onOpenChange={setShowShareCard}
+          data={{
+            type: 'iching',
+            hexagramSymbol: result.originalHexagram.symbol,
+            hexagramName: result.originalHexagram.name,
+            hexagramNumber: result.originalHexagram.number,
+            changedHexagramSymbol: result.changedHexagram?.symbol,
+            changedHexagramName: result.changedHexagram?.name,
+            judgement: result.originalHexagram.judgement,
+          }}
+        />
+      )}
     </div>
   );
 }
