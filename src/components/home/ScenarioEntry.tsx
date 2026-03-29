@@ -69,7 +69,7 @@ export function ScenarioEntry() {
           有困惑？选一个直接测
           <Sparkles className="w-5 h-5 text-amber-400" />
         </h2>
-        <p className="text-gray-400 text-sm">不用纠结选周易还是塔罗，系统会根据你的问题自动匹配</p>
+        <p className="text-gray-400 text-sm">常见问题，一键直达</p>
       </div>
 
       {/* 场景分类 */}
