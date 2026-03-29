@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw, Share2 } from 'lucide-react';
@@ -66,8 +67,16 @@ const spreadNames: Record<SpreadType, string> = {
 
 export default function TarotPage() {
   const { isLoggedIn } = useAuth();
-  const [question, setQuestion] = useState('');
-  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(null);
+  const searchParams = useSearchParams();
+  
+  // 从 URL 参数读取问题和类型
+  const urlQuestion = searchParams.get('question');
+  const urlType = searchParams.get('type');
+  
+  const [question, setQuestion] = useState(urlQuestion || '');
+  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(
+    urlType ? (urlType as QuestionCategory) : null
+  );
   const [spreadType, setSpreadType] = useState<SpreadType>('three');
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
