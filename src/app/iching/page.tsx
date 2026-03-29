@@ -637,7 +637,7 @@ export default function IChingPage() {
                         <GraduationCap className="w-5 h-5" />
                         想深入学习周易？
                       </div>
-                      <div className="text-purple-200/60 text-sm mt-1">
+                      <div className="text-purple-200 text-sm mt-1">
                         前往学习中心，系统学习卦象知识与断卦技巧
                       </div>
                     </div>
