@@ -70,7 +70,7 @@ interface DivinationResult {
 
 // 内部组件 - 使用 useSearchParams
 function IChingContent() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
   
   // 从 URL 参数读取问题和类型
@@ -102,26 +102,35 @@ function IChingContent() {
   // 使用预加载数据服务
   const { hexagrams, trigrams, isLoading, error, needsLogin, refresh } = useHexagramData();
   
-  // 需要登录时自动跳转
+  // 需要登录时自动跳转（等待 AuthContext 加载完成后再判断）
   const [showLoginTip, setShowLoginTip] = useState(false);
   const [countdown, setCountdown] = useState(3);
   
+  // 当 needsLogin 时，等待 AuthContext 加载完成后再判断
   useEffect(() => {
-    if (needsLogin) {
-      setShowLoginTip(true);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            window.location.href = '/login';
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
+    if (needsLogin && !isAuthLoading) {
+      // AuthContext 已加载完成，检查是否真的需要登录
+      if (isLoggedIn) {
+        // 用户已登录，刷新卦象数据
+        console.log('[IChing] 用户已登录，刷新卦象数据');
+        refresh();
+      } else {
+        // 用户未登录，显示登录提示
+        setShowLoginTip(true);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              window.location.href = '/login';
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
     }
-  }, [needsLogin]);
+  }, [needsLogin, isAuthLoading, isLoggedIn, refresh]);
 
   // 抛三枚铜钱
   const throwThreeCoins = (): CoinThrow => {
@@ -397,8 +406,8 @@ function IChingContent() {
     setPendingDivinationResult(null);
   };
 
-  // 加载中状态
-  if (isLoading) {
+  // 加载中状态（包括 AuthContext 加载中）
+  if (isLoading || isAuthLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
         <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
@@ -411,8 +420,8 @@ function IChingContent() {
     );
   }
 
-  // 需要登录提示
-  if (needsLogin || showLoginTip) {
+  // 需要登录提示（仅在 AuthContext 加载完成且用户未登录时显示）
+  if (showLoginTip) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
         <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 max-w-md">

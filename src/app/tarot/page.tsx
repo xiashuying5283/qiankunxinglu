@@ -67,7 +67,7 @@ const spreadNames: Record<SpreadType, string> = {
 
 // 内部组件 - 使用 useSearchParams
 function TarotContent() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
   
   // 从 URL 参数读取问题和类型
@@ -103,6 +103,9 @@ function TarotContent() {
   const [error, setError] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  
+  // 是否已经尝试过刷新（避免无限循环）
+  const hasRetriedRef = useRef(false);
 
   // 加载塔罗牌数据
   const loadCards = async () => {
@@ -156,22 +159,31 @@ function TarotContent() {
     loadCards();
   }, []);
   
-  // 需要登录时自动跳转
+  // 当 needsLogin 时，等待 AuthContext 加载完成后再判断
   useEffect(() => {
-    if (needsLogin) {
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            window.location.href = '/login';
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
+    if (needsLogin && !isAuthLoading) {
+      // AuthContext 已加载完成，检查是否真的需要登录
+      if (isLoggedIn && !hasRetriedRef.current) {
+        // 用户已登录，刷新数据
+        console.log('[Tarot] 用户已登录，刷新塔罗牌数据');
+        hasRetriedRef.current = true;
+        loadCards();
+      } else if (!isLoggedIn) {
+        // 用户未登录，显示登录提示
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              window.location.href = '/login';
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
     }
-  }, [needsLogin]);
+  }, [needsLogin, isAuthLoading, isLoggedIn]);
 
   // 保存占卜记录
   const saveDivinationRecord = async (cards: DrawnCard[], interpretation: string) => {
@@ -384,8 +396,22 @@ function TarotContent() {
     }
   };
 
-  // 需要登录提示
-  if (needsLogin) {
+  // 加载中状态（包括 AuthContext 加载中）
+  if (isLoading || isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
+          <CardContent className="py-12 flex flex-col items-center">
+            <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
+            <p className="text-purple-100">正在加载塔罗牌数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 需要登录提示（仅在 AuthContext 加载完成且用户未登录时显示）
+  if (needsLogin && !isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
         <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 max-w-md">
@@ -406,20 +432,6 @@ function TarotContent() {
             >
               立即登录
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // 加载中状态
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
-          <CardContent className="py-12 flex flex-col items-center">
-            <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
-            <p className="text-purple-100">正在加载塔罗牌数据...</p>
           </CardContent>
         </Card>
       </div>
