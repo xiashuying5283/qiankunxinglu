@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame, CurrencyDisplay } from '@/components/game';
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, UserCircle2, Mail, History, RefreshCw, Calendar, Award } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, History, RefreshCw, Calendar, Award, Sparkles } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
 // 提供商显示名称
@@ -32,6 +32,22 @@ export function UserMenu() {
   const { user, logout, isLoading } = useAuth();
   const { gameState, showSignIn } = useGame();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
+
+  // 签到提醒动画（未签到时每隔一段时间闪烁）
+  useEffect(() => {
+    if (gameState && !gameState.signIn.hasSignedIn) {
+      const timer = setInterval(() => {
+        setShowPulse(true);
+        setTimeout(() => setShowPulse(false), 1000);
+      }, 10000); // 每10秒闪烁一次
+      
+      // 首次显示
+      setTimeout(() => setShowPulse(true), 2000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [gameState?.signIn.hasSignedIn]);
 
   if (isLoading) {
     return (
@@ -83,11 +99,26 @@ export function UserMenu() {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       {/* 货币显示 */}
       <div className="hidden md:flex items-center gap-2">
         <CurrencyDisplay compact />
       </div>
+      
+      {/* 签到快捷按钮 - 未签到时显示 */}
+      {gameState && !gameState.signIn.hasSignedIn && (
+        <Button
+          onClick={showSignIn}
+          size="sm"
+          className={`relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0 h-8 px-3 ${
+            showPulse ? 'animate-pulse ring-2 ring-amber-400/50' : ''
+          }`}
+        >
+          <Calendar className="w-4 h-4 mr-1.5" />
+          签到
+          <Sparkles className="w-3 h-3 ml-1 text-amber-200" />
+        </Button>
+      )}
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
