@@ -50,6 +50,8 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
 
   useEffect(() => {
     if (open) {
+      // 每次打开弹窗时重置签到结果，重新获取最新数据
+      setSignInResult(null);
       fetchData();
     }
   }, [open]);
