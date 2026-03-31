@@ -13,8 +13,13 @@ import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
 import { ScenarioEntry } from '@/components/home/ScenarioEntry';
+import { SignInBanner } from '@/components/home/SignInBanner';
+import { SignInDialog } from '@/components/game/SignInDialog';
 
 export default function Home() {
+  // 签到弹窗状态
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+
   // 轮播推荐功能
   const recommendedFeatures = [
     {
@@ -212,6 +217,15 @@ export default function Home() {
         <OAuthHandler />
       </Suspense>
 
+      {/* 签到弹窗 */}
+      <SignInDialog 
+        open={showSignInDialog} 
+        onOpenChange={setShowSignInDialog}
+        onSignInSuccess={() => {
+          // 签到成功后可以刷新状态
+        }}
+      />
+
       {/* 星空背景效果 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="stars"></div>
@@ -219,6 +233,9 @@ export default function Home() {
 
       {/* 主内容 */}
       <div className="relative z-10">
+        {/* 签到引导横幅 */}
+        <SignInBanner onOpenDialog={() => setShowSignInDialog(true)} />
+        
         {/* 顶部导航栏 */}
         <div className="container mx-auto px-4 py-4 flex items-center justify-end">
           <UserMenu />
