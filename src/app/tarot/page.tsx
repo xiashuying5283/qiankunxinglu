@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,8 @@ const spreadNames: Record<SpreadType, string> = {
   celtic: '凯尔特十字占卜'
 };
 
-export default function TarotPage() {
+// 内部组件 - 使用 useSearchParams
+function TarotContent() {
   const { isLoggedIn } = useAuth();
   const searchParams = useSearchParams();
   
@@ -785,5 +786,26 @@ export default function TarotPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+// 加载状态组件
+function TarotLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950/20 to-slate-900 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+        <p className="text-purple-200">正在加载...</p>
+      </div>
+    </div>
+  );
+}
+
+// 主页面组件 - 用 Suspense 包裹
+export default function TarotPage() {
+  return (
+    <Suspense fallback={<TarotLoading />}>
+      <TarotContent />
+    </Suspense>
   );
 }

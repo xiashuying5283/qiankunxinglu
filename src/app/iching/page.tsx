@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -68,7 +68,8 @@ interface DivinationResult {
   changedBinary: string;
 }
 
-export default function IChingPage() {
+// 内部组件 - 使用 useSearchParams
+function IChingContent() {
   const { isLoggedIn } = useAuth();
   const searchParams = useSearchParams();
   
@@ -712,5 +713,26 @@ export default function IChingPage() {
         />
       )}
     </div>
+  );
+}
+
+// 加载状态组件
+function IChingLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-900 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+        <p className="text-amber-200">正在加载...</p>
+      </div>
+    </div>
+  );
+}
+
+// 主页面组件 - 用 Suspense 包裹
+export default function IChingPage() {
+  return (
+    <Suspense fallback={<IChingLoading />}>
+      <IChingContent />
+    </Suspense>
   );
 }
