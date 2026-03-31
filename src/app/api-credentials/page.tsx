@@ -10,7 +10,7 @@ import {
   ArrowLeft, Key, Plus, Trash2, Copy, Check, Eye, EyeOff, 
   Clock, AlertCircle, CheckCircle, Loader2, XCircle
 } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Credential {
@@ -181,11 +181,11 @@ export default function ApiCredentialsPage() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <LoginDialog
+        <LoginRequiredDialog
           open={showLoginDialog}
           onOpenChange={setShowLoginDialog}
-          title="请先登录"
-          description="登录后才能管理 API 凭证"
+          message="您暂未登录，即将跳转到登录页面"
+          redirectPath="/login"
         />
       </div>
     );

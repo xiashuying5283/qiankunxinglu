@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink, Share2 } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
@@ -324,16 +324,6 @@ function IChingContent() {
         streamInterpretation(divinationResult);
       }
     }, 500);
-  };
-
-  // 登录成功后的回调
-  const handleLoginSuccess = () => {
-    setShowLoginDialog(false);
-    // 如果有待处理的占卜结果，开始AI解读
-    if (pendingDivinationResult) {
-      streamInterpretation(pendingDivinationResult);
-      setPendingDivinationResult(null);
-    }
   };
 
   // 切换爻辞展开状态
@@ -687,13 +677,12 @@ function IChingContent() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录后查看大师解读"
-        description="登录后可以获得AI大师解读，并保存您的占卜记录"
-        onLoginSuccess={handleLoginSuccess}
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
 
       {/* 分享弹窗 */}
