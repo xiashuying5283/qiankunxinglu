@@ -7,9 +7,6 @@ interface DisclaimerProps {
   variant?: 'full' | 'compact' | 'footer';
 }
 
-// ICP 备案号
-const ICP_BEIAN = '京ICP备2026015184号';
-
 /**
  * 免责声明组件
  * - full: 完整版，用于占卜页面底部
@@ -17,6 +14,8 @@ const ICP_BEIAN = '京ICP备2026015184号';
  * - footer: 页脚版，用于网站底部
  */
 export function Disclaimer({ variant = 'full' }: DisclaimerProps) {
+  // ICP 备案号（从环境变量读取）
+  const icpBeian = process.env.NEXT_PUBLIC_ICP_BEIAN;
   // 公安备案号（从环境变量读取，可选）
   const gonganBeian = process.env.NEXT_PUBLIC_GONGAN_BEIAN;
   
@@ -32,26 +31,30 @@ export function Disclaimer({ variant = 'full' }: DisclaimerProps) {
             隐私政策
           </Link>
         </p>
-        <p className="text-gray-500 space-x-3">
-          <a 
-            href="https://beian.miit.gov.cn/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hover:text-gray-400 transition-colors"
-          >
-            {ICP_BEIAN}
-          </a>
-          {gonganBeian && (
-            <a 
-              href={`https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${gonganBeian.replace(/[^0-9]/g, '')}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-gray-400 transition-colors inline-flex items-center gap-1"
-            >
-              {gonganBeian}
-            </a>
-          )}
-        </p>
+        {(icpBeian || gonganBeian) && (
+          <p className="text-gray-500 space-x-3">
+            {icpBeian && (
+              <a 
+                href="https://beian.miit.gov.cn/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-400 transition-colors"
+              >
+                {icpBeian}
+              </a>
+            )}
+            {gonganBeian && (
+              <a 
+                href={`https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${gonganBeian.replace(/[^0-9]/g, '')}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-400 transition-colors inline-flex items-center gap-1"
+              >
+                {gonganBeian}
+              </a>
+            )}
+          </p>
+        )}
       </div>
     );
   }
