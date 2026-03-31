@@ -1,10 +1,16 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface DisclaimerProps {
   variant?: 'full' | 'compact' | 'footer';
+}
+
+interface Config {
+  icpBeian: string | null;
+  gonganBeian: string | null;
 }
 
 /**
@@ -14,10 +20,20 @@ interface DisclaimerProps {
  * - footer: 页脚版，用于网站底部
  */
 export function Disclaimer({ variant = 'full' }: DisclaimerProps) {
-  // ICP 备案号（从环境变量读取）
-  const icpBeian = process.env.NEXT_PUBLIC_ICP_BEIAN;
-  // 公安备案号（从环境变量读取，可选）
-  const gonganBeian = process.env.NEXT_PUBLIC_GONGAN_BEIAN;
+  const [config, setConfig] = useState<Config>({
+    icpBeian: process.env.NEXT_PUBLIC_ICP_BEIAN || null,
+    gonganBeian: process.env.NEXT_PUBLIC_GONGAN_BEIAN || null,
+  });
+
+  // 客户端获取运行时配置（解决 NEXT_PUBLIC_ 需要重新构建的问题）
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => setConfig(data))
+      .catch(() => {});
+  }, []);
+
+  const { icpBeian, gonganBeian } = config;
   
   if (variant === 'footer') {
     return (
