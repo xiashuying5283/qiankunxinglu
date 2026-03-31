@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink, Share2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink, Share2, LogIn } from 'lucide-react';
 import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -100,7 +100,28 @@ function IChingContent() {
   const [showShareCard, setShowShareCard] = useState(false);
   
   // 使用预加载数据服务
-  const { hexagrams, trigrams, isLoading, error, refresh } = useHexagramData();
+  const { hexagrams, trigrams, isLoading, error, needsLogin, refresh } = useHexagramData();
+  
+  // 需要登录时自动跳转
+  const [showLoginTip, setShowLoginTip] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  
+  useEffect(() => {
+    if (needsLogin) {
+      setShowLoginTip(true);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            window.location.href = '/login';
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [needsLogin]);
 
   // 抛三枚铜钱
   const throwThreeCoins = (): CoinThrow => {
@@ -384,6 +405,34 @@ function IChingContent() {
           <CardContent className="py-12 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-amber-300 animate-spin mb-4" />
             <p className="text-amber-100">正在加载卦象数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 需要登录提示
+  if (needsLogin || showLoginTip) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                <LogIn className="w-8 h-8 text-amber-600" />
+              </div>
+            </div>
+            <CardTitle className="text-amber-100 text-xl">暂未登录</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-amber-200 mb-2">您暂未登录，即将跳转到登录页面</p>
+            <p className="text-amber-300/70 text-sm mb-4">{countdown} 秒后自动跳转</p>
+            <Button 
+              onClick={() => window.location.href = '/login'} 
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              立即登录
+            </Button>
           </CardContent>
         </Card>
       </div>

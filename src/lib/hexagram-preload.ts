@@ -37,6 +37,7 @@ type DataState = {
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
+  needsLogin: boolean; // 是否需要登录
 };
 
 // 初始状态
@@ -46,6 +47,7 @@ const initialState: DataState = {
   isLoading: false,
   isInitialized: false,
   error: null,
+  needsLogin: false,
 };
 
 // 全局状态（单例）
@@ -83,15 +85,41 @@ async function fetchData(): Promise<void> {
 
   loadPromise = (async () => {
     try {
-      dataState = { ...dataState, isLoading: true, error: null };
+      dataState = { ...dataState, isLoading: true, error: null, needsLogin: false };
       notifyListeners();
 
       const response = await fetch('/api/hexagrams');
+      
+      // 检查是否需要登录（401 错误）
+      if (response.status === 401) {
+        dataState = {
+          ...dataState,
+          isLoading: false,
+          needsLogin: true,
+          error: '暂未登录',
+        };
+        notifyListeners();
+        return;
+      }
+      
       const data = await response.json();
 
       if (data.needsInit) {
         // 需要初始化
         const initResponse = await fetch('/api/hexagrams/init', { method: 'POST' });
+        
+        // 检查初始化是否需要登录
+        if (initResponse.status === 401) {
+          dataState = {
+            ...dataState,
+            isLoading: false,
+            needsLogin: true,
+            error: '暂未登录',
+          };
+          notifyListeners();
+          return;
+        }
+        
         const initData = await initResponse.json();
 
         if (initData.success) {
@@ -104,12 +132,14 @@ async function fetchData(): Promise<void> {
             isLoading: false,
             isInitialized: true,
             error: null,
+            needsLogin: false,
           };
         } else {
           dataState = {
             ...dataState,
             isLoading: false,
             error: '数据初始化失败',
+            needsLogin: false,
           };
         }
       } else if (data.hexagrams && data.hexagrams.length > 0) {
@@ -119,12 +149,14 @@ async function fetchData(): Promise<void> {
           isLoading: false,
           isInitialized: true,
           error: null,
+          needsLogin: false,
         };
       } else {
         dataState = {
           ...dataState,
           isLoading: false,
           error: data.error || '加载数据失败',
+          needsLogin: false,
         };
       }
     } catch (err) {
@@ -133,6 +165,7 @@ async function fetchData(): Promise<void> {
         ...dataState,
         isLoading: false,
         error: '加载数据失败',
+        needsLogin: false,
       };
     } finally {
       loadPromise = null;

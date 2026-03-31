@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw, Share2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw, Share2, LogIn } from 'lucide-react';
 import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -101,18 +101,36 @@ function TarotContent() {
   const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
   // 加载塔罗牌数据
   const loadCards = async () => {
     setIsLoading(true);
     setError(null);
+    setNeedsLogin(false);
     
     try {
       const response = await fetch('/api/tarot/cards');
+      
+      // 检查是否需要登录（401 错误）
+      if (response.status === 401) {
+        setNeedsLogin(true);
+        setIsLoading(false);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.needsInit) {
         const initResponse = await fetch('/api/tarot/init', { method: 'POST' });
+        
+        if (initResponse.status === 401) {
+          setNeedsLogin(true);
+          setIsLoading(false);
+          return;
+        }
+        
         const initData = await initResponse.json();
         
         if (initData.success) {
@@ -137,6 +155,23 @@ function TarotContent() {
   useEffect(() => {
     loadCards();
   }, []);
+  
+  // 需要登录时自动跳转
+  useEffect(() => {
+    if (needsLogin) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            window.location.href = '/login';
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [needsLogin]);
 
   // 保存占卜记录
   const saveDivinationRecord = async (cards: DrawnCard[], interpretation: string) => {
@@ -348,6 +383,34 @@ function TarotContent() {
       default: return '⭐';
     }
   };
+
+  // 需要登录提示
+  if (needsLogin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
+                <LogIn className="w-8 h-8 text-purple-600" />
+              </div>
+            </div>
+            <CardTitle className="text-purple-100 text-xl">暂未登录</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-purple-200 mb-2">您暂未登录，即将跳转到登录页面</p>
+            <p className="text-purple-300/70 text-sm mb-4">{countdown} 秒后自动跳转</p>
+            <Button 
+              onClick={() => window.location.href = '/login'} 
+              className="bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              立即登录
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // 加载中状态
   if (isLoading) {
