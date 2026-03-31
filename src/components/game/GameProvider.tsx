@@ -110,17 +110,6 @@ export function CurrencyDisplay({ compact = false }: { compact?: boolean }) {
           {gameState.currency.guaCoins.toLocaleString()}
         </span>
       </div>
-
-      {/* 签到按钮 */}
-      {!gameState.signIn.hasSignedIn && (
-        <button
-          onClick={showSignIn}
-          className="flex items-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 px-3 py-1.5 rounded-full transition-colors"
-        >
-          <Calendar className="w-4 h-4 text-green-400" />
-          <span className="text-green-100 text-sm">签到</span>
-        </button>
-      )}
     </div>
   );
 }
