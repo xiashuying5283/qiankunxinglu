@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Moon, Search, Sparkles, History, Bot, BookOpen, Trash2, Clock, ChevronRight, Loader2 } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -757,12 +757,12 @@ export default function DreamInterpretPage() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录保存解梦记录"
-        description="登录后可以保存您的解梦记录，随时查看历史"
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
     </div>
   );

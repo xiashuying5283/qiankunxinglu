@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown, ChevronUp, BookOpen, Loader2, Circle, User, GraduationCap, ExternalLink, Share2, LogIn } from 'lucide-react';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { GlossaryTerm } from '@/components/GlossaryTerm';
 import { HexagramKnowledge } from '@/components/HexagramKnowledge';
+import { ShareCard, IChingShareData } from '@/components/share/ShareCard';
 import { 
   QuestionCategorySelector, 
   QuestionCategory, 
@@ -66,10 +68,19 @@ interface DivinationResult {
   changedBinary: string;
 }
 
-export default function IChingPage() {
-  const { isLoggedIn } = useAuth();
-  const [question, setQuestion] = useState('');
-  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(null);
+// 内部组件 - 使用 useSearchParams
+function IChingContent() {
+  const { isLoggedIn, isLoading: isAuthLoading } = useAuth();
+  const searchParams = useSearchParams();
+  
+  // 从 URL 参数读取问题和类型
+  const urlQuestion = searchParams.get('question');
+  const urlType = searchParams.get('type');
+  
+  const [question, setQuestion] = useState(urlQuestion || '');
+  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(
+    urlType ? (urlType as QuestionCategory) : null
+  );
   const [isDivining, setIsDivining] = useState(false);
   const [result, setResult] = useState<DivinationResult | null>(null);
   const [currentThrow, setCurrentThrow] = useState<number>(0);
@@ -85,8 +96,41 @@ export default function IChingPage() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingDivinationResult, setPendingDivinationResult] = useState<DivinationResult | null>(null);
   
+  // 分享弹窗状态
+  const [showShareCard, setShowShareCard] = useState(false);
+  
   // 使用预加载数据服务
-  const { hexagrams, trigrams, isLoading, error, refresh } = useHexagramData();
+  const { hexagrams, trigrams, isLoading, error, needsLogin, refresh } = useHexagramData();
+  
+  // 需要登录时自动跳转（等待 AuthContext 加载完成后再判断）
+  const [showLoginTip, setShowLoginTip] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  
+  // 当 needsLogin 时，等待 AuthContext 加载完成后再判断
+  useEffect(() => {
+    if (needsLogin && !isAuthLoading) {
+      // AuthContext 已加载完成，检查是否真的需要登录
+      if (isLoggedIn) {
+        // 用户已登录，刷新卦象数据
+        console.log('[IChing] 用户已登录，刷新卦象数据');
+        refresh();
+      } else {
+        // 用户未登录，显示登录提示
+        setShowLoginTip(true);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              window.location.href = '/login';
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [needsLogin, isAuthLoading, isLoggedIn, refresh]);
 
   // 抛三枚铜钱
   const throwThreeCoins = (): CoinThrow => {
@@ -312,16 +356,6 @@ export default function IChingPage() {
     }, 500);
   };
 
-  // 登录成功后的回调
-  const handleLoginSuccess = () => {
-    setShowLoginDialog(false);
-    // 如果有待处理的占卜结果，开始AI解读
-    if (pendingDivinationResult) {
-      streamInterpretation(pendingDivinationResult);
-      setPendingDivinationResult(null);
-    }
-  };
-
   // 切换爻辞展开状态
   const toggleLine = (index: number) => {
     setExpandedLines(prev => {
@@ -372,14 +406,42 @@ export default function IChingPage() {
     setPendingDivinationResult(null);
   };
 
-  // 加载中状态
-  if (isLoading) {
+  // 加载中状态（包括 AuthContext 加载中）
+  if (isLoading || isAuthLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
         <Card className="bg-white/10 backdrop-blur-md border-amber-300/30">
           <CardContent className="py-12 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-amber-300 animate-spin mb-4" />
             <p className="text-amber-100">正在加载卦象数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 需要登录提示（仅在 AuthContext 加载完成且用户未登录时显示）
+  if (showLoginTip) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-amber-300/30 max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                <LogIn className="w-8 h-8 text-amber-600" />
+              </div>
+            </div>
+            <CardTitle className="text-amber-100 text-xl">暂未登录</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-amber-200 mb-2">您暂未登录，即将跳转到登录页面</p>
+            <p className="text-amber-300/70 text-sm mb-4">{countdown} 秒后自动跳转</p>
+            <Button 
+              onClick={() => window.location.href = '/login'} 
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              立即登录
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -633,7 +695,7 @@ export default function IChingPage() {
                         <GraduationCap className="w-5 h-5" />
                         想深入学习周易？
                       </div>
-                      <div className="text-purple-200/60 text-sm mt-1">
+                      <div className="text-purple-200 text-sm mt-1">
                         前往学习中心，系统学习卦象知识与断卦技巧
                       </div>
                     </div>
@@ -651,10 +713,18 @@ export default function IChingPage() {
               <Disclaimer variant="full" />
 
               {/* 重新占卜按钮 */}
-              <div className="text-center">
+              <div className="text-center flex gap-4 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowShareCard(true)}
+                  className="border-amber-400/50 text-amber-200 hover:bg-amber-500/20 px-8 py-6 text-lg"
+                >
+                  <Share2 className="w-5 h-5 mr-2" />
+                  分享结果
+                </Button>
                 <Button
                   onClick={reset}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-6 text-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新占卜
@@ -665,14 +735,51 @@ export default function IChingPage() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录后查看大师解读"
-        description="登录后可以获得AI大师解读，并保存您的占卜记录"
-        onLoginSuccess={handleLoginSuccess}
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
+
+      {/* 分享弹窗 */}
+      {result && (
+        <ShareCard
+          open={showShareCard}
+          onOpenChange={setShowShareCard}
+          data={{
+            type: 'iching',
+            hexagramSymbol: result.originalHexagram.symbol,
+            hexagramName: result.originalHexagram.name,
+            hexagramNumber: result.originalHexagram.number,
+            changedHexagramSymbol: result.changedHexagram?.symbol,
+            changedHexagramName: result.changedHexagram?.name,
+            judgement: result.originalHexagram.judgement,
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+// 加载状态组件
+function IChingLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-900 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+        <p className="text-amber-200">正在加载...</p>
+      </div>
+    </div>
+  );
+}
+
+// 主页面组件 - 用 Suspense 包裹
+export default function IChingPage() {
+  return (
+    <Suspense fallback={<IChingLoading />}>
+      <IChingContent />
+    </Suspense>
   );
 }

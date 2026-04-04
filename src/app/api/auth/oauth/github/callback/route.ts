@@ -10,6 +10,10 @@ import { generateToken, setAuthCookie } from '@/lib/auth';
  */
 export async function GET(request: NextRequest) {
   try {
+    // 从请求中获取域名
+    const requestUrl = new URL(request.url);
+    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
+    
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -20,13 +24,13 @@ export async function GET(request: NextRequest) {
     // 用户取消授权
     if (error === 'access_denied') {
       console.log('[GitHub OAuth] User denied access');
-      return NextResponse.redirect(new URL('/?error=access_denied', process.env.APP_URL || 'http://localhost:5000'));
+      return NextResponse.redirect(new URL('/?error=access_denied', baseUrl));
     }
 
     // 验证参数
     if (!code || !state) {
       console.log('[GitHub OAuth] Missing code or state');
-      return NextResponse.redirect(new URL('/?error=invalid_request', process.env.APP_URL || 'http://localhost:5000'));
+      return NextResponse.redirect(new URL('/?error=invalid_request', baseUrl));
     }
 
     // 验证 state
@@ -38,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     if (!savedState || savedState !== state) {
       console.log('[GitHub OAuth] State mismatch');
-      return NextResponse.redirect(new URL('/?error=invalid_state', process.env.APP_URL || 'http://localhost:5000'));
+      return NextResponse.redirect(new URL('/?error=invalid_state', baseUrl));
     }
 
     // 清除 state cookie
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
     const accessToken = await getAccessToken('github', code, savedRedirectUri);
     if (!accessToken) {
       console.log('[GitHub OAuth] Failed to get access token');
-      return NextResponse.redirect(new URL('/?error=token_failed', process.env.APP_URL || 'http://localhost:5000'));
+      return NextResponse.redirect(new URL('/?error=token_failed', baseUrl));
     }
     console.log('[GitHub OAuth] Access token obtained');
 
@@ -61,7 +65,7 @@ export async function GET(request: NextRequest) {
     
     if (!userInfo || !userInfo.id) {
       console.log('[GitHub OAuth] Failed to get user info');
-      return NextResponse.redirect(new URL('/?error=user_info_failed', process.env.APP_URL || 'http://localhost:5000'));
+      return NextResponse.redirect(new URL('/?error=user_info_failed', baseUrl));
     }
 
     const client = getSupabaseClient();
@@ -136,7 +140,7 @@ export async function GET(request: NextRequest) {
 
       if (createError || !newUser) {
         console.error('[GitHub OAuth] Create user error:', createError);
-        return NextResponse.redirect(new URL('/?error=create_user_failed', process.env.APP_URL || 'http://localhost:5000'));
+        return NextResponse.redirect(new URL('/?error=create_user_failed', baseUrl));
       }
 
       console.log('[GitHub OAuth] New user created:', newUser.id);
@@ -157,13 +161,14 @@ export async function GET(request: NextRequest) {
     console.log('[GitHub OAuth] Login successful, redirecting...');
 
     // 重定向到首页并显示成功
-    return NextResponse.redirect(new URL('/?login=success', process.env.APP_URL || 'http://localhost:5000'));
+    return NextResponse.redirect(new URL('/?login=success', baseUrl));
   } catch (error) {
     console.error('[GitHub OAuth] Callback error:', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
-    const baseUrl = process.env.APP_URL || 'http://localhost:5000';
-    return NextResponse.redirect(new URL(`/?error=oauth_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, baseUrl));
+    const requestUrl = new URL((error as any)?.request?.url || 'http://localhost:5000');
+    const fallbackBaseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
+    return NextResponse.redirect(new URL(`/?error=oauth_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, fallbackBaseUrl));
   }
 }

@@ -5,10 +5,6 @@ import { generateToken, setAuthCookie, generateSessionId } from '@/lib/auth';
 /**
  * 游客登录 API
  * POST /api/auth/guest
- * 
- * 游客登录逻辑：
- * 1. 如果已有游客 session_id，则复用该游客账户
- * 2. 否则创建新的游客账户
  */
 export async function POST(request: NextRequest) {
   try {

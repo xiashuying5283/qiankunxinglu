@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Heart, Sparkles, History, Trash2, User, ChevronDown, ChevronUp, Moon, Sun } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
@@ -320,16 +320,6 @@ export default function MatchPage() {
       console.error('Match error:', error);
       alert(error instanceof Error ? error.message : '匹配失败，请稍后重试');
       setIsMatching(false);
-    }
-  };
-
-  // 登录成功后继续解读
-  const handleLoginSuccess = () => {
-    setShowLoginDialog(false);
-    if (pendingMatchData) {
-      setIsInterpreting(true);
-      streamInterpretation(pendingMatchData);
-      setPendingMatchData(null);
     }
   };
 
@@ -931,13 +921,12 @@ export default function MatchPage() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录查看姻缘解读"
-        description="登录后可以获得AI大师解读，并保存您的匹配记录"
-        onLoginSuccess={handleLoginSuccess}
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
     </div>
   );

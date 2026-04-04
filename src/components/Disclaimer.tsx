@@ -1,10 +1,16 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface DisclaimerProps {
   variant?: 'full' | 'compact' | 'footer';
+}
+
+interface Config {
+  icpBeian: string | null;
+  gonganBeian: string | null;
 }
 
 /**
@@ -14,18 +20,57 @@ interface DisclaimerProps {
  * - footer: 页脚版，用于网站底部
  */
 export function Disclaimer({ variant = 'full' }: DisclaimerProps) {
+  const [config, setConfig] = useState<Config>({
+    icpBeian: process.env.NEXT_PUBLIC_ICP_BEIAN || null,
+    gonganBeian: process.env.NEXT_PUBLIC_GONGAN_BEIAN || null,
+  });
+
+  // 客户端获取运行时配置（解决 NEXT_PUBLIC_ 需要重新构建的问题）
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => setConfig(data))
+      .catch(() => {});
+  }, []);
+
+  const { icpBeian, gonganBeian } = config;
+  
   if (variant === 'footer') {
     return (
       <div className="text-center text-gray-400 text-xs py-4 px-4 border-t border-white/10">
         <p className="mb-2">
           本网站所有内容均为传统民俗文化科普与娱乐参考，不构成任何人生决策依据
         </p>
-        <p>
+        <p className="mb-2">
           不涉及封建迷信宣传与相关承诺 · 
           <Link href="/privacy" className="text-purple-300 hover:text-purple-200 ml-1">
             隐私政策
           </Link>
         </p>
+        {(icpBeian || gonganBeian) && (
+          <p className="text-gray-500 space-x-3">
+            {icpBeian && (
+              <a 
+                href="https://beian.miit.gov.cn/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-400 transition-colors"
+              >
+                {icpBeian}
+              </a>
+            )}
+            {gonganBeian && (
+              <a 
+                href={`https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${gonganBeian.replace(/[^0-9]/g, '')}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-400 transition-colors inline-flex items-center gap-1"
+              >
+                {gonganBeian}
+              </a>
+            )}
+          </p>
+        )}
       </div>
     );
   }

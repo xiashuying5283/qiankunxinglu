@@ -9,16 +9,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getChapterContent, type ContentItem } from '@/lib/books-service';
+import { encodeId, decodeId } from '@/lib/id-obfuscation';
 
 // 禁用静态生成，强制动态渲染
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; chapterId: string }> }): Promise<Metadata> {
   const { id, chapterId } = await params;
-  const bookId = parseInt(id);
-  const chId = parseInt(chapterId);
+  const bookId = decodeId(id);
+  const chId = decodeId(chapterId);
   
-  if (isNaN(bookId) || isNaN(chId)) {
+  if (!bookId || !chId) {
     return { title: '章节不存在' };
   }
   
@@ -97,10 +98,10 @@ function renderContent(contents: ContentItem[]) {
 
 export default async function ChapterReadPage({ params }: { params: Promise<{ id: string; chapterId: string }> }) {
   const { id, chapterId } = await params;
-  const bookId = parseInt(id);
-  const chId = parseInt(chapterId);
+  const bookId = decodeId(id);
+  const chId = decodeId(chapterId);
   
-  if (isNaN(bookId) || isNaN(chId)) {
+  if (!bookId || !chId) {
     notFound();
   }
   
@@ -110,13 +111,15 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
     notFound();
   }
   
+  const encodedBookId = encodeId(bookId);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <div className="container mx-auto px-4 py-8">
         {/* 顶部导航 */}
         <div className="flex items-center justify-between mb-8">
           {/* 左侧：返回按钮 */}
-          <Link href={`/books/${bookId}`}>
+          <Link href={`/books/${encodedBookId}`}>
             <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
               <ChevronLeft className="w-4 h-4 mr-2" />
               返回目录
@@ -136,7 +139,7 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
         <div className="flex items-center gap-2 text-sm text-amber-600 mb-6">
           <Link href="/books" className="hover:text-amber-800">全部书籍</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link href={`/books/${bookId}`} className="hover:text-amber-800">{book.title}</Link>
+          <Link href={`/books/${encodedBookId}`} className="hover:text-amber-800">{book.title}</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-amber-800">{chapter.title}</span>
         </div>
@@ -172,7 +175,7 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
         {navigation && (
           <div className="flex items-center justify-between max-w-2xl mx-auto">
             {navigation.prev ? (
-              <Link href={`/books/${bookId}/${navigation.prev.id}`}>
+              <Link href={`/books/${encodedBookId}/${encodeId(navigation.prev.id)}`}>
                 <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   {navigation.prev.title}
@@ -183,7 +186,7 @@ export default async function ChapterReadPage({ params }: { params: Promise<{ id
             )}
             
             {navigation.next ? (
-              <Link href={`/books/${bookId}/${navigation.next.id}`}>
+              <Link href={`/books/${encodedBookId}/${encodeId(navigation.next.id)}`}>
                 <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-900">
                   {navigation.next.title}
                   <ChevronRight className="w-4 h-4 ml-2" />

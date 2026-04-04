@@ -120,7 +120,7 @@ export async function POST(request: Request) {
     // 验证必填字段
     if (!term || !category || !short_desc || !full_desc) {
       return NextResponse.json({
-        error: '缺少必填字段'
+        error: '缺少必填字段：词条名称、分类、简短描述和详细描述为必填项'
       }, { status: 400 });
     }
     
@@ -132,21 +132,25 @@ export async function POST(request: Request) {
         category,
         short_desc,
         full_desc,
-        origin,
-        examples,
-        related_terms,
-        refs: references,  // 数据库字段名为 refs
-        contribution_type,
-        original_term_id,
-        user_id,
-        user_name,
+        origin: origin || null,
+        examples: examples || [],
+        related_terms: related_terms || [],
+        refs: references || [],  // 数据库字段名为 refs
+        contribution_type: contribution_type || 'add',
+        original_term_id: original_term_id || null,
+        user_id: user_id || null,
+        user_name: user_name || null,
         status: 'pending',
       })
       .select()
       .single();
     
     if (error) {
-      throw error;
+      console.error('Supabase insert error:', error);
+      return NextResponse.json({
+        error: '数据库操作失败',
+        details: error.message
+      }, { status: 500 });
     }
     
     return NextResponse.json({
@@ -155,9 +159,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('提交贡献失败:', error);
+    const errorMessage = error instanceof Error ? error.message : '未知错误';
     return NextResponse.json({
       error: '提交失败',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: errorMessage
     }, { status: 500 });
   }
 }

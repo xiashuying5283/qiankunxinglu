@@ -121,18 +121,18 @@ export function HexagramKnowledge({ hexagramNumber, hexagramName }: HexagramKnow
             {hexagramName}卦科普
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-amber-200/80">
+        <CardContent className="text-amber-100">
           <p className="mb-4">
             第{hexagramNumber}卦，属{' '}
             <GlossaryTerm term="六十四卦">六十四卦</GlossaryTerm>
             {' '}之一。
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-amber-200">
             详细科普内容正在完善中，敬请期待...
           </p>
           <div className="mt-4 pt-4 border-t border-amber-300/20">
             <Link href={`/learn/hexagram/${hexagramNumber}`}>
-              <Button variant="outline" size="sm" className="border-amber-400/50 text-amber-200">
+              <Button variant="outline" size="sm" className="border-amber-400/50 text-amber-100 hover:bg-amber-500/20">
                 <GraduationCap className="w-4 h-4 mr-2" />
                 前往学习中心
               </Button>
@@ -301,7 +301,7 @@ export function HexagramKnowledge({ hexagramNumber, hexagramName }: HexagramKnow
         <CardContent className="py-4 flex items-center justify-between">
           <div>
             <div className="text-amber-100 font-medium">想深入了解{hexagramName}卦？</div>
-            <div className="text-amber-200/60 text-sm">前往学习中心获取更多内容</div>
+            <div className="text-amber-200 text-sm">前往学习中心获取更多内容</div>
           </div>
           <Link href={`/learn/hexagram/${hexagramNumber}`}>
             <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">

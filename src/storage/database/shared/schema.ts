@@ -218,6 +218,39 @@ export const users = pgTable("users", {
 	unique("users_session_id_unique").on(table.sessionId),
 ]);
 
+// API 凭证表（HMAC 签名认证）
+export const apiCredentials = pgTable("api_credentials", {
+	id: varchar({ length: 36 }).default(gen_random_uuid()).primaryKey().notNull(),
+	userId: varchar("user_id", { length: 36 }).notNull(),
+	accessKey: varchar("access_key", { length: 50 }).notNull(),
+	secretKey: text("secret_key").notNull(),
+	secretKeyHash: varchar("secret_key_hash", { length: 100 }).notNull(),
+	name: varchar({ length: 100 }),
+	status: varchar({ length: 20 }).default('pending').notNull(), // pending, approved, rejected
+	reason: text(), // 申请理由或拒绝原因
+	isActive: boolean("is_active").default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: 'string' }),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+	reviewedBy: varchar("reviewed_by", { length: 36 }),
+}, (table) => [
+	index("api_credentials_user_id_idx").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+	index("api_credentials_access_key_idx").using("btree", table.accessKey.asc().nullsLast().op("text_ops")),
+	index("api_credentials_status_idx").using("btree", table.status.asc().nullsLast().op("text_ops")),
+	unique("api_credentials_access_key_unique").on(table.accessKey),
+]);
+
+// 游客使用次数记录表
+export const guestUsage = pgTable("guest_usage", {
+	id: serial().notNull(),
+	userId: varchar("user_id", { length: 36 }).notNull(),
+	usageDate: varchar("usage_date", { length: 10 }).notNull(), // YYYY-MM-DD
+	count: integer().default(1).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+}, (table) => [
+	index("guest_usage_user_date_idx").using("btree", table.userId.asc().nullsLast().op("text_ops"), table.usageDate.asc().nullsLast().op("text_ops")),
+]);
+
 // 古籍阅读系统表
 
 // 书籍表

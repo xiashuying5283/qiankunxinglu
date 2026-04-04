@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { ArrowLeft, RefreshCw, Sparkles, Star, Loader2, RotateCcw, Share2, LogIn } from 'lucide-react';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Disclaimer } from '@/components/Disclaimer';
 import { QuestionCategorySelector, QuestionCategory } from '@/components/QuestionCategorySelector';
+import { ShareCard, TarotShareData } from '@/components/share/ShareCard';
 
 // 类型定义
 interface TarotCard {
@@ -63,10 +65,19 @@ const spreadNames: Record<SpreadType, string> = {
   celtic: '凯尔特十字占卜'
 };
 
-export default function TarotPage() {
-  const { isLoggedIn } = useAuth();
-  const [question, setQuestion] = useState('');
-  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(null);
+// 内部组件 - 使用 useSearchParams
+function TarotContent() {
+  const { isLoggedIn, isLoading: isAuthLoading } = useAuth();
+  const searchParams = useSearchParams();
+  
+  // 从 URL 参数读取问题和类型
+  const urlQuestion = searchParams.get('question');
+  const urlType = searchParams.get('type');
+  
+  const [question, setQuestion] = useState(urlQuestion || '');
+  const [questionCategory, setQuestionCategory] = useState<QuestionCategory | null>(
+    urlType ? (urlType as QuestionCategory) : null
+  );
   const [spreadType, setSpreadType] = useState<SpreadType>('three');
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
@@ -83,22 +94,46 @@ export default function TarotPage() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [pendingCards, setPendingCards] = useState<DrawnCard[] | null>(null);
   
+  // 分享弹窗状态
+  const [showShareCard, setShowShareCard] = useState(false);
+  
   // 数据状态
   const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  
+  // 是否已经尝试过刷新（避免无限循环）
+  const hasRetriedRef = useRef(false);
 
   // 加载塔罗牌数据
   const loadCards = async () => {
     setIsLoading(true);
     setError(null);
+    setNeedsLogin(false);
     
     try {
       const response = await fetch('/api/tarot/cards');
+      
+      // 检查是否需要登录（401 错误）
+      if (response.status === 401) {
+        setNeedsLogin(true);
+        setIsLoading(false);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.needsInit) {
         const initResponse = await fetch('/api/tarot/init', { method: 'POST' });
+        
+        if (initResponse.status === 401) {
+          setNeedsLogin(true);
+          setIsLoading(false);
+          return;
+        }
+        
         const initData = await initResponse.json();
         
         if (initData.success) {
@@ -123,6 +158,32 @@ export default function TarotPage() {
   useEffect(() => {
     loadCards();
   }, []);
+  
+  // 当 needsLogin 时，等待 AuthContext 加载完成后再判断
+  useEffect(() => {
+    if (needsLogin && !isAuthLoading) {
+      // AuthContext 已加载完成，检查是否真的需要登录
+      if (isLoggedIn && !hasRetriedRef.current) {
+        // 用户已登录，刷新数据
+        console.log('[Tarot] 用户已登录，刷新塔罗牌数据');
+        hasRetriedRef.current = true;
+        loadCards();
+      } else if (!isLoggedIn) {
+        // 用户未登录，显示登录提示
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              window.location.href = '/login';
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [needsLogin, isAuthLoading, isLoggedIn]);
 
   // 保存占卜记录
   const saveDivinationRecord = async (cards: DrawnCard[], interpretation: string) => {
@@ -273,16 +334,6 @@ export default function TarotPage() {
     }, numCards * 500 + 1000);
   };
 
-  // 登录成功后的回调
-  const handleLoginSuccess = () => {
-    setShowLoginDialog(false);
-    // 如果有待处理的卡牌，开始AI解读
-    if (pendingCards) {
-      streamInterpretation(pendingCards);
-      setPendingCards(null);
-    }
-  };
-
   // 翻转单张牌
   const flipCard = (index: number) => {
     if (showCards[index]) return;
@@ -345,14 +396,42 @@ export default function TarotPage() {
     }
   };
 
-  // 加载中状态
-  if (isLoading) {
+  // 加载中状态（包括 AuthContext 加载中）
+  if (isLoading || isAuthLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
         <Card className="bg-white/10 backdrop-blur-md border-purple-300/30">
           <CardContent className="py-12 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-purple-300 animate-spin mb-4" />
             <p className="text-purple-100">正在加载塔罗牌数据...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 需要登录提示（仅在 AuthContext 加载完成且用户未登录时显示）
+  if (needsLogin && !isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-purple-300/30 max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
+                <LogIn className="w-8 h-8 text-purple-600" />
+              </div>
+            </div>
+            <CardTitle className="text-purple-100 text-xl">暂未登录</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-purple-200 mb-2">您暂未登录，即将跳转到登录页面</p>
+            <p className="text-purple-300/70 text-sm mb-4">{countdown} 秒后自动跳转</p>
+            <Button 
+              onClick={() => window.location.href = '/login'} 
+              className="bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              立即登录
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -712,10 +791,18 @@ export default function TarotPage() {
 
               {/* 重新占卜按钮 */}
               {allRevealed && (
-                <div className="text-center">
+                <div className="text-center flex gap-4 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowShareCard(true)}
+                    className="border-purple-400/50 text-purple-200 hover:bg-purple-500/20 px-8 py-6 text-lg"
+                  >
+                    <Share2 className="w-5 h-5 mr-2" />
+                    分享结果
+                  </Button>
                   <Button
                     onClick={reset}
-                    className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white px-12 py-6 text-lg"
+                    className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white px-8 py-6 text-lg"
                   >
                     <RefreshCw className="w-5 h-5 mr-2" />
                     重新占卜
@@ -727,14 +814,31 @@ export default function TarotPage() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录后查看大师解读"
-        description="登录后可以获得AI大师解读，并保存您的占卜记录"
-        onLoginSuccess={handleLoginSuccess}
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
+
+      {/* 分享弹窗 */}
+      {drawnCards.length > 0 && (
+        <ShareCard
+          open={showShareCard}
+          onOpenChange={setShowShareCard}
+          data={{
+            type: 'tarot',
+            spreadName: spreadNames[spreadType],
+            cards: drawnCards.map((dc, i) => ({
+              name: dc.card.name,
+              position: spreadPositions[spreadType][i],
+              isReversed: dc.isReversed,
+              keywords: dc.card.keywords,
+            })),
+          }}
+        />
+      )}
 
       {/* 添加翻转动画CSS */}
       <style jsx global>{`
@@ -746,5 +850,26 @@ export default function TarotPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+// 加载状态组件
+function TarotLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950/20 to-slate-900 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+        <p className="text-purple-200">正在加载...</p>
+      </div>
+    </div>
+  );
+}
+
+// 主页面组件 - 用 Suspense 包裹
+export default function TarotPage() {
+  return (
+    <Suspense fallback={<TarotLoading />}>
+      <TarotContent />
+    </Suspense>
   );
 }

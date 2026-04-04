@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGame, CurrencyDisplay } from '@/components/game';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, UserCircle2, Mail, History, RefreshCw } from 'lucide-react';
+import { User, LogOut, UserCircle2, Mail, History, RefreshCw, Calendar, Award, Sparkles } from 'lucide-react';
 import { LoginDialog } from './LoginDialog';
 
 // 提供商显示名称
@@ -29,7 +30,24 @@ const providerColors: Record<string, string> = {
 
 export function UserMenu() {
   const { user, logout, isLoading } = useAuth();
+  const { gameState, showSignIn } = useGame();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
+
+  // 签到提醒动画（未签到时每隔一段时间闪烁）
+  useEffect(() => {
+    if (gameState && !gameState.signIn.hasSignedIn) {
+      const timer = setInterval(() => {
+        setShowPulse(true);
+        setTimeout(() => setShowPulse(false), 1000);
+      }, 10000); // 每10秒闪烁一次
+      
+      // 首次显示
+      setTimeout(() => setShowPulse(true), 2000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [gameState?.signIn.hasSignedIn]);
 
   if (isLoading) {
     return (
@@ -81,80 +99,128 @@ export function UserMenu() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative text-white/80 hover:text-white hover:bg-white/10">
-          {user.avatar ? (
-            // 显示头像
-            <img
-              src={user.avatar}
-              alt={user.name || '用户'}
-              className="h-6 w-6 rounded-full mr-2 object-cover"
-            />
-          ) : user.isGuest ? (
-            <UserCircle2 className="h-5 w-5 mr-2" />
-          ) : (
-            <User className="h-5 w-5 mr-2" />
-          )}
-          <span className="max-w-[100px] truncate">{user.name || '用户'}</span>
-          {user.isGuest && (
-            <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-500" />
-          )}
+    <div className="flex items-center gap-2">
+      {/* 货币显示 */}
+      <div className="hidden md:flex items-center gap-2">
+        <CurrencyDisplay compact />
+      </div>
+      
+      {/* 签到快捷按钮 - 未签到时显示 */}
+      {gameState && !gameState.signIn.hasSignedIn && (
+        <Button
+          onClick={showSignIn}
+          size="sm"
+          className={`relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0 h-8 px-3 ${
+            showPulse ? 'animate-pulse ring-2 ring-amber-400/50' : ''
+          }`}
+        >
+          <Calendar className="w-4 h-4 mr-1.5" />
+          签到
+          <Sparkles className="w-3 h-3 ml-1 text-amber-200" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
-            <div className="flex items-center gap-2">
-              {user.avatar && (
-                <img
-                  src={user.avatar}
-                  alt={user.name || '用户'}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              )}
-              <div className="flex-1">
-                <p className="text-sm font-medium">{user.name || '用户'}</p>
-                {user.provider && (
-                  <p className={`text-xs ${providerColors[user.provider] || 'text-muted-foreground'}`}>
-                    {providerNames[user.provider] || user.provider} 账号
-                  </p>
-                )}
-              </div>
-            </div>
-            {user.email && (
-              <p className="text-xs text-muted-foreground flex items-center mt-1">
-                <Mail className="h-3 w-3 mr-1" />
-                {user.email}
-              </p>
+      )}
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="relative text-white/80 hover:text-white hover:bg-white/10">
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || '用户'}
+                className="h-6 w-6 rounded-full mr-2 object-cover"
+              />
+            ) : user.isGuest ? (
+              <UserCircle2 className="h-5 w-5 mr-2" />
+            ) : (
+              <User className="h-5 w-5 mr-2" />
             )}
+            <span className="max-w-[100px] truncate">{user.name || '用户'}</span>
             {user.isGuest && (
-              <span className="text-xs text-amber-500 mt-1">游客模式</span>
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-500" />
             )}
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/history" className="flex items-center w-full">
-            <History className="mr-2 h-4 w-4" />
-            历史记录
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {!user.isGuest && (
-          <>
-            <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              切换账号
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
-          <LogOut className="mr-2 h-4 w-4" />
-          退出登录
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center gap-2">
+                {user.avatar && (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || '用户'}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{user.name || '用户'}</p>
+                  {user.provider && (
+                    <p className={`text-xs ${providerColors[user.provider] || 'text-muted-foreground'}`}>
+                      {providerNames[user.provider] || user.provider} 账号
+                    </p>
+                  )}
+                </div>
+              </div>
+              {user.email && (
+                <p className="text-xs text-muted-foreground flex items-center mt-1">
+                  <Mail className="h-3 w-3 mr-1" />
+                  {user.email}
+                </p>
+              )}
+              {user.isGuest && (
+                <span className="text-xs text-amber-500 mt-1">游客模式</span>
+              )}
+              {/* 显示等级 */}
+              {gameState && (
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t">
+                  <Award className="w-4 h-4 text-amber-500" />
+                  <span className="text-xs font-medium text-amber-600">
+                    {gameState.level.title}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Lv.{gameState.level.level}
+                  </span>
+                </div>
+              )}
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/profile" className="flex items-center w-full">
+              <Award className="mr-2 h-4 w-4" />
+              我的修行
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={showSignIn} className="cursor-pointer">
+            <Calendar className="mr-2 h-4 w-4" />
+            每日签到
+            {gameState && !gameState.signIn.hasSignedIn && (
+              <span className="ml-auto text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">
+                待签到
+              </span>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/history" className="flex items-center w-full">
+              <History className="mr-2 h-4 w-4" />
+              历史记录
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {!user.isGuest && (
+            <>
+              <DropdownMenuItem onClick={handleSwitchAccount} className="cursor-pointer">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                切换账号
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            退出登录
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

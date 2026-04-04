@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, History, Moon, Heart, Clock, Trash2, ChevronRight, Loader2, BookOpen, Star, Scroll, PenTool, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { LoginRequiredDialog } from '@/components/auth/LoginRequiredDialog';
 
 interface DivinationRecord {
   id: number;
@@ -333,16 +333,12 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* 登录弹窗 */}
-      <LoginDialog
+      {/* 暂未登录提示弹窗 */}
+      <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
-        title="登录查看历史记录"
-        description="登录后可以保存您的占卜记录，随时查看历史"
-        onLoginSuccess={() => {
-          setShowLoginDialog(false);
-          checkAuthAndLoadRecords();
-        }}
+        message="您暂未登录，即将跳转到登录页面"
+        redirectPath="/login"
       />
 
       <style jsx>{`

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
-import { streamLLM } from '@/lib/llm';
+import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { verifyAuth } from '@/lib/api-auth';
 
 // 系统提示词
 const SYSTEM_PROMPT = `你是一位专业的周公解梦大师，精通中国传统解梦文化和现代心理学。你的任务是根据用户描述的梦境，给出专业、细致、有温度的解析。
@@ -8,8 +9,8 @@ const SYSTEM_PROMPT = `你是一位专业的周公解梦大师，精通中国传
 解梦原则：
 1. 结合中国传统文化中的梦境象征意义
 2. 融入现代心理学对梦境的理解
-3. 给出积极正面的引导和建议
-4. 语言温和亲切，给人以安慰和希望
+3. 如实解读，不编造假话：如果梦境预示不利信息，必须如实告知用户，不可为了安抚用户而编造虚假的正面解读。梦吉则说吉，梦凶则说凶，这才是对做梦者负责的态度
+4. 语言温和亲切，给出切实可行的建议
 
 回复格式要求（使用JSON格式）：
 {
@@ -38,8 +39,41 @@ const SYSTEM_PROMPT = `你是一位专业的周公解梦大师，精通中国传
 /**
  * AI智能解梦API（流式输出）
  * POST /api/dream/interpret
+ * 
+ * 需要 API Key 鉴权
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyAuth(request);
+  
+  if (!authResult.success) {
+    return new Response(
+      JSON.stringify({ 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      }),
+      { 
+        status: authResult.statusCode || 401, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+  
+  // 检查游客限制
+  if (authResult.isGuest && authResult.guestLimitReached) {
+    return new Response(
+      JSON.stringify({ 
+        error: `游客每日仅限 10 次大模型解析，今日已用完。注册账户后可无限使用。`,
+        code: 'GUEST_LIMIT_REACHED',
+        guestUsageCount: authResult.guestUsageCount,
+        guestLimit: 10,
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { dreamContent, sessionId, saveRecord } = body;
@@ -51,9 +85,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 如果是游客，增加使用次数
+    if (authResult.isGuest && authResult.userId) {
+      const { incrementGuestUsage } = await import('@/lib/api-auth');
+      await incrementGuestUsage(authResult.userId);
+    }
+
+    // 提取请求头
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const config = new Config();
+    const client = new LLMClient(config, customHeaders);
+
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `请解析我做的这个梦：${dreamContent}` }
+      { role: 'system' as const, content: SYSTEM_PROMPT },
+      { role: 'user' as const, content: `请解析我做的这个梦：${dreamContent}` }
     ];
 
     // 创建流式响应
@@ -63,10 +108,16 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of streamLLM(messages, { temperature: 0.7 })) {
+          const llmStream = client.stream(messages, {
+            model: 'doubao-seed-1-6-251015',
+            temperature: 0.7,
+          });
+
+          for await (const chunk of llmStream) {
             if (chunk.content) {
-              fullContent += chunk.content;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`));
+              const text = chunk.content.toString();
+              fullContent += text;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
             }
           }
 

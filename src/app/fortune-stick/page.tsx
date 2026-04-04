@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, Scroll, ChevronDown, ChevronUp, BookOpen, Sparkles } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Scroll, ChevronDown, ChevronUp, BookOpen, Sparkles, Share2 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { ShareCard, FortuneStickShareData } from '@/components/share/ShareCard';
 
 interface FortuneInterpretation {
   wealth: string;
@@ -39,6 +40,9 @@ export default function FortuneStickPage() {
   });
   const [shakeOffset, setShakeOffset] = useState(0);
   const [stickNumber, setStickNumber] = useState<number | null>(null);
+  
+  // 分享弹窗状态
+  const [showShareCard, setShowShareCard] = useState(false);
 
   // 保存占卜记录
   const saveDivinationRecord = async (stick: FortuneStick) => {
@@ -380,10 +384,18 @@ export default function FortuneStickPage() {
               </Card>
 
               {/* 重新抽签 */}
-              <div className="text-center">
+              <div className="text-center flex gap-4 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowShareCard(true)}
+                  className="border-amber-400/50 text-amber-200 hover:bg-amber-500/20 px-8 py-6 text-lg"
+                >
+                  <Share2 className="w-5 h-5 mr-2" />
+                  分享签文
+                </Button>
                 <Button
                   onClick={() => setResult(null)}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-12 py-6 text-lg shadow-lg"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-6 text-lg shadow-lg"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新抽签
@@ -393,6 +405,21 @@ export default function FortuneStickPage() {
           )}
         </div>
       </div>
+
+      {/* 分享弹窗 */}
+      {result && (
+        <ShareCard
+          open={showShareCard}
+          onOpenChange={setShowShareCard}
+          data={{
+            type: 'fortune-stick',
+            stickNumber: result.number,
+            level: result.level,
+            poem: result.poem.split('\n'),
+            interpretation: result.meaning,
+          }}
+        />
+      )}
     </div>
   );
 }

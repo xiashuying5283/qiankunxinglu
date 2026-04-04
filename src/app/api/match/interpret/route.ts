@@ -1,7 +1,39 @@
 import { NextRequest } from 'next/server';
-import { streamLLM } from '@/lib/llm';
+import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { verifyAuth } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyAuth(request);
+  
+  if (!authResult.success) {
+    return new Response(
+      JSON.stringify({ 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      }),
+      { 
+        status: authResult.statusCode || 401, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+  
+  // 检查游客限制
+  if (authResult.isGuest && authResult.guestLimitReached) {
+    return new Response(
+      JSON.stringify({ 
+        error: `游客每日仅限 10 次大模型解析，今日已用完。注册账户后可无限使用。`,
+        code: 'GUEST_LIMIT_REACHED',
+        guestUsageCount: authResult.guestUsageCount,
+        guestLimit: 10,
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { name1, name2, bazi1, bazi2, score, level, shengxiaoMatch, baziMatch } = body;
@@ -14,6 +46,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // 如果是游客，增加使用次数
+    if (authResult.isGuest && authResult.userId) {
+      const { incrementGuestUsage } = await import('@/lib/api-auth');
+      await incrementGuestUsage(authResult.userId);
+    }
+
     // 构建 prompt
     const systemPrompt = `你是一位专业的姻缘命理大师，精通八字命理、生肖配对、五行生克等传统命理学。
 请根据以下信息，为用户生成一段专业、温馨、个性化的姻缘解读。
@@ -22,7 +60,7 @@ export async function POST(request: NextRequest) {
 1. 语言优美，富有文采，但不要过于玄奥
 2. 结合双方八字特点，给出有针对性的分析
 3. 提供切实可行的感情建议
-4. 语气要积极正面，即使分数不高也要给予鼓励
+4. 如实解读，不编造假话：如果配对分数较低或存在冲克等不利因素，必须如实告知用户，不可为了安抚用户而编造虚假的正面解读。分数低就说低，有冲克就说冲克，这才是对用户负责的态度
 5. 输出格式使用Markdown，包含以下几个部分：
    - ## 缘分总评
    - ## 命理分析
@@ -53,20 +91,34 @@ export async function POST(request: NextRequest) {
 
 请生成详细的姻缘解读。`;
 
+    // 提取请求头
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+
+    // 初始化 LLM 客户端
+    const config = new Config();
+    const client = new LLMClient(config, customHeaders);
+
     const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userPrompt }
     ];
 
     // 创建流式响应
+    const stream = client.stream(messages, {
+      model: 'doubao-seed-1-8-251228',
+      temperature: 0.8
+    });
+
+    // 创建 ReadableStream
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of streamLLM(messages, { temperature: 0.8 })) {
+          for await (const chunk of stream) {
             if (chunk.content) {
+              const text = chunk.content.toString();
               // SSE 格式
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
             }
           }
           // 发送结束信号

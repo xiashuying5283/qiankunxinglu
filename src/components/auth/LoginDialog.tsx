@@ -15,30 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, User, Mail, Lock, UserCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
 import { SliderCaptcha } from '@/components/ui/slider-captcha';
 
-// Google SVG 图标
-function GoogleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none">
-      <path
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-        fill="#34A853"
-      />
-      <path
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-        fill="#EA4335"
-      />
-    </svg>
-  );
-}
-
 // GitHub SVG 图标
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -49,12 +25,11 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 interface OAuthStatus {
-  google: boolean;
   github: boolean;
 }
 
 interface LastOAuthAccount {
-  provider: 'google' | 'github';
+  provider: 'github';
   name: string;
   email?: string;
   avatar?: string;
@@ -97,8 +72,8 @@ export function LoginDialog({
   const [pendingAction, setPendingAction] = useState<'login' | 'register' | 'guest' | 'oauth'>('login');
 
   // OAuth 状态
-  const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ google: false, github: false });
-  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<'google' | 'github' | null>(null);
+  const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ github: false });
+  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<'github' | null>(null);
 
   // 获取 OAuth 配置状态
   useEffect(() => {
@@ -106,7 +81,7 @@ export function LoginDialog({
       try {
         const response = await fetch('/api/auth/oauth/status');
         const data = await response.json();
-        setOauthStatus(data);
+        setOauthStatus({ github: data.github || false });
       } catch (error) {
         console.error('Failed to fetch OAuth status:', error);
       }
@@ -130,7 +105,6 @@ export function LoginDialog({
   const handleCaptchaVerify = (success: boolean) => {
     if (success) {
       setCaptchaVerified(true);
-      // 不自动执行，等用户点击确认按钮
     }
   };
 
@@ -156,7 +130,7 @@ export function LoginDialog({
     resetCaptchaState();
   };
 
-  // 重置验证码状态（不重置表单）
+  // 重置验证码状态
   const resetCaptchaState = () => {
     setShowCaptcha(false);
     setCaptchaVerified(false);
@@ -210,7 +184,7 @@ export function LoginDialog({
   };
 
   // 触发 OAuth 登录
-  const triggerOAuthLogin = (provider: 'google' | 'github') => {
+  const triggerOAuthLogin = (provider: 'github') => {
     window.location.href = `/api/auth/oauth/${provider}`;
   };
 
@@ -231,14 +205,14 @@ export function LoginDialog({
   };
 
   // 处理游客登录（显示验证码）
-  const handleGuestLogin = async () => {
+  const handleGuestLogin = () => {
     setError('');
     setPendingAction('guest');
     setShowCaptcha(true);
   };
 
   // 处理 OAuth 登录（显示验证码）
-  const handleOAuthLogin = (provider: 'google' | 'github') => {
+  const handleOAuthLogin = (provider: 'github') => {
     setPendingOAuthProvider(provider);
     setPendingAction('oauth');
     setShowCaptcha(true);
@@ -253,12 +227,9 @@ export function LoginDialog({
     resetCaptchaState();
   };
 
-  // 是否显示第三方登录
-  const showOAuth = oauthStatus.google || oauthStatus.github;
-
   // 获取 OAuth 提供商的中文名称
-  const getOAuthProviderName = (provider: 'google' | 'github') => {
-    return provider === 'google' ? 'Google' : 'GitHub';
+  const getOAuthProviderName = (provider: 'github') => {
+    return 'GitHub';
   };
 
   return (
@@ -318,11 +289,7 @@ export function LoginDialog({
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                          {pendingOAuthProvider === 'google' ? (
-                            <GoogleIcon className="w-6 h-6" />
-                          ) : (
-                            <GitHubIcon className="w-6 h-6" />
-                          )}
+                          <GitHubIcon className="w-6 h-6" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
@@ -519,40 +486,26 @@ export function LoginDialog({
               </TabsContent>
             </Tabs>
 
-            {/* 第三方登录按钮 */}
-            {showOAuth && (
+            {/* GitHub 登录按钮 */}
+            {oauthStatus.github && (
               <>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">或者使用第三方登录</span>
+                    <span className="bg-background px-2 text-muted-foreground">或者</span>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  {oauthStatus.google && (
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleOAuthLogin('google')}
-                    >
-                      <GoogleIcon className="w-5 h-5 mr-2" />
-                      使用 Google 登录
-                    </Button>
-                  )}
-                  {oauthStatus.github && (
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleOAuthLogin('github')}
-                    >
-                      <GitHubIcon className="w-5 h-5 mr-2" />
-                      使用 GitHub 登录
-                    </Button>
-                  )}
-                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleOAuthLogin('github')}
+                >
+                  <GitHubIcon className="w-5 h-5 mr-2" />
+                  使用 GitHub 登录
+                </Button>
               </>
             )}
 
@@ -586,7 +539,7 @@ export function LoginDialog({
             </Button>
 
             <p className="text-xs text-muted-foreground text-center mt-2">
-              游客登录可查看结果，但历史记录仅保存在本地
+              游客无法创建 API 凭证
             </p>
           </>
         )}

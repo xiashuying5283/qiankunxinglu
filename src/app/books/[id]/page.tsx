@@ -6,15 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBookWithChapters, type Chapter } from '@/lib/books-service';
+import { encodeId, decodeId } from '@/lib/id-obfuscation';
 
 // 禁用静态生成，强制动态渲染
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const bookId = parseInt(id);
+  const bookId = decodeId(id);
   
-  if (isNaN(bookId)) {
+  if (!bookId) {
     return { title: '书籍不存在' };
   }
   
@@ -33,17 +34,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 // 渲染章节树
 function renderChapterTree(
   chapters: Chapter[], 
-  bookId: number,
+  encodedBookId: string,
   level: number = 0,
   startIndex: number = 1
 ): React.ReactNode {
   return chapters.map((chapter, index) => {
     const currentIndex = startIndex + index;
+    const encodedChapterId = encodeId(chapter.id);
     return (
       <div key={chapter.id} className={`${level > 0 ? 'ml-4' : ''}`}>
         {chapter.is_leaf ? (
           // 叶子节点：可点击阅读
-          <Link href={`/books/${bookId}/${chapter.id}`}>
+          <Link href={`/books/${encodedBookId}/${encodedChapterId}`}>
             <div className="flex items-center py-2 px-3 hover:bg-amber-100 rounded-lg transition-colors group cursor-pointer">
               <span className="w-6 h-6 flex items-center justify-center text-xs text-amber-500 bg-amber-100 rounded-full mr-3 font-medium">
                 {currentIndex}
@@ -65,7 +67,7 @@ function renderChapterTree(
             </div>
             {chapter.children && chapter.children.length > 0 && (
               <div className="border-l border-amber-200 ml-5">
-                {renderChapterTree(chapter.children, bookId, level + 1, 1)}
+                {renderChapterTree(chapter.children, encodedBookId, level + 1, 1)}
               </div>
             )}
           </div>
@@ -77,9 +79,9 @@ function renderChapterTree(
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const bookId = parseInt(id);
+  const bookId = decodeId(id);
   
-  if (isNaN(bookId)) {
+  if (!bookId) {
     notFound();
   }
   
@@ -91,6 +93,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   
   // 找到第一个可读章节
   const firstChapter = allChapters.find((c: Chapter) => c.is_leaf);
+  const encodedBookId = encodeId(bookId);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
@@ -131,7 +134,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
               <p className="text-amber-900/70 leading-relaxed">{book.description}</p>
               
               {firstChapter && (
-                <Link href={`/books/${bookId}/${firstChapter.id}`} className="inline-block mt-6">
+                <Link href={`/books/${encodedBookId}/${encodeId(firstChapter.id)}`} className="inline-block mt-6">
                   <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                     <BookOpen className="w-4 h-4 mr-2" />
                     开始阅读
@@ -159,7 +162,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
               </div>
             ) : (
               <div className="space-y-1">
-                {renderChapterTree(chapters, bookId)}
+                {renderChapterTree(chapters, encodedBookId)}
               </div>
             )}
           </CardContent>

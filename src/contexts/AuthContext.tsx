@@ -9,7 +9,6 @@ export interface User {
   name?: string;
   avatar?: string;
   isGuest: boolean;
-  sessionId?: string;
   provider?: string; // oauth 提供商: google, github
 }
 
@@ -39,27 +38,6 @@ const DEV_USER: User = {
 
 // 是否为开发环境
 const isDev = process.env.NODE_ENV === 'development';
-
-// 获取或创建游客 sessionId
-function getGuestSessionId(): string {
-  if (typeof window === 'undefined') return '';
-  
-  const storageKey = 'guest_session_id';
-  let sessionId = localStorage.getItem(storageKey);
-  
-  if (!sessionId) {
-    sessionId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem(storageKey, sessionId);
-  }
-  
-  return sessionId;
-}
-
-// 清除游客 sessionId
-function clearGuestSessionId() {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('guest_session_id');
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -103,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setUser(data.user);
-        clearGuestSessionId();
         return { success: true };
       }
       
@@ -127,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setUser(data.user);
-        clearGuestSessionId();
         return { success: true };
       }
       
@@ -141,7 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 游客登录
   const loginAsGuest = useCallback(async () => {
     try {
-      const sessionId = getGuestSessionId();
+      const sessionId = typeof window !== 'undefined' 
+        ? localStorage.getItem('guest_session_id') || undefined
+        : undefined;
       
       const response = await fetch('/api/auth/guest', {
         method: 'POST',
@@ -153,6 +131,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setUser(data.user);
+        // 保存 sessionId 到 localStorage
+        if (typeof window !== 'undefined' && data.user.sessionId) {
+          localStorage.setItem('guest_session_id', data.user.sessionId);
+        }
         return { success: true };
       }
       
@@ -174,7 +156,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
-      clearGuestSessionId();
     } catch (error) {
       console.error('Logout error:', error);
     }

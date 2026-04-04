@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import { streamLLM } from '@/lib/llm';
+import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { verifyAuth } from '@/lib/api-auth';
 
 // 占卜类型
 type DivinationType = 'iching' | 'tarot';
@@ -74,6 +75,7 @@ const ICHING_SYSTEM_PROMPT = `你是一位精通周易六十四卦的大师，�
 3. **结合卦象特质**：根据卦象的特点（上下卦组合、卦辞含义）进行针对性分析
 4. **给出具体建议**：解读要有实用性，给出可行的行动建议
 5. **语言通俗有文采**：既要有传统文化的底蕴，又要让现代人能理解
+6. **如实解读，不编造假话**：如果卦象显示凶、厉、吝、悔、咎等不利信息，必须如实告知用户，不可为了安抚用户而编造虚假的正面解读。卦象吉则说吉，卦象凶则说凶，这才是对求卦者负责的态度
 
 回复格式要求（使用Markdown）：
 ## 卦象总览
@@ -139,6 +141,7 @@ const TAROT_SYSTEM_PROMPT = `你是一位经验丰富的塔罗解读师，精通
 3. **结合正逆位**：正逆位含义不同，要准确区分
 4. **分析牌际关系**：多张牌之间要找出关联和故事线
 5. **给出具体建议**：解读要有实用性，给出可行的行动建议
+6. **如实解读，不编造假话**：如果牌面显示逆位、挑战、阻碍等不利信息，必须如实告知用户，不可为了安抚用户而编造虚假的正面解读。牌面吉则说吉，牌面凶则说凶，这才是对求问者负责的态度
 
 回复格式要求（使用Markdown）：
 ## 牌面总览
@@ -165,8 +168,41 @@ const TAROT_SYSTEM_PROMPT = `你是一位经验丰富的塔罗解读师，精通
 /**
  * 占卜AI解读API（流式输出）
  * POST /api/divination/interpret
+ * 
+ * 需要 API Key 鉴权
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyAuth(request);
+  
+  if (!authResult.success) {
+    return new Response(
+      JSON.stringify({ 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      }),
+      { 
+        status: authResult.statusCode || 401, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+  
+  // 检查游客限制
+  if (authResult.isGuest && authResult.guestLimitReached) {
+    return new Response(
+      JSON.stringify({ 
+        error: `游客每日仅限 10 次大模型解析，今日已用完。注册账户后可无限使用。`,
+        code: 'GUEST_LIMIT_REACHED',
+        guestUsageCount: authResult.guestUsageCount,
+        guestLimit: 10,
+      }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { type, ...data } = body as DivinationData;
@@ -177,6 +213,17 @@ export async function POST(request: NextRequest) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    // 如果是游客，增加使用次数
+    if (authResult.isGuest && authResult.userId) {
+      const { incrementGuestUsage } = await import('@/lib/api-auth');
+      await incrementGuestUsage(authResult.userId);
+    }
+
+    // 提取请求头
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const config = new Config();
+    const client = new LLMClient(config, customHeaders);
 
     let systemPrompt: string;
     let userPrompt: string;
@@ -277,20 +324,27 @@ ${index + 1}. ${card.name}（${card.isReversed ? '逆位' : '正位'}）${positi
     }
 
     const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userPrompt }
     ];
 
     // 创建流式响应
+    const stream = client.stream(messages, {
+      model: 'doubao-seed-1-8-251228',
+      temperature: 0.8
+    });
+
+    // 创建 ReadableStream
     const encoder = new TextEncoder();
     let isClosed = false;
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of streamLLM(messages, { temperature: 0.8 })) {
+          for await (const chunk of stream) {
             if (isClosed) break;
             if (chunk.content) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`));
+              const text = chunk.content.toString();
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
             }
           }
           if (!isClosed) {
@@ -319,6 +373,8 @@ ${index + 1}. ${card.name}（${card.isReversed ? '逆位' : '正位'}）${positi
 
   } catch (error) {
     console.error('Divination interpretation error:', error);
+    // 记录失败日志
+    await authResult.logUsage?.(500, Date.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
     return new Response(
       JSON.stringify({ error: '解读失败，请稍后重试' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

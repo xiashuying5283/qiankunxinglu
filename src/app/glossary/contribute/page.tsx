@@ -117,32 +117,51 @@ function ContributePageContent() {
   };
   
   const handleSubmit = async () => {
-    if (!term || !shortDesc || !fullDesc) {
-      setError('请填写词条名称、简短描述和详细描述');
+    // 验证必填字段
+    if (!term.trim()) {
+      setError('请填写词条名称');
+      return;
+    }
+    if (!shortDesc.trim()) {
+      setError('请填写简短描述');
+      return;
+    }
+    if (!fullDesc.trim()) {
+      setError('请填写详细描述');
+      return;
+    }
+    
+    // 检查参考文献
+    const validRefs = references.filter(r => r.title.trim());
+    if (validRefs.length === 0) {
+      setError('请至少添加一条参考文献');
       return;
     }
     
     setLoading(true);
     setError('');
+    setSuccess(false);
     
     try {
       const response = await fetch('/api/glossary/contributions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          term,
+          term: term.trim(),
           category,
-          short_desc: shortDesc,
-          full_desc: fullDesc,
-          origin,
+          short_desc: shortDesc.trim(),
+          full_desc: fullDesc.trim(),
+          origin: origin.trim() || null,
           examples: examples.filter(e => e.trim()),
           related_terms: relatedTerms.filter(t => t.trim()),
-          references: references.filter(r => r.title.trim()),
+          references: validRefs,
           contribution_type: 'add',
-          user_id: user?.id,
-          user_name: user?.name || user?.email,
+          user_id: user?.id || null,
+          user_name: user?.name || user?.email || null,
         }),
       });
+      
+      const data = await response.json();
       
       if (response.ok) {
         setSuccess(true);
@@ -155,11 +174,13 @@ function ContributePageContent() {
         setRelatedTerms(['']);
         setReferences([{ title: '', author: '', publisher: '', year: '', url: '' }]);
         fetchMyContributions();
+        // 滚动到顶部显示成功消息
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        const data = await response.json();
-        setError(data.error || '提交失败');
+        setError(data.error || data.details || '提交失败，请稍后重试');
       }
     } catch (e) {
+      console.error('Submit error:', e);
       setError('网络错误，请稍后重试');
     } finally {
       setLoading(false);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { decodeId } from '@/lib/id-obfuscation';
 
 // GET /api/books/[id]/chapters/[chapterId] - 获取章节内容
 export async function GET(
@@ -8,10 +9,11 @@ export async function GET(
 ) {
   try {
     const { id, chapterId } = await params;
-    const bookId = parseInt(id);
-    const chId = parseInt(chapterId);
+    // 支持混淆ID和数字ID（兼容）
+    const bookId = decodeId(id) || parseInt(id);
+    const chId = decodeId(chapterId) || parseInt(chapterId);
     
-    if (isNaN(bookId) || isNaN(chId)) {
+    if (!bookId || !chId || isNaN(bookId) || isNaN(chId)) {
       return NextResponse.json(
         { success: false, error: '无效的ID' },
         { status: 400 }

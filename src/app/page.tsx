@@ -1,19 +1,80 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Moon, BookOpen, PenTool, Star, Compass, Heart, 
   Wand2, Sun, Calendar, Zap, ArrowRight,
-  Users, Shield
+  Users, Shield, Key
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { OAuthHandler } from '@/components/auth/OAuthHandler';
 import { Disclaimer } from '@/components/Disclaimer';
+import { ScenarioEntry } from '@/components/home/ScenarioEntry';
 
 export default function Home() {
+  // 轮播推荐功能
+  const recommendedFeatures = [
+    {
+      title: '30秒速测今日运势',
+      description: '新手首选，快速了解今日运势',
+      icon: <Zap className="w-5 h-5" />,
+      href: '/daily-fortune',
+      color: 'from-sky-500 to-blue-500',
+    },
+    {
+      title: '周易占卜',
+      description: '经典起卦，解当下困惑',
+      icon: <BookOpen className="w-5 h-5" />,
+      href: '/iching',
+      color: 'from-amber-500 to-orange-500',
+    },
+    {
+      title: '塔罗占卜',
+      description: '热门推荐，探前路方向',
+      icon: <Moon className="w-5 h-5" />,
+      href: '/tarot',
+      color: 'from-purple-500 to-indigo-500',
+    },
+    {
+      title: '奇门遁甲',
+      description: '帝王之学，预测之巅',
+      icon: <Compass className="w-5 h-5" />,
+      href: '/qimen',
+      color: 'from-amber-500 to-yellow-500',
+    },
+    {
+      title: '观音灵签',
+      description: '虔诚抽签，指点迷津',
+      icon: <Wand2 className="w-5 h-5" />,
+      href: '/fortune-stick',
+      color: 'from-yellow-500 to-amber-500',
+    },
+    {
+      title: '姻缘匹配',
+      description: '测算你们的缘分指数',
+      icon: <Heart className="w-5 h-5" />,
+      href: '/match',
+      color: 'from-rose-500 to-red-500',
+    },
+  ];
+
+  // 轮播状态
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // 自动切换（10秒间隔）
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % recommendedFeatures.length);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 当前推荐
+  const currentFeature = recommendedFeatures[currentIndex];
+
   // 高频核心功能 - 首屏C位
   const coreFeatures = [
     {
@@ -134,6 +195,14 @@ export default function Home() {
       color: 'from-violet-500 to-purple-500',
       badge: '新',
     },
+    {
+      title: 'API 凭证',
+      description: '管理 API 凭证，用于外部调用',
+      icon: <Key className="w-6 h-6" />,
+      href: '/api-credentials',
+      color: 'from-slate-500 to-gray-500',
+      badge: '开发者',
+    },
   ];
 
   return (
@@ -156,7 +225,7 @@ export default function Home() {
         </div>
         
         {/* Hero 区域 */}
-        <div className="container mx-auto px-4 pt-8 pb-12 text-center">
+        <div className="container mx-auto px-4 pt-8 pb-6 text-center">
           <div className="flex items-center justify-center mb-4">
             <img 
               src="/logo.png" 
@@ -168,57 +237,43 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-lg md:text-xl text-purple-200 mb-3">探索古老智慧，指引人生方向</p>
-          <p className="text-sm text-gray-400 max-w-xl mx-auto mb-6">
+          <p className="text-sm text-gray-400 max-w-xl mx-auto">
             融合周易六十四卦、塔罗牌、测字、梅花易数等传统智慧
           </p>
-          
-          {/* 新手引导 - 快速入口 */}
-          <Link href="/daily-fortune">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-sky-500/20 to-blue-500/20 
-              border border-sky-400/30 rounded-full px-6 py-3 cursor-pointer
-              hover:from-sky-500/30 hover:to-blue-500/30 transition-all group">
-              <Zap className="w-5 h-5 text-sky-300" />
-              <span className="text-sky-100">新手首选：30秒速测今日运势</span>
-              <ArrowRight className="w-4 h-4 text-sky-300 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
         </div>
 
-        {/* 高频核心功能 - 大卡片 */}
-        <div className="container mx-auto px-4 mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+        {/* 场景化占卜入口 - 新用户首选 */}
+        <div className="container mx-auto px-4 mb-8">
+          <ScenarioEntry />
+        </div>
+
+        {/* 高频核心功能 */}
+        <div className="container mx-auto px-4 mb-12 max-w-6xl">
+          <h2 className="text-lg font-medium text-gray-300 mb-4 flex items-center">
+            <Sparkles className="w-5 h-5 mr-2 text-amber-400" />
+            常用功能
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {coreFeatures.map((feature, index) => (
               <Link href={feature.href} key={index}>
-                <Card className="group h-full bg-white/10 backdrop-blur-md border-white/20 
-                  hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl 
-                  cursor-pointer overflow-hidden">
+                <Card className="group bg-white/5 backdrop-blur-md border-white/10 
+                  hover:bg-white/15 transition-all cursor-pointer relative">
                   {feature.badge && (
-                    <div className={`absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full
+                    <div className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full
                       ${feature.badge === '推荐' ? 'bg-sky-500/80 text-white' : 
                         feature.badge === '热门' ? 'bg-rose-500/80 text-white' : 
                         'bg-amber-500/80 text-white'}`}>
                       {feature.badge}
                     </div>
                   )}
-                  <CardHeader className="pb-2">
-                    <div className={`inline-flex w-fit p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-3`}>
-                      <div className="text-white">{feature.icon}</div>
+                  <CardContent className="py-4 px-4">
+                    <div className={`inline-flex w-fit p-2 rounded-lg bg-gradient-to-br ${feature.color} mb-2`}>
+                      <div className="text-white w-5 h-5">{feature.icon}</div>
                     </div>
-                    <CardTitle className="text-lg text-white group-hover:text-amber-300 transition-colors">
+                    <h3 className="text-sm font-medium text-white group-hover:text-amber-300 transition-colors">
                       {feature.title}
-                    </CardTitle>
-                    <CardDescription className="text-purple-200 text-sm">
-                      {feature.subtitle}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-gray-400 text-xs mb-3">{feature.description}</p>
-                    <Button 
-                      size="sm"
-                      className={`w-full bg-gradient-to-r ${feature.color} hover:opacity-90 text-white`}
-                    >
-                      立即体验
-                    </Button>
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">{feature.subtitle}</p>
                   </CardContent>
                 </Card>
               </Link>

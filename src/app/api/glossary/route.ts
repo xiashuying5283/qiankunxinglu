@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { withCache } from '@/lib/cache';
+import { verifyAuth } from '@/lib/api-auth';
 
 const CACHE_KEY = 'glossary_data';
 const CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
@@ -42,8 +43,25 @@ async function fetchGlossaryData() {
  * - category: 分类筛选 (iching, bazi, qimen, general)
  * - term: 搜索单个词条
  * - nocache: 跳过缓存（可选）
+ * 
+ * 需要 API Key 鉴权
  */
 export async function GET(request: Request) {
+  const startTime = Date.now();
+  
+  // API Key 鉴权
+  const authResult = await verifyAuth(request);
+  
+  if (!authResult.success) {
+    return NextResponse.json(
+      { 
+        error: authResult.error,
+        code: 'UNAUTHORIZED'
+      },
+      { status: authResult.statusCode || 401 }
+    );
+  }
+  
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
