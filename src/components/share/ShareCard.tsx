@@ -82,7 +82,7 @@ const getDomain = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'https://divination.coze.site';
+  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000';
 };
 
 export function ShareCard({ open, onOpenChange, data, userName }: ShareCardProps) {

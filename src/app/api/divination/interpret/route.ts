@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { streamLLM } from '@/lib/llm';
 import { verifyAuth } from '@/lib/api-auth';
 
 // 占卜类型
@@ -220,11 +220,6 @@ export async function POST(request: NextRequest) {
       await incrementGuestUsage(authResult.userId);
     }
 
-    // 提取请求头
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
     let systemPrompt: string;
     let userPrompt: string;
 
@@ -324,27 +319,20 @@ ${index + 1}. ${card.name}（${card.isReversed ? '逆位' : '正位'}）${positi
     }
 
     const messages = [
-      { role: 'system' as const, content: systemPrompt },
-      { role: 'user' as const, content: userPrompt }
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
     ];
 
     // 创建流式响应
-    const stream = client.stream(messages, {
-      model: 'doubao-seed-1-8-251228',
-      temperature: 0.8
-    });
-
-    // 创建 ReadableStream
     const encoder = new TextEncoder();
     let isClosed = false;
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
+          for await (const chunk of streamLLM(messages, { temperature: 0.8 })) {
             if (isClosed) break;
             if (chunk.content) {
-              const text = chunk.content.toString();
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`));
             }
           }
           if (!isClosed) {

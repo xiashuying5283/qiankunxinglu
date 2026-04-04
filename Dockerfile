@@ -33,7 +33,6 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.coze ./.coze
 
 # 只安装生产依赖
 RUN pnpm install --prod --frozen-lockfile

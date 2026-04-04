@@ -135,21 +135,6 @@ function isDevelopmentRequest(request: Request): boolean {
     return true;
   }
   
-  const devDomainPattern = /\.dev\.coze\.site$/;
-  if (origin && devDomainPattern.test(new URL(origin).hostname)) {
-    return true;
-  }
-  if (referer) {
-    try {
-      const refererUrl = new URL(referer);
-      if (devDomainPattern.test(refererUrl.hostname)) {
-        return true;
-      }
-    } catch {
-      // URL 解析失败
-    }
-  }
-  
   return false;
 }
 

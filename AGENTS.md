@@ -93,7 +93,7 @@ src/
 pnpm install
 
 # 开发环境
-coze dev
+pnpm dev
 
 # 构建检查
 npx tsc --noEmit

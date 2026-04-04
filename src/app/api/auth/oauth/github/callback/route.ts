@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     // 从请求中获取域名
     const requestUrl = new URL(request.url);
-    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
     
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
     });
     const requestUrl = new URL((error as any)?.request?.url || 'http://localhost:5000');
-    const fallbackBaseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
+    const fallbackBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
     return NextResponse.redirect(new URL(`/?error=oauth_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, fallbackBaseUrl));
   }
 }

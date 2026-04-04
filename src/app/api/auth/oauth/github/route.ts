@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     // 从请求中获取域名（优先使用环境变量，其次从请求头获取）
     const requestUrl = new URL(request.url);
-    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || requestUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
     const redirectUri = `${baseUrl}/api/auth/oauth/github/callback`;
     
     console.log('[GitHub OAuth] Initiating login:', {
@@ -72,6 +72,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('[GitHub OAuth] Error:', error);
-    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'http://localhost:5000'));
+    return NextResponse.redirect(new URL('/?error=oauth_failed', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'));
   }
 }
