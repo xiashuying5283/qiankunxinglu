@@ -1,5 +1,5 @@
 # 构建阶段
-FROM docker.m.daocloud.io/library/node:20-alpine AS builder
+FROM node:20-alpine AS builder
 
 # 安装 pnpm
 RUN npm install -g pnpm
@@ -17,7 +17,7 @@ COPY . .
 RUN pnpm build
 
 # 运行阶段
-FROM docker.m.daocloud.io/library/node:20-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
