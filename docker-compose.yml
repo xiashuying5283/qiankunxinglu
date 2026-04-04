@@ -10,15 +10,18 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
-      # 数据库配置 - 请修改为你的 Supabase 配置
+      # 应用域名（改为你的实际域名）
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:5000}
+      # Supabase 数据库配置
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      # JWT 密钥 - 请生成一个随机字符串
+      # JWT 密钥（生成一个随机字符串）
       - JWT_SECRET=${JWT_SECRET}
-      # 大模型配置
-      - DOUBAO_API_KEY=${DOUBAO_API_KEY}
-      # OAuth 配置
+      # OpenAI API 配置
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      # OAuth 配置（可选）
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       # 管理员用户 ID（逗号分隔）
@@ -26,7 +29,7 @@ services:
       # ICP 备案号（可选）
       - ICP_BEIAN=${ICP_BEIAN}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5000"]
       interval: 30s
       timeout: 10s
       retries: 3
