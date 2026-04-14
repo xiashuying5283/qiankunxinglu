@@ -6,6 +6,9 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
+# 配置 npm 镜像源
+RUN pnpm config set registry https://registry.npmmirror.com
+
 # 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
@@ -27,6 +30,9 @@ ENV PORT=5000
 
 # 安装 pnpm
 RUN npm install -g pnpm
+
+# 配置 npm 镜像源
+RUN pnpm config set registry https://registry.npmmirror.com
 
 # 复制必要文件
 COPY --from=builder /app/package.json ./
