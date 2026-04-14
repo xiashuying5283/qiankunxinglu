@@ -56,17 +56,17 @@ export async function generateImage(prompt: string, options?: { size?: string })
   try {
     const client = getClient();
 
-    const sizeMap: Record<string, string> = {
+    const sizeMap = {
       '1K': '1024x1024',
       '2K': '1024x1024',
       '4K': '1792x1024',
-    };
+    } as const;
 
     const response = await client.images.generate({
       model: 'dall-e-3',
       prompt,
       n: 1,
-      size: (options?.size ? sizeMap[options.size] : undefined) || '1024x1024',
+      size: (options?.size ? sizeMap[options.size as keyof typeof sizeMap] : '1024x1024') as '1024x1024' | '1792x1024',
     });
 
     if (response.data && response.data.length > 0) {
