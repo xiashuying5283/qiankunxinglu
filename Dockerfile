@@ -48,4 +48,4 @@ RUN pnpm install --prod
 EXPOSE 5000
 
 # 启动
-CMD ["pnpm", "start"]
+CMD ["node", "dist/server.js"]
