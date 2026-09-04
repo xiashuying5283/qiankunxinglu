@@ -7,7 +7,7 @@
  * 3. 每日签到体系：连续签到奖励
  */
 
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // ==================== 类型定义 ====================
 
@@ -160,8 +160,8 @@ class GameService {
   private async checkTablesExist(): Promise<boolean> {
     if (this.tablesInitialized) return true;
     
-    const supabase = getSupabaseClient();
-    const { error } = await supabase
+    const db = getPgClient();
+    const { error } = await db
       .from('user_currency')
       .select('id')
       .limit(1);
@@ -182,9 +182,9 @@ class GameService {
     const tablesExist = await this.checkTablesExist();
     if (!tablesExist) return false;
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('user_currency')
       .select('id')
       .eq('user_id', userId)
@@ -192,7 +192,7 @@ class GameService {
     
     if (error && error.code === 'PGRST116') {
       // 记录不存在，创建新记录
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from('user_currency')
         .insert({
           user_id: userId,
@@ -218,9 +218,9 @@ class GameService {
     const tablesExist = await this.checkTablesExist();
     if (!tablesExist) return false;
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('user_levels')
       .select('id')
       .eq('user_id', userId)
@@ -228,7 +228,7 @@ class GameService {
     
     if (error && error.code === 'PGRST116') {
       // 记录不存在，创建新记录
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from('user_levels')
         .insert({
           user_id: userId,
@@ -261,8 +261,8 @@ class GameService {
       return { guaCoins: 0, spiritStones: 0, totalGuaCoins: 0, totalSpiritStones: 0 };
     }
     
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    const db = getPgClient();
+    const { data, error } = await db
       .from('user_currency')
       .select('*')
       .eq('user_id', userId)
@@ -293,10 +293,10 @@ class GameService {
   ): Promise<number> {
     await this.ensureCurrencyRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 获取当前余额
-    const { data: current } = await supabase
+    const { data: current } = await db
       .from('user_currency')
       .select('gua_coins, total_gua_coins')
       .eq('user_id', userId)
@@ -306,7 +306,7 @@ class GameService {
     const newTotal = (current?.total_gua_coins || 0) + amount;
     
     // 更新余额
-    await supabase
+    await db
       .from('user_currency')
       .update({ 
         gua_coins: newBalance, 
@@ -316,7 +316,7 @@ class GameService {
       .eq('user_id', userId);
     
     // 记录交易
-    await supabase
+    await db
       .from('currency_transactions')
       .insert({
         user_id: userId,
@@ -343,10 +343,10 @@ class GameService {
   ): Promise<{ success: boolean; balance: number; message?: string }> {
     await this.ensureCurrencyRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 获取当前余额
-    const { data: current } = await supabase
+    const { data: current } = await db
       .from('user_currency')
       .select('gua_coins')
       .eq('user_id', userId)
@@ -365,7 +365,7 @@ class GameService {
     const newBalance = currentBalance - amount;
     
     // 更新余额
-    await supabase
+    await db
       .from('user_currency')
       .update({ 
         gua_coins: newBalance,
@@ -374,7 +374,7 @@ class GameService {
       .eq('user_id', userId);
     
     // 记录交易
-    await supabase
+    await db
       .from('currency_transactions')
       .insert({
         user_id: userId,
@@ -411,8 +411,8 @@ class GameService {
       };
     }
     
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    const db = getPgClient();
+    const { data, error } = await db
       .from('user_levels')
       .select('*')
       .eq('user_id', userId)
@@ -456,10 +456,10 @@ class GameService {
   async addExperience(userId: string, amount: number): Promise<{ newLevel: number; levelUp: boolean }> {
     await this.ensureLevelRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 获取当前经验
-    const { data: current } = await supabase
+    const { data: current } = await db
       .from('user_levels')
       .select('level, experience, total_experience')
       .eq('user_id', userId)
@@ -470,7 +470,7 @@ class GameService {
     const newLevel = calculateLevel(newTotalExp);
     
     // 更新经验值
-    await supabase
+    await db
       .from('user_levels')
       .update({ 
         experience: (current?.experience || 0) + amount,
@@ -492,9 +492,9 @@ class GameService {
   async incrementDivinationCount(userId: string): Promise<void> {
     await this.ensureLevelRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
-    await supabase.rpc('increment_divination_count', { user_id: userId });
+    await db.rpc('increment_divination_count', { user_id: userId });
   }
 
   // ==================== 签到相关 ====================
@@ -508,8 +508,8 @@ class GameService {
     
     const today = new Date().toISOString().split('T')[0];
     
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    const db = getPgClient();
+    const { data, error } = await db
       .from('sign_in_records')
       .select('id')
       .eq('user_id', userId)
@@ -542,13 +542,13 @@ class GameService {
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 获取用户等级信息（包含总签到天数）
     const levelInfo = await this.getLevel(userId);
     
     // 获取最近的签到记录
-    const { data: lastRecord } = await supabase
+    const { data: lastRecord } = await db
       .from('sign_in_records')
       .select('continuous_days, sign_in_date')
       .eq('user_id', userId)
@@ -628,10 +628,10 @@ class GameService {
       };
     }
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 获取昨日签到记录
-    const { data: yesterdayRecord } = await supabase
+    const { data: yesterdayRecord } = await db
       .from('sign_in_records')
       .select('continuous_days')
       .eq('user_id', userId)
@@ -652,7 +652,7 @@ class GameService {
     
     // 检查里程碑奖励
     const levelSuccess = await this.ensureLevelRecord(userId);
-    const { data: levelData } = await supabase
+    const { data: levelData } = await db
       .from('user_levels')
       .select('sign_in_days')
       .eq('user_id', userId)
@@ -669,7 +669,7 @@ class GameService {
     }
     
     // 创建签到记录
-    const { error: insertError } = await supabase
+    const { error: insertError } = await db
       .from('sign_in_records')
       .insert({
         user_id: userId,
@@ -699,7 +699,7 @@ class GameService {
     await this.addExperience(userId, EXP_REWARDS.signIn);
     
     // 更新签到天数
-    await supabase
+    await db
       .from('user_levels')
       .update({ 
         sign_in_days: totalSignInDays,
@@ -726,16 +726,16 @@ class GameService {
   async recordDivination(userId: string): Promise<void> {
     await this.ensureLevelRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
     // 增加占卜次数
-    const { data } = await supabase
+    const { data } = await db
       .from('user_levels')
       .select('divination_count')
       .eq('user_id', userId)
       .single();
     
-    await supabase
+    await db
       .from('user_levels')
       .update({ 
         divination_count: (data?.divination_count || 0) + 1,
@@ -754,15 +754,15 @@ class GameService {
   async recordReadKnowledge(userId: string): Promise<void> {
     await this.ensureLevelRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
-    const { data } = await supabase
+    const { data } = await db
       .from('user_levels')
       .select('read_knowledge_count')
       .eq('user_id', userId)
       .single();
     
-    await supabase
+    await db
       .from('user_levels')
       .update({ 
         read_knowledge_count: (data?.read_knowledge_count || 0) + 1,
@@ -780,15 +780,15 @@ class GameService {
   async recordShare(userId: string): Promise<void> {
     await this.ensureLevelRecord(userId);
     
-    const supabase = getSupabaseClient();
+    const db = getPgClient();
     
-    const { data } = await supabase
+    const { data } = await db
       .from('user_levels')
       .select('share_count')
       .eq('user_id', userId)
       .single();
     
-    await supabase
+    await db
       .from('user_levels')
       .update({ 
         share_count: (data?.share_count || 0) + 1,

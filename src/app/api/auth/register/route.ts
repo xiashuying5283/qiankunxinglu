@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { generateToken, setAuthCookie } from '@/lib/auth';
 
 /**
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 检查邮箱是否已注册
     const { data: existingUser } = await client

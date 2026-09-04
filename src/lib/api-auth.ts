@@ -8,7 +8,7 @@
  */
 
 import { createHash, createHmac, randomBytes } from 'crypto';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // 配置
 export const AUTH_CONFIG = {
@@ -55,7 +55,7 @@ export interface ApiCredential {
  * 检查游客今日使用次数
  */
 export async function checkGuestUsage(userId: string): Promise<{ count: number; limitReached: boolean }> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   
   const { data, error } = await client
@@ -80,7 +80,7 @@ export async function checkGuestUsage(userId: string): Promise<{ count: number; 
  * 增加游客使用次数
  */
 export async function incrementGuestUsage(userId: string): Promise<void> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   const today = new Date().toISOString().slice(0, 10);
   
   // 尝试更新
@@ -113,7 +113,7 @@ export async function incrementGuestUsage(userId: string): Promise<void> {
  * 检查用户是否为游客
  */
 export async function checkIsGuest(userId: string): Promise<boolean> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { data: user } = await client
     .from('users')
@@ -277,7 +277,7 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
   const { accessKey, timestamp, signature } = extractSignatureAuth(request);
   
   if (accessKey && timestamp && signature) {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 查询凭证
     const { data: credential, error } = await client
@@ -404,7 +404,7 @@ export async function createCredential(
   name?: string,
   reason?: string
 ): Promise<{ success: boolean; accessKey?: string; secretKey?: string; error?: string }> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   // 检查用户的凭证数量
   const { count, error: countError } = await client
@@ -470,7 +470,7 @@ export async function revokeCredential(
   userId: string,
   credentialId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { error } = await client
     .from('api_credentials')
@@ -492,7 +492,7 @@ export async function revokeCredential(
  * 获取用户的所有凭证
  */
 export async function getUserCredentials(userId: string): Promise<ApiCredential[]> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { data, error } = await client
     .from('api_credentials')
@@ -513,7 +513,7 @@ export async function getUserCredentials(userId: string): Promise<ApiCredential[
  * 获取所有待审批的凭证（管理员用）
  */
 export async function getPendingCredentials(): Promise<Array<ApiCredential & { user_email?: string; user_name?: string }>> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { data, error } = await client
     .from('api_credentials')
@@ -534,13 +534,13 @@ export async function getPendingCredentials(): Promise<Array<ApiCredential & { u
   }
   
   // 单独查询用户信息
-  const userIds = [...new Set(data.map(item => item.user_id))];
+  const userIds = [...new Set(data.map((item: any) => item.user_id))] as string[];
   const { data: users } = await client
     .from('users')
     .select('id, email, name')
     .in('id', userIds);
   
-  const userMap = new Map((users || []).map(u => [u.id, u]));
+  const userMap = new Map<string, any>((users || []).map((u: any) => [u.id, u]));
   
   return data.map((item: any) => ({
     ...item,
@@ -553,7 +553,7 @@ export async function getPendingCredentials(): Promise<Array<ApiCredential & { u
  * 获取所有凭证（管理员用）
  */
 export async function getAllCredentials(): Promise<Array<ApiCredential & { user_email?: string; user_name?: string }>> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { data, error } = await client
     .from('api_credentials')
@@ -572,13 +572,13 @@ export async function getAllCredentials(): Promise<Array<ApiCredential & { user_
   }
   
   // 单独查询用户信息
-  const userIds = [...new Set(data.map(item => item.user_id))];
+  const userIds = [...new Set(data.map((item: any) => item.user_id))] as string[];
   const { data: users } = await client
     .from('users')
     .select('id, email, name')
     .in('id', userIds);
   
-  const userMap = new Map((users || []).map(u => [u.id, u]));
+  const userMap = new Map<string, any>((users || []).map((u: any) => [u.id, u]));
   
   return data.map((item: any) => ({
     ...item,
@@ -596,7 +596,7 @@ export async function reviewCredential(
   approved: boolean,
   rejectReason?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   
   const { error } = await client
     .from('api_credentials')

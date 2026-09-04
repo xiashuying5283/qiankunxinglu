@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 初始化游戏化系统数据库表
@@ -7,7 +7,7 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
  * POST /api/game/init - 强制初始化
  */
 export async function POST() {
-  const supabase = getSupabaseClient();
+  const db = getPgClient();
   const results: { table: string; status: string; message: string }[] = [];
   
   // 创建表的SQL
@@ -68,13 +68,13 @@ CREATE TABLE IF NOT EXISTS sign_in_records (
 
   try {
     // 使用 RPC 执行创建表语句
-    // 注意：Supabase 需要 superuser 权限才能创建表
+    // 注意：PostgreSQL 需要足够权限才能创建表
     // 这里我们尝试通过检查表是否存在来确认
     const tables = ['user_currency', 'currency_transactions', 'user_levels', 'sign_in_records'];
     
     for (const table of tables) {
       try {
-        const { error } = await supabase
+        const { error } = await db
           .from(table)
           .select('id')
           .limit(1);
@@ -106,11 +106,11 @@ CREATE TABLE IF NOT EXISTS sign_in_records (
     if (!allExists) {
       return NextResponse.json({
         success: false,
-        message: '部分表不存在，请在Supabase控制台执行SQL创建表',
+        message: '部分表不存在，请在 PostgreSQL 数据库中执行 SQL 创建表',
         results,
         sql: createTableSQL,
         instructions: [
-          '1. 打开 Supabase 控制台',
+          '1. 连接 PostgreSQL 数据库',
           '2. 进入 SQL Editor',
           '3. 复制上面的 SQL 语句并执行',
           '4. 刷新页面重试',

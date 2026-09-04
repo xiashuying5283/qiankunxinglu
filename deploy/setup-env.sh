@@ -44,33 +44,30 @@ fi
 echo "NEXT_PUBLIC_SITE_URL=https://$domain" >> $ENV_FILE
 echo "" >> $ENV_FILE
 
-# Supabase 配置
+# PostgreSQL 配置
 echo "-------------------------------------------"
-echo "【Supabase 数据库配置】（必需）"
-echo "请前往 https://supabase.com 创建项目并获取以下信息："
-echo "  - 项目设置 > API > URL"
-echo "  - 项目设置 > API > anon public key"
+echo "【PostgreSQL 数据库配置】（必需）"
+echo "请输入 PostgreSQL 连接串，例如："
+echo "  postgres://user:password@host:5432/database"
 echo ""
-read -p "SUPABASE_URL: " supabase_url
-read -p "SUPABASE_ANON_KEY: " supabase_key
+read -p "PGDATABASE_URL: " pgdatabase_url
 
 cat >> $ENV_FILE << EOF
-# Supabase 数据库配置
-SUPABASE_URL=$supabase_url
-SUPABASE_ANON_KEY=$supabase_key
+# PostgreSQL 数据库配置
+PGDATABASE_URL=$pgdatabase_url
 
 EOF
 
 # OpenAI 配置
 echo "-------------------------------------------"
 echo "【OpenAI API 配置】（AI 功能必需）"
-echo "支持 OpenAI 或兼容接口（如 DeepSeek、Moonshot 等）"
+echo "支持火山方舟或兼容 OpenAI 格式的接口"
 echo ""
 read -p "OPENAI_API_KEY: " openai_key
-read -p "OPENAI_BASE_URL (默认: https://api.openai.com/v1): " openai_base
-openai_base=${openai_base:-https://api.openai.com/v1}
-read -p "OPENAI_MODEL (默认: gpt-4o-mini): " openai_model
-openai_model=${openai_model:-gpt-4o-mini}
+read -p "OPENAI_BASE_URL (默认: https://ark.cn-beijing.volces.com/api/v3): " openai_base
+openai_base=${openai_base:-https://ark.cn-beijing.volces.com/api/v3}
+read -p "OPENAI_MODEL (默认: doubao-seed-2-0-pro-260215): " openai_model
+openai_model=${openai_model:-doubao-seed-2-0-pro-260215}
 
 cat >> $ENV_FILE << EOF
 # OpenAI API 配置

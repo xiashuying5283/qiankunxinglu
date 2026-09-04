@@ -1,5 +1,5 @@
 -- 游戏化系统数据库初始化脚本
--- 请在 Supabase SQL Editor 中执行此脚本
+-- 请在 PostgreSQL 数据库中执行此脚本
 
 -- 1. 用户货币表
 CREATE TABLE IF NOT EXISTS user_currency (

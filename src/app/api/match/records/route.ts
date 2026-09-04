@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // 获取匹配记录
 export async function GET(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('match_records')
       .select('*')
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('match_records')
       .insert({
@@ -136,7 +136,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { error } = await client
       .from('match_records')
       .delete()

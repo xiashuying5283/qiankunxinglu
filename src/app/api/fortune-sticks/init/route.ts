@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { allFortuneSticksData } from '@/lib/fortune-sticks-all';
 
 /**
@@ -8,7 +8,7 @@ import { allFortuneSticksData } from '@/lib/fortune-sticks-all';
  */
 export async function POST(request: NextRequest) {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 检查是否已有数据
     const { data: existing } = await client
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     const { data, error } = await client
       .from('fortune_sticks')

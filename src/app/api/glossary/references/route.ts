@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // 专业参考文献数据
 const DEFAULT_REFERENCES = [
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     let query = client
       .from('glossary_references')
@@ -143,7 +143,7 @@ export async function GET(request: Request) {
  */
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 检查是否已有数据
     const { data: existing } = await client

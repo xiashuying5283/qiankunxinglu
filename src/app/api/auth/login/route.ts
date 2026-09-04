@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { generateToken, setAuthCookie, getCurrentUser } from '@/lib/auth';
 
 /**
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 查找用户
     const { data: user, error } = await client

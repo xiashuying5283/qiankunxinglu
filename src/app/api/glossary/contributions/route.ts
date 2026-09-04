@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取用户贡献列表
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const userId = searchParams.get('user_id');
     
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     let query = client
       .from('glossary_contributions')
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     }
     
     // 转换字段名
-    const result = (data || []).map(item => ({
+    const result = (data || []).map((item: any) => ({
       id: item.id,
       term: item.term,
       category: item.category,
@@ -100,7 +100,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     const {
       term,
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
       .single();
     
     if (error) {
-      console.error('Supabase insert error:', error);
+      console.error('Database insert error:', error);
       return NextResponse.json({
         error: '数据库操作失败',
         details: error.message

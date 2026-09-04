@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { withCache } from '@/lib/cache';
 import { verifyAuth } from '@/lib/api-auth';
 
@@ -7,8 +7,8 @@ const CACHE_KEY = 'glossary_data';
 const CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
 
 // 获取科普词条数据
-async function fetchGlossaryData() {
-  const client = getSupabaseClient();
+async function fetchGlossaryData(): Promise<any[]> {
+  const client = getPgClient();
   
   const { data, error } = await client
     .from('glossary')
@@ -22,7 +22,7 @@ async function fetchGlossaryData() {
   console.log(`[Glossary] Fetched ${data?.length || 0} terms from database`);
   
   // 转换字段名
-  return (data || []).map(item => ({
+  return (data || []).map((item: any) => ({
     id: item.id,
     term: item.term,
     category: item.category,
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
     
     // 如果搜索单个词条，直接查询
     if (term) {
-      const client = getSupabaseClient();
+      const client = getPgClient();
       const { data, error } = await client
         .from('glossary')
         .select('*')
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
     
     // 按分类筛选
     const data = category 
-      ? allData.filter(item => item.category === category)
+      ? allData.filter((item: any) => item.category === category)
       : allData;
     
     return NextResponse.json(data);

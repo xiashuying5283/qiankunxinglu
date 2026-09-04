@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { ArrowLeft, BookOpen, ChevronRight, PenLine, ExternalLink } from 'lucide-react';
 
 interface GlossaryData {
@@ -47,9 +47,9 @@ const CATEGORY_INFO = {
 };
 
 async function getTermData(term: string): Promise<GlossaryData | null> {
-  const supabase = getSupabaseClient();
+  const db = getPgClient();
   
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('glossary')
     .select('*')
     .eq('term', term)
@@ -103,14 +103,14 @@ export default async function TermDetailPage({ params }: { params: Promise<{ ter
   // 获取相关词条的数据
   let relatedTermsData: GlossaryData[] = [];
   if (data.relatedTerms && data.relatedTerms.length > 0) {
-    const supabase = getSupabaseClient();
-    const { data: related } = await supabase
+    const db = getPgClient();
+    const { data: related } = await db
       .from('glossary')
       .select('id, term, category, short_desc')
       .in('term', data.relatedTerms);
     
     if (related) {
-      relatedTermsData = related.map(r => ({
+      relatedTermsData = related.map((r: any) => ({
         id: r.id,
         term: r.term,
         category: r.category,

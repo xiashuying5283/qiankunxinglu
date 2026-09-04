@@ -5,7 +5,7 @@ let openaiClient: OpenAI | null = null;
 function getClient(): OpenAI {
   if (!openaiClient) {
     const apiKey = process.env.OPENAI_API_KEY;
-    const baseURL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    const baseURL = process.env.OPENAI_BASE_URL || 'https://ark.cn-beijing.volces.com/api/v3';
 
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not set. Please check your .env.local or environment variables.');
@@ -17,7 +17,7 @@ function getClient(): OpenAI {
 }
 
 export function getDefaultModel(): string {
-  return process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  return process.env.OPENAI_MODEL || 'doubao-seed-2-0-pro-260215';
 }
 
 /**

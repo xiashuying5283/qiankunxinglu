@@ -1,5 +1,5 @@
 -- 科普词典数据库初始化脚本
--- 在 Supabase SQL Editor 中执行此脚本
+-- 在 PostgreSQL 数据库中执行此脚本
 
 -- 1. 为 glossary 表添加 refs 列（如果不存在）
 -- 注意：使用 refs 而非 references，因为 references 是 PostgreSQL 保留关键字

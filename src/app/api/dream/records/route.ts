@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取梦境记录
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const sessionId = searchParams.get('sessionId');
     const limit = parseInt(searchParams.get('limit') || '10', 10);
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     if (sessionId) {
       // 获取指定会话的记录
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { error } = await client
       .from('dream_records')
       .delete()

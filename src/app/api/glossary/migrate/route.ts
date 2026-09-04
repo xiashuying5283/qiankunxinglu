@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 数据库迁移：添加参考文献字段和用户贡献表
  * POST /api/glossary/migrate
  */
 export async function POST() {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   const results: string[] = [];
 
   try {

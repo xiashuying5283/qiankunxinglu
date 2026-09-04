@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取卦象详情
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     }
     
     // 获取详情
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('hexagram_details')
       .select('*')

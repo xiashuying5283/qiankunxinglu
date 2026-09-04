@@ -122,8 +122,7 @@ rsync -avz --exclude 'node_modules' --exclude '.next' --exclude '.git' ./ user@y
 | 变量名 | 说明 | 获取方式 |
 |--------|------|----------|
 | `NEXT_PUBLIC_SITE_URL` | 应用域名 | `https://your-domain.com` |
-| `SUPABASE_URL` | Supabase 项目 URL | [Supabase 控制台](https://supabase.com) > 项目设置 > API |
-| `SUPABASE_ANON_KEY` | Supabase 匿名密钥 | 同上 |
+| `PGDATABASE_URL` | PostgreSQL 连接串 | `postgres://user:password@host:5432/database` |
 | `OPENAI_API_KEY` | OpenAI API 密钥 | [OpenAI 平台](https://platform.openai.com) > API Keys |
 | `JWT_SECRET` | JWT 加密密钥 | 随机字符串（建议 32 位以上） |
 
@@ -131,8 +130,8 @@ rsync -avz --exclude 'node_modules' --exclude '.next' --exclude '.git' ./ user@y
 
 | 变量名 | 说明 |
 |--------|------|
-| `OPENAI_BASE_URL` | API 地址（默认 OpenAI，可用兼容接口） |
-| `OPENAI_MODEL` | 模型名称（默认 gpt-4o-mini） |
+| `OPENAI_BASE_URL` | API 地址（默认火山方舟，可用兼容接口） |
+| `OPENAI_MODEL` | 模型名称（默认 doubao-seed-2-0-pro-260215） |
 | `GITHUB_CLIENT_ID` | GitHub OAuth 登录 |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth 登录 |
 | `ADMIN_USER_IDS` | 管理员用户 ID（逗号分隔） |
@@ -158,14 +157,13 @@ nano .env
 # 应用域名
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 
-# Supabase 数据库（必需）
-SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# PostgreSQL 数据库（必需）
+PGDATABASE_URL=postgres://user:password@host:5432/database
 
 # OpenAI API（必需）
 OPENAI_API_KEY=sk-xxxxx
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+OPENAI_MODEL=doubao-seed-2-0-pro-260215
 
 # JWT 密钥（必需）
 JWT_SECRET=your-random-secret-key-at-least-32-chars
@@ -305,9 +303,9 @@ docker-compose config
 
 ### 2. 数据库连接失败
 
-- 检查 `SUPABASE_URL` 和 `SUPABASE_ANON_KEY` 是否正确
-- 确认 Supabase 项目未暂停
-- 检查防火墙是否允许出站连接
+- 检查 `PGDATABASE_URL` 或 `DATABASE_URL` 是否正确
+- 确认 PostgreSQL 服务可访问且数据库已初始化
+- 检查防火墙是否允许服务器连接数据库端口
 
 ### 3. AI 功能不工作
 

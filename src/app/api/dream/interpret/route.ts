@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { streamLLM } from '@/lib/llm';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { verifyAuth } from '@/lib/api-auth';
 
 // 系统提示词
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 // 保存梦境记录
 async function saveDreamRecord(sessionId: string, dreamContent: string, interpretation: string) {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 尝试解析JSON提取关键词和建议
     let keywords: string[] = [];

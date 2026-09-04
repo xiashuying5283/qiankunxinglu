@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 更新用户信息
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 更新数据库
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('users')
       .update(updateData)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 保存占卜记录
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     const { data, error } = await client
       .from('divination_records')
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     let query = client
       .from('divination_records')
@@ -129,7 +129,7 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 只能删除自己的记录
     const { error } = await client

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取当前登录用户信息
@@ -15,7 +15,7 @@ export async function GET() {
     }
 
     // 从数据库获取完整的用户信息（包括头像和提供商）
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data: fullUser } = await client
       .from('users')
       .select('id, email, name, avatar, is_guest, session_id, provider')

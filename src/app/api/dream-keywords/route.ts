@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { dreamKeywordsData, categories, DreamKeywordData } from '@/lib/dream-keywords-data';
 import { withCache, clearCache } from '@/lib/cache';
 
@@ -9,9 +9,9 @@ const CACHE_KEY = 'dream_keywords_data';
 const CACHE_TTL = 15 * 60 * 1000;
 
 // 获取所有关键词数据（带缓存）
-async function getAllKeywords() {
+async function getAllKeywords(): Promise<DreamKeywordData[]> {
   return withCache(CACHE_KEY, async () => {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('dream_keywords')
       .select('*')
@@ -29,7 +29,7 @@ async function getAllKeywords() {
  */
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 检查是否已有数据
     const { data: existing } = await client
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     const categoryQuery = searchParams.get('category');
     const initCheck = searchParams.get('init');
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 检查初始化状态
     if (initCheck === '1') {
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     // 按分类获取
     if (categoryQuery) {
       const allKeywords = await getAllKeywords();
-      const filtered = allKeywords.filter(k => k.category === categoryQuery);
+      const filtered = allKeywords.filter((k: DreamKeywordData) => k.category === categoryQuery);
 
       return NextResponse.json({
         success: true,
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
     // 搜索关键词
     if (searchQuery) {
       const allKeywords = await getAllKeywords();
-      const filtered = allKeywords.filter(k => 
+      const filtered = allKeywords.filter((k: DreamKeywordData) => 
         k.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
         k.meaning.toLowerCase().includes(searchQuery.toLowerCase())
       ).slice(0, 20);
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
       groupedData[cat] = [];
     });
     
-    data.forEach(item => {
+    data.forEach((item: DreamKeywordData) => {
       if (groupedData[item.category]) {
         groupedData[item.category].push({
           keyword: item.keyword,

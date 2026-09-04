@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { generateToken, setAuthCookie } from '@/lib/auth';
 
 /**
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 查找有效的重置令牌
     const { data: user, error } = await client
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 查找有效的重置令牌
     const { data: user, error: findError } = await client

@@ -1,6 +1,6 @@
 # 乾坤星路
 
-基于 [Next.js](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) + [Supabase](https://supabase.com) 的全栈应用。
+基于 [Next.js](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) + PostgreSQL (`pg`) 的全栈应用。
 
 ## 快速开始
 

@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 export interface Book {
   id: number;
@@ -47,7 +47,7 @@ export interface ContentItem {
 // 获取书籍列表
 export async function getBooks(category?: string): Promise<Book[]> {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     let query = client
       .from('books')
@@ -75,7 +75,7 @@ export async function getBookWithChapters(bookId: number): Promise<{
   allChapters: Chapter[];
 }> {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 并行查询书籍和章节
     const [bookResult, chaptersResult] = await Promise.all([
@@ -98,11 +98,11 @@ export async function getBookWithChapters(bookId: number): Promise<{
     const chapterMap = new Map<number, Chapter>();
     const rootChapters: Chapter[] = [];
     
-    allChapters.forEach((chapter) => {
+    allChapters.forEach((chapter: Chapter) => {
       chapterMap.set(chapter.id, { ...chapter, children: [] });
     });
     
-    allChapters.forEach((chapter) => {
+    allChapters.forEach((chapter: Chapter) => {
       const node = chapterMap.get(chapter.id)!;
       if (chapter.parent_id === null) {
         rootChapters.push(node);
@@ -139,7 +139,7 @@ export async function getChapterContent(bookId: number, chapterId: number): Prom
   } | null;
 }> {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 并行查询所有数据
     const [chapterResult, contentsResult, bookResult, allChaptersResult] = await Promise.all([
@@ -174,14 +174,14 @@ export async function getChapterContent(bookId: number, chapterId: number): Prom
     
     const contents = contentsResult.data || [];
     const allChapters = allChaptersResult.data || [];
-    const currentIndex = allChapters.findIndex((c) => c.id === chapterId);
+    const currentIndex = allChapters.findIndex((c: Chapter) => c.id === chapterId);
     
     // 按内容类型分组
     const groupedContents = {
-      original: contents.filter((c) => c.content_type === 'original'),
-      note: contents.filter((c) => c.content_type === 'note'),
-      commentary: contents.filter((c) => c.content_type === 'commentary'),
-      translation: contents.filter((c) => c.content_type === 'translation'),
+      original: contents.filter((c: ContentItem) => c.content_type === 'original'),
+      note: contents.filter((c: ContentItem) => c.content_type === 'note'),
+      commentary: contents.filter((c: ContentItem) => c.content_type === 'commentary'),
+      translation: contents.filter((c: ContentItem) => c.content_type === 'translation'),
     };
     
     return {

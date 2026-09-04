@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { decodeId } from '@/lib/id-obfuscation';
 
 // GET /api/books/[id] - 获取书籍详情和章节目录
@@ -19,7 +19,7 @@ export async function GET(
       );
     }
     
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 获取书籍信息
     const { data: book, error: bookError } = await client

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { clearCache } from '@/lib/cache';
 
 // 基础周易科普词条数据
@@ -1320,7 +1320,7 @@ const GLOSSARY_DATA = [
  */
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 先检查表是否存在，如果不存在则尝试创建
     const { error: checkError } = await client
@@ -1342,7 +1342,7 @@ export async function POST() {
       .from('glossary')
       .select('term');
     
-    const existingTermSet = new Set((existingTerms || []).map(t => t.term));
+    const existingTermSet = new Set((existingTerms || []).map((t: any) => t.term));
     
     // 筛选出需要新增的术语
     const newTerms = GLOSSARY_DATA.filter(item => !existingTermSet.has(item.term));
@@ -1361,7 +1361,7 @@ export async function POST() {
     // 插入新术语
     const { error } = await client
       .from('glossary')
-      .insert(newTerms);
+      .insert(newTerms as any[]);
     
     if (error) {
       throw error;

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 审核用户贡献
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
     
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 获取贡献记录
     const { data: contribution, error: fetchError } = await client

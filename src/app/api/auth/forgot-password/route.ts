@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { isMailConfigured, sendPasswordResetEmail } from '@/lib/mail';
 
 // 生成随机令牌
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 查找用户
     const { data: user, error } = await client

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { Converter } from 'opencc-js';
 
 // 繁体转简体转换器
@@ -211,7 +211,7 @@ function parseContent(html: string): ContentUnit[] {
 
 // GET /api/crawl/zhouyi - 爬取周易正义
 export async function GET() {
-  const client = getSupabaseClient();
+  const client = getPgClient();
   const logs: string[] = [];
   
   try {

@@ -9,7 +9,7 @@
 - **框架**: Next.js 16 (App Router)
 - **核心**: React 19
 - **语言**: TypeScript 5
-- **数据库**: Supabase (PostgreSQL)
+- **数据库**: PostgreSQL (`pg` 直连)
 - **UI组件**: shadcn/ui (基于 Radix UI)
 - **样式**: Tailwind CSS 4
 - **农历库**: lunar-javascript
@@ -41,7 +41,7 @@ src/
 │   └── api-auth.ts         # API 鉴权
 └── storage/                # 数据存储
     └── database/
-        └── supabase-client.ts
+        └── pg-client.ts
 ```
 
 ## 核心功能模块

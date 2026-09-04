@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // 词条参考文献映射
 const TERM_REFERENCES: Record<string, Array<{ title: string; author?: string; publisher?: string; year?: string }>> = {
@@ -89,7 +89,7 @@ const TERM_REFERENCES: Record<string, Array<{ title: string; author?: string; pu
  */
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const results: string[] = [];
     
     for (const [term, refs] of Object.entries(TERM_REFERENCES)) {
@@ -118,7 +118,7 @@ export async function POST() {
       message: '参考文献添加完成',
       results,
       total: Object.keys(TERM_REFERENCES).length,
-      note: '如果看到 "refs 列不存在"，请在 Supabase 控制台执行：ALTER TABLE glossary ADD COLUMN refs JSONB DEFAULT \'[]\'::jsonb;'
+      note: '如果看到 "refs 列不存在"，请在 PostgreSQL 数据库执行：ALTER TABLE glossary ADD COLUMN refs JSONB DEFAULT \'[]\'::jsonb;'
     });
   } catch (error) {
     console.error('添加参考文献失败:', error);

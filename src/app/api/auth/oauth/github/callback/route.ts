@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getAccessToken, getOAuthUserInfo } from '@/lib/oauth';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { generateToken, setAuthCookie } from '@/lib/auth';
 
 /**
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/?error=user_info_failed', baseUrl));
     }
 
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 查找或创建用户
     let user;

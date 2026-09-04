@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
     }
     
     // 检查是否为游客
-    const { getSupabaseClient } = await import('@/storage/database/supabase-client');
-    const client = getSupabaseClient();
+    const { getPgClient } = await import('@/storage/database/pg-client');
+    const client = getPgClient();
     const { data: user } = await client
       .from('users')
       .select('is_guest')

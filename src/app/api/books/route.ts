@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { verifyAuth } from '@/lib/api-auth';
 
 // GET /api/books - 获取书籍列表
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
     

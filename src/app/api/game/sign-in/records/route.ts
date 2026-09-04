@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/api-auth';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取用户签到记录
@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
   
-  const supabase = getSupabaseClient();
+  const db = getPgClient();
   
   // 获取指定月份的签到记录
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('sign_in_records')
     .select('*')
     .eq('user_id', authResult.userId)
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   });
   
   // 获取统计信息
-  const { data: statsData } = await supabase
+  const { data: statsData } = await db
     .from('sign_in_records')
     .select('sign_in_date, continuous_days')
     .eq('user_id', authResult.userId)
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   }
   
   // 获取总签到天数
-  const { data: levelData } = await supabase
+  const { data: levelData } = await db
     .from('user_levels')
     .select('sign_in_days')
     .eq('user_id', authResult.userId)

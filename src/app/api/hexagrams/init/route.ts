@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { hexagrams as hexagramsSource, trigrams as trigramsSource, type LineText } from '@/lib/hexagram-data';
 import { clearCache } from '@/lib/cache';
 
@@ -8,7 +8,7 @@ const CACHE_KEY = 'hexagrams_data';
 
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
 
     // 检查是否已有数据
     const { data: existingHexagrams } = await client
@@ -85,7 +85,7 @@ export async function POST() {
 
 export async function DELETE() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 清空数据（按依赖顺序删除）
     await client.from('hexagrams').delete().neq('id', 0);

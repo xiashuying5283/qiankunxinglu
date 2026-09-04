@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 // 八字科普词条数据
 const BAZI_GLOSSARY_DATA = [
@@ -218,7 +218,7 @@ const BAZI_GLOSSARY_DATA = [
  */
 export async function POST() {
   try {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     // 插入数据（如果不存在）
     for (const item of BAZI_GLOSSARY_DATA) {

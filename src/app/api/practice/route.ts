@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 
 /**
  * 获取断卦练习题
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const random = searchParams.get('random') === 'true';
     
-    const client = getSupabaseClient();
+    const client = getPgClient();
     
     let query = client
       .from('practice_questions')

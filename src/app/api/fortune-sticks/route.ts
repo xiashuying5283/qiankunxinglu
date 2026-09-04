@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { getPgClient } from '@/storage/database/pg-client';
 import { withCache, clearCache } from '@/lib/cache';
 
 // 缓存键
@@ -8,9 +8,9 @@ const CACHE_KEY = 'fortune_sticks_data';
 const CACHE_TTL = 10 * 60 * 1000;
 
 // 获取所有灵签数据（带缓存）
-async function getAllSticks() {
+async function getAllSticks(): Promise<any[]> {
   return withCache(CACHE_KEY, async () => {
-    const client = getSupabaseClient();
+    const client = getPgClient();
     const { data, error } = await client
       .from('fortune_sticks')
       .select('*')
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       }
 
       const allSticks = await getAllSticks();
-      const stick = allSticks.find(s => s.number === number);
+      const stick = allSticks.find((s: any) => s.number === number);
 
       if (!stick) {
         return NextResponse.json(
