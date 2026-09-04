@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -15,11 +14,8 @@ import {
   History, 
   Lightbulb, 
   Target, 
-  ExternalLink,
   Loader2,
-  GraduationCap
 } from 'lucide-react';
-import Link from 'next/link';
 import { GlossaryTerm } from './GlossaryTerm';
 
 interface HexagramKnowledgeProps {
@@ -130,14 +126,6 @@ export function HexagramKnowledge({ hexagramNumber, hexagramName }: HexagramKnow
           <p className="text-sm text-amber-200">
             详细科普内容正在完善中，敬请期待...
           </p>
-          <div className="mt-4 pt-4 border-t border-amber-300/20">
-            <Link href={`/learn/hexagram/${hexagramNumber}`}>
-              <Button variant="outline" size="sm" className="border-amber-400/50 text-amber-100 hover:bg-amber-500/20">
-                <GraduationCap className="w-4 h-4 mr-2" />
-                前往学习中心
-              </Button>
-            </Link>
-          </div>
         </CardContent>
       </Card>
     );
@@ -296,21 +284,6 @@ export function HexagramKnowledge({ hexagramNumber, hexagramName }: HexagramKnow
         </Card>
       )}
 
-      {/* 学习入口 */}
-      <Card className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border-amber-400/30">
-        <CardContent className="py-4 flex items-center justify-between">
-          <div>
-            <div className="text-amber-100 font-medium">想深入了解{hexagramName}卦？</div>
-            <div className="text-amber-200 text-sm">前往学习中心获取更多内容</div>
-          </div>
-          <Link href={`/learn/hexagram/${hexagramNumber}`}>
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-              前往学习
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
     </div>
   );
 }
