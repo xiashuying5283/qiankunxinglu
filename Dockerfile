@@ -11,7 +11,7 @@ RUN pnpm config set registry https://registry.npmmirror.com
 
 # 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+RUN pnpm install --ignore-scripts
 
 # 复制源码
 COPY . .
@@ -42,7 +42,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/dist ./dist
 
 # 只安装生产依赖
-RUN pnpm install --prod
+RUN pnpm config set ignore-scripts true && pnpm install --prod
 
 # 暴露端口
 EXPOSE 5000
