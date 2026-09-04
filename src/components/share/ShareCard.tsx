@@ -469,7 +469,7 @@ export function ShareCard({ open, onOpenChange, data, userName }: ShareCardProps
               variant="outline"
               onClick={handleDownload}
               disabled={!imageUrl || isGenerating}
-              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+              className="flex-1 border-slate-500 bg-slate-800 text-slate-50 hover:bg-slate-700 hover:text-white"
             >
               <Download className="w-4 h-4 mr-2" />
               保存图片
@@ -478,7 +478,7 @@ export function ShareCard({ open, onOpenChange, data, userName }: ShareCardProps
               onClick={handleShare}
               disabled={!imageUrl || isGenerating}
               className="flex-1"
-              style={{ background: theme.primary, color: '#000' }}
+              style={{ background: theme.primary, color: '#0f172a', fontWeight: 600 }}
             >
               <Share2 className="w-4 h-4 mr-2" />
               分享

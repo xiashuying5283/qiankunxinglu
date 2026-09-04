@@ -905,7 +905,7 @@ export default function MatchPage() {
                 <Button
                   onClick={reset}
                   variant="outline"
-                  className="border-rose-300/30 text-rose-200 hover:bg-white/10"
+                  className="border-rose-300/80 bg-rose-500/15 text-rose-50 hover:bg-rose-400 hover:text-slate-950 font-semibold"
                 >
                   重新匹配
                 </Button>

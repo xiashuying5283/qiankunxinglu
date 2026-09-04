@@ -687,7 +687,7 @@ function TarotContent() {
                       <Button
                         onClick={revealAll}
                         variant="outline"
-                        className="border-purple-400 text-purple-200 hover:bg-purple-500/20"
+                        className="border-purple-300/80 bg-purple-500/15 text-purple-50 hover:bg-purple-400 hover:text-slate-950 font-semibold"
                       >
                         全部翻开
                       </Button>
@@ -795,14 +795,14 @@ function TarotContent() {
                   <Button
                     variant="outline"
                     onClick={() => setShowShareCard(true)}
-                    className="border-purple-400/50 text-purple-200 hover:bg-purple-500/20 px-8 py-6 text-lg"
+                    className="border-purple-300/80 bg-purple-500/15 text-purple-50 hover:bg-purple-400 hover:text-slate-950 px-8 py-6 text-lg font-semibold"
                   >
                     <Share2 className="w-5 h-5 mr-2" />
                     分享结果
                   </Button>
                   <Button
                     onClick={reset}
-                    className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white px-8 py-6 text-lg"
+                    className="bg-gradient-to-r from-purple-400 to-violet-400 text-slate-950 hover:from-purple-300 hover:to-violet-300 px-8 py-6 text-lg font-semibold"
                   >
                     <RefreshCw className="w-5 h-5 mr-2" />
                     重新占卜

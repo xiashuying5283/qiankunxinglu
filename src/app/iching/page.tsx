@@ -700,7 +700,7 @@ function IChingContent() {
                       </div>
                     </div>
                     <Link href="/learn">
-                      <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600">
+                      <Button className="bg-gradient-to-r from-purple-400 to-indigo-400 text-slate-950 font-semibold hover:from-purple-300 hover:to-indigo-300">
                         开始学习
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Button>
@@ -717,14 +717,14 @@ function IChingContent() {
                 <Button
                   variant="outline"
                   onClick={() => setShowShareCard(true)}
-                  className="border-amber-400/50 text-amber-200 hover:bg-amber-500/20 px-8 py-6 text-lg"
+                  className="border-amber-300/80 bg-amber-500/15 text-amber-50 hover:bg-amber-400 hover:text-slate-950 px-8 py-6 text-lg font-semibold"
                 >
                   <Share2 className="w-5 h-5 mr-2" />
                   分享结果
                 </Button>
                 <Button
                   onClick={reset}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-6 text-lg"
+                  className="bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:from-amber-300 hover:to-orange-300 px-8 py-6 text-lg font-semibold"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   重新占卜
